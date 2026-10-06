@@ -1,8 +1,8 @@
 # 前端实现清单 · 博客前台 blog-web（S9）
 
-> 派生实现清单，**不是排期/状态权威源**。切片级状态以 `../RuoYi-Vue-Plus/docs/ROADMAP.md`（S9 + §6 D21/D27/D28）为准；本文件只做 blog-web 页面/组件粒度的 TODO 拆解，引用 S9 与契约章节，不复制状态。
+> 派生实现清单，**不是排期/状态权威源**。切片级状态以 `../RuoYi-Vue-Plus/docs/ROADMAP.md`（S9/S12 + §6 D21/D27/D28/D29）为准；本文件只做 blog-web 页面/组件粒度的 TODO 拆解，引用 S9/S12 与契约章节，不复制状态。
 > 权威源：API 契约 `../RuoYi-Vue-Plus/docs/blog-api.md`；红线 `AGENTS.md`；编码规范 `.codex/skills/nuxt-frontend-coding/SKILL.md` + `references/nuxt.md`。
-> 范围（2026-10-06 定）：**完整 S9 剩余**；D28 附加模块（`@nuxtjs/seo`/`@nuxt/image`/shiki/`@nuxt/eslint`）统一标 `⏸ 按需/MVP 后再定`，只作可选增强，不纳入本轮承诺。
+> 范围（2026-10-06 定）：**完整 S9 剩余**（2026-10-07 追加 **S12 作者中心**，D29 修订 D24，见 §2.8）；D28 附加模块（`@nuxtjs/seo`/`@nuxt/image`/shiki/`@nuxt/eslint`）统一标 `⏸ 按需/MVP 后再定`，只作可选增强，不纳入本轮承诺。
 
 ## 0. 正常 Nuxt 流程（本清单的推进模板）
 
@@ -85,9 +85,22 @@
 - [x] 首页预留 hero / 背景槽位（`<ClientOnly>` 挂载点，结构改动极小，中立不锁版式，为桶 B 铺垫）。
 - [ ] ⏸ 桶 B 装饰增强（MVP 后）：three.js 背景 / 视差 / 页转过场 / 滚动微交互等，作为独立客户端叠层组件注入上述槽位；three.js 仅客户端运行、不进 SSR，天然与首屏/SEO 解耦，**注入不改数据获取代码**。
 
+### 2.8 作者中心（S12 / D29，登录态）
+
+> D29 修订 D24：blog-web 增设作者中心，登录用户前台自助管理**自己的**文章，全部走 `/blog/article/**`，**零后端改动**；复用已登录 `web` 会话，无需二次登录。
+
+- [ ] 我的文章列表：`GET /blog/article/my`（status/visibility/keyword + 分页），行内动作 发布/hide/show/delete
+- [ ] 新建/编辑页：`POST /blog/article`（草稿）/ `PUT /blog/article/{id}`；**编辑器 WangEditor `@wangeditor-next/editor` + `@wangeditor-next/editor-for-vue` 6.4.1**，`<ClientOnly>` + 按需加载（`ssr:false`），产出 HTML（后端 jsoup 净化），**不上 Markdown**
+- [ ] 封面/正文传图：复用 `/resource/oss/upload`（契约 §2.4）+ `oss://` 引用解析（照 plus-ui `src/utils/ossContent.ts`）
+- [ ] 发布/隐藏/重新公开/删除：`POST /blog/article/{id}/publish|hide|show`、`DELETE /{id}`（服务端按 author_id 校验）
+- [ ] 版本只读（可选）：`GET /blog/article/{id}/versions[/vId]` 嵌详情子视图
+- [ ] 边界：禁 `/blog/admin/**`（平台治理仍 plus-ui）；作者中心页 CSR 为主、不进读者首屏/SEO；不信任前端 authorId
+
+依赖：S2–S8 后端接口就绪 + S9 `web` 认证链路就位。
+
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 
-- 三层 API 边界：只调 `/blog/public/**` + `/blog/article|user/**`，**禁 `/blog/admin/**`**；作者发文/编辑不在前台（D24）。
+- 三层 API 边界：只调 `/blog/public/**` + `/blog/article|user/**`，**禁 `/blog/admin/**`**；作者自助发文/编辑/隐藏/删除在**作者中心**（D29，走 `/blog/article/**`），平台治理仍仅 plus-ui。
 - 不信任前端 `authorId`/权限；公共可见三条件（`status='1' AND visibility='0' AND del_flag='0'`）由后端过滤。
 - token 走 cookie + Nitro 代理，`clientid` 用 `web` 记录，业务代码不手写认证头；`.env` 不入库。
 - 无组件库；SSR-safe；构建/校验只在 `blog-web/` 目录内执行；每里程碑小步 commit 标 S9。
@@ -100,6 +113,7 @@ M2 交互与登录：评论发表(§10.2) + 登录验证码链路 + Header 登�
 M3 检索与作者：/search(§6) + /user(§9.1/§9.2)
 M4 收口：alias 301 实测 + 部署(node-server/Dockerfile/compose/architecture)
 M5 验收：移动视口 + SEO 首屏
+M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐藏/删除（走 /blog/article/**，零后端改动）
 ```
 
 每个里程碑一次小步 commit；涉及后端仓库的部署项按"零后端代码"边界只做 infra/文档。
