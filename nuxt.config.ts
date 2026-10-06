@@ -11,6 +11,9 @@ export default defineNuxtConfig({
     '@unocss/nuxt'
   ],
 
+  // 全局样式：设计 token 单一来源（变量 + 基础层），UnoCSS 语义类消费之
+  css: ['~/assets/css/tokens.css'],
+
   // runtimeConfig：服务端专用（不暴露给浏览器）
   // 环境变量映射：NUXT_API_BASE → apiBase，NUXT_APP_CLIENT_ID → appClientId
   runtimeConfig: {

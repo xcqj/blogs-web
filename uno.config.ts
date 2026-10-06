@@ -8,21 +8,68 @@ import {
   transformerVariantGroup
 } from 'unocss';
 
-// blog-web UnoCSS 配置：以 plus-ui/uno.config.ts 为蓝本裁剪（D28）
-// - 去 Element Plus 相关：删除 --el-* CSS 变量依赖的配色与 panel-title shortcut
-// - 去 auto-import：Nuxt 原生自动导入，无需额外配置
-// - 保留：presetWind3（与 plus-ui 同语法，默认断点 sm640/md768/lg1024/xl1280 = D28 响应式口径）
-//         + presetAttributify + presetTypography（正文 prose 排版）+ presetIcons（mdi 集合）
+// blog-web UnoCSS 配置（D28 裁剪自 plus-ui；桶A 落地 design/tokens.css 的 token 单一来源）
+// - 配色/字号/圆角/阴影全部指向 CSS 变量（app/assets/css/tokens.css），深浅主题自动切换
+// - 去 Element Plus 相关、去 auto-import（Nuxt 原生）；留 wind3/attributify/typography/icons + transformers
+// - presetWind3 默认断点 sm640/md768/lg1024/xl1280 = D28 响应式口径，不自造断点
 export default defineConfig({
   shortcuts: {
-    // 通用布局/交互快捷类，随页面骨架增量补充，不预置业务样式
     'flex-center': 'flex items-center justify-center',
-    'card-hover': 'transition-shadow hover:shadow-md'
+    // 容器两档：列表/首页宽档 1080，正文窄档 68ch
+    'sd-wrap': 'mx-auto w-full max-w-[var(--container)] px-5',
+    'sd-measure': 'max-w-[var(--measure)]',
+    // 卡片 / 面板
+    'sd-card': 'rounded-md border border-border bg-elevated',
+    'card-hover': 'transition duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-[0_10px_30px_var(--glow-soft)]',
+    // 按钮
+    'btn-primary': 'inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-ink shadow-glow transition hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0',
+    'btn-ghost': 'inline-flex items-center justify-center gap-2 rounded-full border border-border bg-transparent px-4 py-2 text-sm font-semibold text-text transition hover:border-primary',
+    // 标签 chip
+    'sd-chip': 'inline-flex items-center rounded-full border border-[var(--chip-border)] bg-chip px-2.5 py-0.5 text-xs text-primary-strong',
+    // 次级文本 / 小标题
+    'sd-muted': 'text-sm text-muted',
+    'sd-eyebrow': 'text-xs uppercase tracking-[1.5px] text-muted'
   },
   theme: {
     colors: {
-      // 博客前台品牌主色（非管理后台，无 EP 变量依赖）
-      primary: '#3b82f6'
+      bg: 'var(--bg)',
+      surface: 'var(--surface)',
+      elevated: 'var(--elevated)',
+      text: 'var(--text)',
+      muted: 'var(--text-muted)',
+      border: 'var(--border)',
+      primary: 'var(--accent)',
+      'primary-strong': 'var(--accent-strong)',
+      'primary-ink': 'var(--accent-ink)',
+      chip: 'var(--chip-bg)',
+      code: 'var(--code-bg)'
+    },
+    fontFamily: {
+      sans: 'var(--font-sans)',
+      mono: 'var(--font-mono)'
+    },
+    // 覆盖 presetWind3 默认字号阶梯为设计 token（含阅读行高）
+    fontSize: {
+      xs: ['var(--text-xs)', { lineHeight: 'var(--lh-xs)' }],
+      sm: ['var(--text-sm)', { lineHeight: 'var(--lh-sm)' }],
+      base: ['var(--text-base)', { lineHeight: 'var(--lh-base)' }],
+      lg: ['var(--text-lg)', { lineHeight: 'var(--lh-lg)' }],
+      xl: ['var(--text-xl)', { lineHeight: 'var(--lh-xl)' }],
+      '2xl': ['var(--text-2xl)', { lineHeight: 'var(--lh-2xl)' }],
+      '3xl': ['var(--text-3xl)', { lineHeight: 'var(--lh-3xl)' }],
+      '4xl': ['var(--text-4xl)', { lineHeight: 'var(--lh-4xl)' }]
+    },
+    borderRadius: {
+      sm: 'var(--radius-sm)',
+      md: 'var(--radius-md)',
+      lg: 'var(--radius-lg)',
+      xl: 'var(--radius-xl)',
+      full: 'var(--radius-full)'
+    },
+    boxShadow: {
+      glow: 'var(--shadow-glow)',
+      sm: 'var(--shadow-sm)',
+      md: 'var(--shadow-md)'
     }
   },
   presets: [
@@ -30,8 +77,8 @@ export default defineConfig({
     presetAttributify(),
     presetTypography({
       cssExtend: {
-        // 正文链接与代码块的基础排版微调，细节在页面实现期真机微调
-        'a': { color: '#3b82f6', 'text-decoration': 'none' },
+        // preset-typography 用 :where() 零特异性，正文细节由 assets/css/prose.css 以 token 覆盖
+        'a': { color: 'var(--accent)', 'text-decoration': 'none' },
         'a:hover': { 'text-decoration': 'underline' }
       }
     }),
