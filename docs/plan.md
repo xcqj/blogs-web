@@ -36,8 +36,8 @@
 | runtimeConfig `apiBase`/`appClientId` + `.env`(`NUXT_APP_CLIENT_ID`) | ✅ |
 | 首页 `/` SSR 真实数据跑通（dev + prod 双验证，9 篇进可见 DOM） | ✅ |
 | `/page/[n]`、`/tag/[slug]`（复用 §5.1 代理，含分页/标签过滤） | ✅ |
-| `/post/[slug]` | ✅ 详情(§5.2)+评论列表(§10.1) 已跑通（M1，发表评论 §10.2 待 M2） |
-| `/search`、`/user/[userId]` | 🟡 路由骨架（数据待接） |
+| `/post/[slug]` | ✅ 详情(§5.2)+评论列表(§10.1)+发表评论(§10.2) 已跑通（M1/M2） |
+| `/search`、`/user/[userId]` | ✅ §6 搜索 / §9.1+§9.2 用户页 SSR 已跑通（M3） |
 | `LoginModal`（CSR 弹层）、`useAuth`（SSR 读登录态）、`useLoginModal` | ✅ 骨架 |
 
 ## 2. 待办（按优先级）
@@ -47,8 +47,8 @@
 - [x] `/post/{slug}` 文章详情：§5.2 `GET /blog/public/articles/{articleId}` 代理；字段 `article`/`currentVersion`/`author`/`tags`/`viewCount`；正文用 `prose` 渲染后端**已净化** HTML（前台不二次清洗）；`slug` 为预留字段，MVP 路由承载 `articleId`（契约 §1.4）；阅读量 +1 由后端内建。（2026-10-06 prod 验证渲染标题/prose/封面/标签）
 - [x] `/post` 评论列表：§10.1 `GET /blog/public/articles/{articleId}/comments` 代理，一级评论按时间序 SSR 展示。（2026-10-06 prod 验证 2 条评论 + userName 渲染；内容 `{{ }}` 转义不 v-html）
 - [x] `/post` 发表评论：§10.2 `POST /blog/article/{articleId}/comments`（需登录，走 authed 代理注入 token/clientid；CSR 提交，成功后刷新评论列表；未登录点击唤起 `LoginModal`）。（2026-10-06 M2：`CommentForm` + `server/api/blog/article/[id]/comments.post.ts`；未登录 401 已验）
-- [ ] `/search`：§6 `GET /blog/public/search` 代理，`keyword` + 分页；结果复用 `ArticleCard`；空态与参数校验；表单导航到 `/search?keyword=...` 后 SSR 取数。
-- [ ] `/user/{userId}`：§9.1 公开资料代理 + §9.2 其公开文章（可复用 §5.1 `authorId` 参数）；用户不存在按列表类语义返回空。
+- [x] `/search`：§6 `GET /blog/public/search` 代理，`keyword` + 分页；结果复用 `ArticleCard`；空态与参数校验；表单导航到 `/search?keyword=...` 后 SSR 取数。（2026-10-06 M3：空关键词不查后端；prod 验 Java 共 1 篇进 SSR）
+- [x] `/user/{userId}`：§9.1 公开资料代理 + §9.2 其公开文章（可复用 §5.1 `authorId` 参数）；用户不存在按列表类语义返回空。（2026-10-06 M3：资料卡+文章，prod 验 疯狂的狮子Li/9 篇）
 
 ### 2.2 登录 / 认证完整化
 
