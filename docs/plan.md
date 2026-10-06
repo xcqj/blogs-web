@@ -46,15 +46,15 @@
 
 - [x] `/post/{slug}` 文章详情：§5.2 `GET /blog/public/articles/{articleId}` 代理；字段 `article`/`currentVersion`/`author`/`tags`/`viewCount`；正文用 `prose` 渲染后端**已净化** HTML（前台不二次清洗）；`slug` 为预留字段，MVP 路由承载 `articleId`（契约 §1.4）；阅读量 +1 由后端内建。（2026-10-06 prod 验证渲染标题/prose/封面/标签）
 - [x] `/post` 评论列表：§10.1 `GET /blog/public/articles/{articleId}/comments` 代理，一级评论按时间序 SSR 展示。（2026-10-06 prod 验证 2 条评论 + userName 渲染；内容 `{{ }}` 转义不 v-html）
-- [ ] `/post` 发表评论：§10.2 `POST /blog/article/{articleId}/comments`（需登录，走 authed 代理注入 token/clientid；CSR 提交，成功后刷新评论列表；未登录点击唤起 `LoginModal`）。
+- [x] `/post` 发表评论：§10.2 `POST /blog/article/{articleId}/comments`（需登录，走 authed 代理注入 token/clientid；CSR 提交，成功后刷新评论列表；未登录点击唤起 `LoginModal`）。（2026-10-06 M2：`CommentForm` + `server/api/blog/article/[id]/comments.post.ts`；未登录 401 已验）
 - [ ] `/search`：§6 `GET /blog/public/search` 代理，`keyword` + 分页；结果复用 `ArticleCard`；空态与参数校验；表单导航到 `/search?keyword=...` 后 SSR 取数。
 - [ ] `/user/{userId}`：§9.1 公开资料代理 + §9.2 其公开文章（可复用 §5.1 `authorId` 参数）；用户不存在按列表类语义返回空。
 
 ### 2.2 登录 / 认证完整化
 
-- [ ] 验证码链路：对接后端 RuoYi 验证码接口，登录 body 补 `code`/`uuid`，`LoginModal` 增验证码图与刷新。
-- [ ] `api-encrypt` 前置检查：确认本地 `api-encrypt.enable` 状态；若开启，`/auth/login` 带 `@ApiEncrypt`，login 代理需实现加密链路（照 plus-ui encrypt 逻辑）或在本地验证阶段临时关闭——列为实现前置检查项，**不默认改动生产安全策略**。
-- [ ] `AppHeader` 接 `useAuth`：登录态显示昵称/头像、提供登出入口。
+- [x] 验证码链路：`server/api/auth/captcha` 代理 `/auth/code`，`LoginModal` 打开时拉图、随 `code`/`uuid` 提交、失败刷新重试。（2026-10-06 M2 已接）
+- [x] `api-encrypt` 前置检查：确认本地 `api-decrypt.enabled=true` + `/auth/login` 带 `@ApiEncrypt`（评论等其它接口不加密）。login 代理已实现 AES-256-ECB + RSA/PKCS1 加解密链路（`server/utils/apiCrypto.ts`，密钥走 `.env` `NUXT_RSA_PUBLIC_KEY`/`NUXT_RSA_PRIVATE_KEY`，server-only）。（2026-10-06 直连后端 + 代理均验证：错验证码返回"验证码已失效"=请求被成功解密，非"没有访问权限"）
+- [x] `AppHeader` 接 `useAuth`：登录态显示昵称（链到 `/user/{userId}`）、提供退出按钮。（2026-10-06 M2）
 
 ### 2.3 alias 301 实测
 

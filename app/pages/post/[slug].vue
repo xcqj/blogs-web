@@ -11,7 +11,7 @@ const { data: article, error } = await useAsyncData(
   () => $fetch<ArticleDetail>(`/api/blog/public/articles/${articleId.value}`),
   { watch: [articleId] }
 )
-const { data: comments } = await useAsyncData(
+const { data: comments, refresh: refreshComments } = await useAsyncData(
   `article-comments-${articleId.value}`,
   () => $fetch<PageResult<Comment>>(`/api/blog/public/articles/${articleId.value}/comments`, {
     query: { pageNum: 1, pageSize: 20 }
@@ -75,7 +75,10 @@ useSeoMeta({
         </li>
       </ul>
       <p v-if="!comments?.rows?.length" class="mt-4 text-sm text-gray-400">还没有评论。</p>
-      <p class="mt-6 text-xs text-gray-400">评论功能即将开放（登录后可发表，M2）。</p>
+      <!-- 发表评论（§10.2，需登录）：纯客户端交互，未登录点按唤起登录弹层 -->
+      <ClientOnly>
+        <CommentForm :article-id="articleId" @posted="refreshComments" />
+      </ClientOnly>
     </section>
   </article>
 </template>

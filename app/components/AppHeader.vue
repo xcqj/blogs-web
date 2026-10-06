@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { logged, profile } = useAuth()
+const { logged, profile, logout } = useAuth()
 const { show: showLogin } = useLoginModal()
 const siteName = useRuntimeConfig().public.siteName
 
@@ -28,10 +28,14 @@ const nav = [
         </NuxtLink>
 
         <template v-if="logged">
-          <span class="flex items-center gap-1 text-gray-700">
+          <NuxtLink
+            :to="profile?.userId ? `/user/${profile.userId}` : '#'"
+            class="flex items-center gap-1 text-gray-700 hover:text-primary"
+          >
             <span class="i-mdi:account-circle text-xl" />
             {{ profile?.nickName || '已登录' }}
-          </span>
+          </NuxtLink>
+          <button class="text-gray-400 hover:text-gray-600" @click="logout">退出</button>
         </template>
         <button v-else class="rounded bg-primary px-3 py-1 text-white hover:opacity-90" @click="showLogin">
           登录

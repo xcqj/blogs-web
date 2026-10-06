@@ -2,21 +2,40 @@
 const { open, hide } = useLoginModal()
 const { login } = useAuth()
 
-const form = reactive({ username: '', password: '' })
+const form = reactive({ username: '', password: '', code: '' })
+const uuid = ref('')
+const captchaImg = ref('')
+const captchaEnabled = ref(true)
 const loading = ref(false)
 const error = ref('')
+
+async function refreshCaptcha() {
+  try {
+    const c = await $fetch<{ captchaEnabled: boolean; uuid: string; img: string }>('/api/auth/captcha')
+    captchaEnabled.value = c.captchaEnabled !== false
+    captchaImg.value = c.img || ''
+    uuid.value = c.uuid || ''
+    form.code = ''
+  } catch {
+    captchaEnabled.value = false
+  }
+}
+
+// 打开弹层时拉取验证码（仅客户端，LoginModal 由 <ClientOnly> 包裹，SSR-safe）
+watch(open, (v) => { if (v) refreshCaptcha() }, { immediate: true })
 
 async function submit() {
   if (loading.value) return
   loading.value = true
   error.value = ''
   try {
-    await login({ username: form.username, password: form.password })
+    await login({ username: form.username, password: form.password, code: form.code, uuid: uuid.value })
     hide()
     form.password = ''
+    form.code = ''
   } catch (e: any) {
-    // 后端开启验证码时此处会失败，验证码链路属后续切片（本弹层为 S9 骨架）
-    error.value = e?.statusMessage || e?.message || '登录失败'
+    error.value = e?.statusMessage || e?.data?.message || '登录失败'
+    refreshCaptcha() // 验证码一次性，失败后刷新重试
   } finally {
     loading.value = false
   }
@@ -46,6 +65,26 @@ async function submit() {
           autocomplete="current-password"
           class="w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
         />
+
+        <div v-if="captchaEnabled" class="flex items-center gap-2">
+          <input
+            v-model="form.code"
+            type="text"
+            placeholder="验证码"
+            autocomplete="off"
+            class="min-w-0 flex-1 rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+          <!-- base64 验证码图，点击刷新；不缓存 -->
+          <img
+            v-if="captchaImg"
+            :src="`data:image/png;base64,${captchaImg}`"
+            alt="验证码"
+            class="h-9 w-24 cursor-pointer rounded border border-gray-200"
+            title="点击刷新"
+            @click="refreshCaptcha"
+          />
+        </div>
+
         <p v-if="error" class="text-xs text-red-500">{{ error }}</p>
         <button
           type="submit"
