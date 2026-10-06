@@ -2,6 +2,8 @@ export interface AuthProfile {
   userId?: string
   nickName?: string
   avatar?: string
+  // 解析后的头像 URL（后端翻译字段；avatar 是 ossId 不可直接作 src）
+  avatarUrl?: string | null
   bio?: string
 }
 interface Session {

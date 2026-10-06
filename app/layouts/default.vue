@@ -1,7 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+  <!-- 全站默认布局（design/shell.html）：宽档容器 1080；正文页在自身内部再收 68ch 窄档 -->
+  <div class="flex min-h-screen flex-col bg-bg text-text">
     <AppHeader />
-    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+    <main class="sd-wrap flex-1 py-8">
       <slot />
     </main>
     <AppFooter />
