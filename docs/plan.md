@@ -81,7 +81,7 @@
 
 > 分层原则：**版式结构（桶 A）后补贵 → 尽早按效果图一次定；装饰动效（桶 B）后补便宜 → 独立叠层、MVP 后再加，且不改数据链。**
 
-- [ ] 🔔 **提醒用户（用户明确要求在此节点提醒他）**：进入"首页视觉定稿"轮**之前**，向用户索取首页效果图 / 竞品链接 / 风格描述；无参考则先出一版干净 UnoCSS + prose 排版供其改定。此轮属桶 A（MVP 内），一旦定稿不再反复。
+- [x] 🔔 首页视觉定稿轮（桶A）**设计层已完成**：全套 mockup 与决策见本仓库 `design/` 与 §2.8，无需再向用户索取参考；**落地实现见 §2.9**。此轮属桶 A（MVP 内），设计已定稿不再反复。
 - [x] 首页预留 hero / 背景槽位（`<ClientOnly>` 挂载点，结构改动极小，中立不锁版式，为桶 B 铺垫）。
 - [ ] ⏸ 桶 B 装饰增强（MVP 后）：three.js 背景 / 视差 / 页转过场 / 滚动微交互等，作为独立客户端叠层组件注入上述槽位；three.js 仅客户端运行、不进 SSR，天然与首屏/SEO 解耦，**注入不改数据获取代码**。
 
@@ -106,6 +106,19 @@
 - 分页：全站列表统一**数字分页**（与 `/page/{n}` 一致），不做无限滚动。
 - 编辑器字段：**无 slug、无定时发布**；历史版本**只读可查、不可修改**（对齐 append-only 红线）。
 - 视觉基线：全套 mockup 见本仓库 `design/`（`design/README.md` 为索引），S12 落地以此为基准。
+
+### 2.9 桶A 视觉落地（把 `design/` 基线写进真实代码）
+
+> 基线在 `design/`（**参考与规范，非逐像素照抄**，实现纪律见 `AGENTS.md`）；每步一个 commit 标 S9。
+
+- [ ] `uno.config.ts` 落 token：`theme.colors` 用 `var(--…)`（青+炭黑深浅两套，源 `design/tokens.css`）、覆盖 `theme.fontSize`、`radius`；主题变量单一来源 `:root[data-theme]`
+- [ ] 接 `@nuxtjs/color-mode`：默认跟随系统 + 可手动切，cookie 存偏好保 SSR 无闪烁；配 `color-scheme`；主题切换按钮 `<ClientOnly>`
+- [ ] logo/favicon 接入：`AppHeader` 内联 SVG（双色随主题）替换纯文字品牌；`public/favicon.svg`（内嵌 `prefers-color-scheme`）
+- [ ] 全站 shell：header（首页/标签/搜索 + **登录态才显示"作者中心"**）/ footer / 容器两档（列表 1080 / 正文 68ch）
+- [ ] 首页 `home` 按 `design/home.html` 定稿版式（静态 hero；three.js 属桶B 不做，保留 `<ClientOnly>` 槽位）
+- [ ] 详情页 `article` 正文 prose 版式（限宽 68ch、代码块、meta 条、评论区结构）按 `design/article.html`
+- [ ] 状态组件：骨架屏 / EmptyState / 错误 / 404（按 `design/states.html`）全站复用一套
+- [ ] 响应式规则落地（按 `design/responsive.html` 表：<640 汉堡、hero 背景移动端隐藏等）
 
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 

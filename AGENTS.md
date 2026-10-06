@@ -38,6 +38,7 @@ blog-web 是**读者前台 + 登录作者中心**（仍非管理端），只允�
 
 ## 编码规范与技能
 - 新增/修改页面、SSR 数据获取、Nitro 代理、UnoCSS/prose 样式，动手前先读 `.codex/skills/nuxt-frontend-coding/SKILL.md` 与其 references
+- **`design/` 是视觉基线与规范参考，不是逐像素照抄的成品**：落地时按目标真实代码风格**重构为可复用组件（该封装就封装）**，遵循可维护/可扩展/可读与 SSR 安全；配色/字号/间距一律走 `uno.config.ts` 的 token（`var(--…)`），不把 mockup 里的内联样式/魔法数字搬进页面；与契约/红线冲突时以文档为准并先报告，不默默改设计
 - 信息源优先级（与后端 AGENTS.md §4 同序）：① blog-web 仓库内真实页面/组件（同类页优先）→ ② `../RuoYi-Vue-Plus/docs/` 权威文档 → ③ 本仓库 skill 资产 → ④ 通用 Nuxt/Vue/UnoCSS 知识（最低，禁止照搬通用模板）
 
 ## 工作流
