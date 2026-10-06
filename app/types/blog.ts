@@ -41,3 +41,37 @@ export interface ApiEnvelope<T> {
   msg: string
   data: T
 }
+
+/** §5.2 当前生效版本（title/summary/coverUrl/content 物理在版本表） */
+export interface ArticleVersion {
+  versionId: string
+  articleId: string
+  versionNo: number
+  title: string
+  summary: string
+  coverUrl: string
+  content: string
+  createBy: string
+  createTime: string
+}
+
+/** §5.2 公共文章详情（BlogPublicArticleDetailVo，不含 status/visibility/治理字段） */
+export interface ArticleDetail {
+  articleId: string
+  authorId: string
+  authorName: string
+  currentVersion: ArticleVersion
+  publishedAt: string
+  tags: TagRef[]
+  viewCount: number
+}
+
+/** §10.1 一级评论项（userName 由后端 USER_ID_TO_NAME 翻译，不复制） */
+export interface Comment {
+  commentId: string
+  articleId: string
+  userId: string
+  userName: string
+  content: string
+  createTime: string
+}
