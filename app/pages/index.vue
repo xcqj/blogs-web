@@ -3,7 +3,7 @@
 // + 双栏「最新文章 / 标签侧栏」。数据仍走 §5.1/§7.1/§7.2 三个 SSR useAsyncData，版式与数据解耦。
 import type { ArticleSummary, PageResult, TagItem } from '~/types/blog'
 
-const { data: page } = await useAsyncData('home-articles', () =>
+const { data: page, status: pageStatus, refresh: refreshPage } = await useAsyncData('home-articles', () =>
   $fetch<PageResult<ArticleSummary>>('/api/blog/public/articles', { query: { pageNum: 1, pageSize: 10 } })
 )
 const { data: featured } = await useAsyncData('home-featured-tags', () => $fetch<TagItem[]>('/api/blog/public/tags/featured'))
@@ -40,16 +40,26 @@ useSeoMeta({
     <div id="latest" class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <section>
         <h2 class="sd-eyebrow mb-4">最新文章</h2>
-        <div class="space-y-3.5">
-          <ArticleCard v-for="a in page?.rows" :key="a.articleId" :article="a" />
-        </div>
-        <EmptyState
-          v-if="!page?.rows?.length"
-          title="还没有文章"
-          description="这个列表暂时是空的，去别处看看或稍后再来。"
+        <ArticleListSkeleton v-if="pageStatus === 'pending'" :count="3" />
+        <ErrorState
+          v-else-if="pageStatus === 'error'"
+          title="文章加载失败"
+          description="网络异常或服务暂不可用，请稍后重试。"
         >
-          <NuxtLink to="/tags" class="btn-ghost mt-1">逛标签</NuxtLink>
-        </EmptyState>
+          <button class="btn-primary" @click="refreshPage">重试</button>
+        </ErrorState>
+        <template v-else>
+          <div class="space-y-3.5">
+            <ArticleCard v-for="a in page?.rows" :key="a.articleId" :article="a" />
+          </div>
+          <EmptyState
+            v-if="!page?.rows?.length"
+            title="还没有文章"
+            description="这个列表暂时是空的，去别处看看或稍后再来。"
+          >
+            <NuxtLink to="/tags" class="btn-ghost mt-1">逛标签</NuxtLink>
+          </EmptyState>
+        </template>
         <div v-if="page?.total" class="mt-4 flex items-center justify-between text-sm text-muted">
           <span>共 {{ page.total }} 篇</span>
           <NuxtLink v-if="page.total > 10" to="/page/2" class="transition hover:text-primary">更早文章 →</NuxtLink>
