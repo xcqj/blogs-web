@@ -75,3 +75,12 @@ export interface Comment {
   content: string
   createTime: string
 }
+
+/** §9.1 公共用户资料（avatar/avatarUrl 实时取自 sys_user，可能为 null） */
+export interface PublicUser {
+  userId: string
+  nickName: string
+  avatar: string | null
+  avatarUrl: string | null
+  bio: string | null
+}
