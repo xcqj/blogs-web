@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" fill="none">
+  <!-- 单色版：两框都走 currentColor，外层 CSS 的 color 即可整体变色 -->
+  <rect x="6" y="10" width="22" height="22" rx="6" stroke="currentColor" stroke-width="2.6"/>
+  <rect x="12" y="6" width="22" height="22" rx="6" stroke="currentColor" stroke-width="2.6"/>
+</svg>

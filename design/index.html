@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stack Depth · 桶A 设计交付物 Hub</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: var(--lh-base); transition: background .35s, color .35s; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+    .top { display: flex; align-items: center; justify-content: space-between; padding: 24px 0; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
+    .brand .logo { width: 36px; height: 36px; filter: drop-shadow(0 0 8px var(--glow)); }
+    .theme-toggle { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 14px; border-radius: var(--radius-full); cursor: pointer; font-size: 13px; }
+    .hero { text-align: center; padding: 48px 0 8px; }
+    .hero h1 { font-size: var(--text-3xl); margin: 0 0 8px; letter-spacing: -.5px; }
+    .hero p { color: var(--text-muted); margin: 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 40px 0; }
+    a.card { display: block; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--elevated); padding: 22px; text-decoration: none; color: inherit; transition: .2s; }
+    a.card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 12px 34px var(--glow-soft); }
+    a.card .k { font-size: var(--text-xs); color: var(--accent-strong); font-weight: 600; letter-spacing: .5px; }
+    a.card h3 { margin: 6px 0 6px; font-size: var(--text-lg); }
+    a.card p { margin: 0; color: var(--text-muted); font-size: var(--text-sm); }
+    .assets { border-top: 1px solid var(--border); padding-top: 24px; margin-bottom: 48px; }
+    .assets h2 { font-size: var(--text-base); margin: 0 0 14px; color: var(--text-muted); }
+    .row { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+    .asset { text-align: center; font-size: var(--text-xs); color: var(--text-muted); }
+    .asset .box { width: 64px; height: 64px; border: 1px solid var(--border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; background: var(--surface); }
+    .asset .box svg { width: 40px; height: 40px; }
+    .mono-demo { color: var(--accent); }
+    footer { text-align: center; color: var(--text-muted); font-size: var(--text-sm); padding: 24px 0; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg>
+        <span>Stack Depth</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+    </div>
+
+    <div class="hero">
+      <h1>桶A 设计交付物</h1>
+      <p>命名 · Logo · 排版配色 · 详情页版式 —— 纯预览，不写入 blog-web 仓库</p>
+    </div>
+
+    <div class="cards">
+      <a class="card" href="./home.html">
+        <div class="k">首页 HERO</div>
+        <h3>D1 布局 + 漂浮层</h3>
+        <p>顶栏 / 左标题 CTA / 右 three.js 漂浮玻璃层 / 双栏内容。</p>
+      </a>
+      <a class="card" href="./article.html">
+        <div class="k">交付物 B</div>
+        <h3>文章详情页</h3>
+        <p>正文 prose 版式、meta 条、TOC、上一篇/下一篇、评论区。</p>
+      </a>
+      <a class="card" href="./tokens.html">
+        <div class="k">交付物 A</div>
+        <h3>设计 Token 规范</h3>
+        <p>语义色 / 排版阶梯 / 间距 / 圆角，深浅两套同源。</p>
+      </a>
+      <a class="card" href="./shell.html">
+        <div class="k">桶A · 第 5 点</div>
+        <h3>全站 Shell 与导航</h3>
+        <p>顶栏/页脚/登录态、容器两档、页面清单 → 布局映射。</p>
+      </a>
+      <a class="card" href="./states.html">
+        <div class="k">桶A · 第 7 点</div>
+        <h3>状态版式</h3>
+        <p>骨架屏 / 空态 / 错误态 / 404，全站复用一套。</p>
+      </a>
+      <a class="card" href="./responsive.html">
+        <div class="k">桶A · 第 8 点</div>
+        <h3>响应式规则表</h3>
+        <p>sm/md/lg/xl 断点行为，拖窗口实时命中高亮。</p>
+      </a>
+    </div>
+
+    <h2 style="font-size:var(--text-lg);margin:24px 0 12px">作者中心 · S12 / D29</h2>
+    <div class="cards">
+      <a class="card" href="./author-articles.html"><div class="k">作者中心</div><h3>我的文章</h3><p>状态标签 + 发布/隐藏/重新公开/删除动作，体现状态机。</p></a>
+      <a class="card" href="./author-editor.html"><div class="k">作者中心</div><h3>新建 / 编辑</h3><p>WangEditor（ClientOnly）+ 封面/标签/摘要/发布设置。</p></a>
+      <a class="card" href="./profile.html"><div class="k">作者中心</div><h3>个人资料</h3><p>头像/昵称(只读)/bio，走 /blog/user/profile。</p></a>
+    </div>
+
+    <h2 style="font-size:var(--text-lg);margin:8px 0 12px">读者页 · S9</h2>
+    <div class="cards">
+      <a class="card" href="./tag.html"><div class="k">读者</div><h3>标签页</h3><p>#标签 + 文章列表 + 热门标签侧栏。</p></a>
+      <a class="card" href="./search.html"><div class="k">读者</div><h3>搜索页</h3><p>搜索框 + 命中高亮 + 空态。</p></a>
+      <a class="card" href="./user.html"><div class="k">读者</div><h3>用户公开主页</h3><p>资料卡 + TA 的公开文章 + 常用标签。</p></a>
+    </div>
+
+    <div class="assets">
+      <h2>交付物 C · 可变色 Logo 资产</h2>
+      <div class="row">
+        <div class="asset">
+          <div class="box"><svg viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg></div>
+          双色（随主题）<br><a href="./logo-duotone.svg" style="color:var(--accent)">logo-duotone.svg</a>
+        </div>
+        <div class="asset">
+          <div class="box mono-demo"><svg viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="currentColor" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="currentColor" stroke-width="2.6"/></svg></div>
+          单色 currentColor<br><a href="./logo-mono.svg" style="color:var(--accent)">logo-mono.svg</a>
+        </div>
+        <div class="asset">
+          <div class="box"><img src="./favicon.svg" width="40" height="40" alt="favicon" /></div>
+          favicon 内嵌深浅<br><a href="./favicon.svg" style="color:var(--accent)">favicon.svg</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Stack Depth · 桶A 设计预览 Hub · 产物在 blog-web/.cache/preview（gitignore）</footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

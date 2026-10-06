@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>搜索 · Stack Depth</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <link rel="stylesheet" href="./app.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap bar">
+      <a class="brand" href="./home.html"><svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg><span>Stack Depth</span></a>
+      <div class="actions">
+        <nav class="navlinks"><a href="./home.html">首页</a><a href="./tag.html">标签</a><a href="./search.html" class="active">搜索</a></nav>
+        <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+        <a href="./author-articles.html" class="avatar" style="width:32px;height:32px;font-size:14px" title="作者中心">S</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" style="max-width:820px">
+    <div class="page-head" style="margin-bottom:6px"><div><h1>搜索</h1><p class="sub">§6 公共搜索 · 命中当前生效版本的 title / summary / content</p></div></div>
+    <form class="searchbar" onsubmit="return false">
+      <input class="input" placeholder="搜索文章标题、摘要、正文…" value="版本" />
+      <button class="btn-primary">搜索</button>
+    </form>
+    <p class="meta" style="margin:6px 2px 20px">共 <b style="color:var(--text)">3</b> 篇包含「版本」的文章</p>
+
+    <a class="acard" href="./article.html"><h3>Loop <mark>版本</mark>ing：幂等发布的设计取舍</h3><p>从 append-only <mark>版本</mark>表出发，聊聊发布原子性与回滚边界为什么值得单独维护当前<mark>版本</mark>指针。</p><div class="meta"><span class="tag">架构</span><span class="dot"></span><span>2026-10-05</span><span class="dot"></span><span>👁 128</span></div></a>
+    <a class="acard" href="./article.html"><h3>文章不可变历史<mark>版本</mark>模型</h3><p><mark>版本</mark>只 INSERT、禁止 UPDATE/DELETE，可追溯、可回滚、可 diff。</p><div class="meta"><span class="tag">数据库</span><span class="dot"></span><span>2026-10-01</span><span class="dot"></span><span>👁 88</span></div></a>
+    <a class="acard" href="./article.html"><h3>编辑即新<mark>版本</mark>：内容变化比对</h3><p>title / summary / coverUrl / content 四字段实际变化才创建新<mark>版本</mark>。</p><div class="meta"><span class="tag">后端</span><span class="dot"></span><span>2026-09-30</span><span class="dot"></span><span>👁 61</span></div></a>
+
+    <div class="pager"><button>‹</button><button class="on">1</button><button>›</button></div>
+
+    <!-- 空态示例（无结果时） -->
+    <div class="panel empty" style="margin-top:8px">
+      <div style="font-size:32px;margin-bottom:8px">🔍</div>
+      没有找到相关<mark style="background:none">文章</mark>，换个关键词试试。
+    </div>
+  </main>
+
+  <footer class="site"><div class="wrap bar"><div>© 2026 Stack Depth · 把技术一层层读到深处</div><div class="links"><a href="./home.html">首页</a><a href="./tag.html">标签</a></div></div></footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

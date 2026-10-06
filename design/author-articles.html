@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的文章 · 作者中心 · Stack Depth</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <link rel="stylesheet" href="./app.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap bar">
+      <a class="brand" href="./home.html"><svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg><span>Stack Depth</span></a>
+      <div class="actions">
+        <nav class="navlinks"><a href="./home.html">首页</a><a href="./tag.html">标签</a><a href="./search.html">搜索</a><a href="./author-articles.html" class="active">作者中心</a></nav>
+        <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+        <a href="./profile.html" class="avatar" style="width:32px;height:32px;font-size:14px">S</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div><h1>我的文章</h1><p class="sub">作者中心 · 走 <code>/blog/article/my</code>，服务端按 author_id 隔离</p></div>
+      <a class="btn-primary" href="./author-editor.html">＋ 新建文章</a>
+    </div>
+
+    <div class="tabs">
+      <button class="on">全部 <span class="n">4</span></button>
+      <button>草稿 <span class="n">1</span></button>
+      <button>已发布 <span class="n">2</span></button>
+      <button>已隐藏 <span class="n">1</span></button>
+    </div>
+
+    <!-- 已发布：可 编辑 / 隐藏 / 删除 -->
+    <div class="arow">
+      <div class="l">
+        <h3>Loop Versioning：幂等发布的设计取舍</h3>
+        <div class="meta"><span class="badge pub">已发布</span><span class="dot"></span><span class="tag">架构</span><span class="tag">数据库</span><span class="dot"></span><span>更新于 2026-10-05</span><span class="dot"></span><span>👁 128</span></div>
+      </div>
+      <div class="r"><button>编辑</button><button>隐藏</button><button class="danger">删除</button></div>
+    </div>
+    <!-- 草稿：可 编辑 / 发布 / 删除 -->
+    <div class="arow">
+      <div class="l">
+        <h3>Nuxt 4 SSR 认证笔记（未完成）</h3>
+        <div class="meta"><span class="badge draft">草稿</span><span class="dot"></span><span class="tag">前端</span><span class="dot"></span><span>更新于 2026-10-06</span></div>
+      </div>
+      <div class="r"><button>编辑</button><button class="primary">发布</button><button class="danger">删除</button></div>
+    </div>
+    <!-- 用户隐藏：可 编辑 / 公开 / 删除 -->
+    <div class="arow">
+      <div class="l">
+        <h3>标签合并的事务边界（我暂时隐藏）</h3>
+        <div class="meta"><span class="badge uhidden">已隐藏</span><span class="dot"></span><span class="tag">数据库</span><span class="dot"></span><span>更新于 2026-10-02</span><span class="dot"></span><span>👁 64</span></div>
+      </div>
+      <div class="r"><button>编辑</button><button class="primary">重新公开</button><button class="danger">删除</button></div>
+    </div>
+    <!-- 管理员下线：编辑禁用，仅可删除（体现状态机红线） -->
+    <div class="arow">
+      <div class="l">
+        <h3>某篇被管理员下线的文章</h3>
+        <div class="meta"><span class="badge ahidden">管理员下线</span><span class="dot"></span><span class="tag">随笔</span><span class="dot"></span><span>更新于 2026-09-28</span></div>
+      </div>
+      <div class="r"><button title="ADMIN_HIDDEN 作者不可编辑/恢复" style="opacity:.4;cursor:not-allowed">编辑</button><button class="danger">删除</button></div>
+    </div>
+
+    <div class="pager"><button>‹</button><button class="on">1</button><button>›</button></div>
+  </main>
+
+  <footer class="site"><div class="wrap bar"><div>© 2026 Stack Depth · 作者中心（S12 / D29）</div><div class="links"><a href="./profile.html">个人资料</a><a href="./home.html">返回前台</a></div></div></footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

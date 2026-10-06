@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>响应式规则表 · Stack Depth（桶A 第8点）</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: var(--lh-base); transition: background .35s, color .35s; }
+    a { color: var(--accent); text-decoration: none; }
+    .wrap { max-width: var(--container); margin: 0 auto; padding: 0 20px 60px; }
+    .top { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .brand .logo { width: 30px; height: 30px; filter: drop-shadow(0 0 6px var(--glow)); }
+    .theme-toggle { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 14px; border-radius: var(--radius-full); cursor: pointer; font-size: 13px; }
+    h1 { font-size: var(--text-2xl); margin: 20px 0 4px; }
+    .sub { color: var(--text-muted); margin: 0 0 24px; }
+    .vp { display:inline-block; font-size: var(--text-sm); color: var(--accent-strong); background: var(--chip-bg); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); border-radius: 999px; padding: 4px 12px; margin-bottom: 20px; font-family: var(--font-mono); }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { background: var(--surface); font-weight: 600; }
+    td.on { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+    .bp { font-family: var(--font-mono); color: var(--accent-strong); white-space: nowrap; }
+    .dim { color: var(--text-muted); }
+    h3 { font-size: var(--text-lg); margin: 30px 0 10px; }
+    ul { margin: 0; padding-left: 1.3em; font-size: var(--text-sm); color: var(--text-muted); }
+    li { margin: 4px 0; }
+    .note { margin-top: 24px; font-size: var(--text-sm); color: var(--text-muted); border-left: 3px solid var(--accent); background: var(--surface); padding: 10px 16px; border-radius: 0 8px 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg>
+        <span>Stack Depth · 响应式规则表</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+    </div>
+
+    <h1>响应式规则表</h1>
+    <p class="sub">桶A 第 8 点 —— 只拍一张桌面骨架，其余由 UnoCSS 默认断点推导。<b>拖动窗口宽度</b>看当前命中断点（下方实时显示，表格高亮对应列）。</p>
+    <div class="vp" id="vp">视口：—</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th class="bp" data-min="0" data-max="639">xs &lt;640</th>
+          <th class="bp" data-min="640" data-max="767">sm 640+</th>
+          <th class="bp" data-min="768" data-max="1023">md 768+</th>
+          <th class="bp" data-min="1024" data-max="1279">lg 1024+</th>
+          <th class="bp" data-min="1280" data-max="99999">xl 1280+</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>导航</td><td>汉堡/图标</td><td>汉堡/图标</td><td>文字展开</td><td>文字展开</td><td>文字展开</td></tr>
+        <tr><td>首页布局</td><td>单列</td><td>单列</td><td>单列·侧栏置底</td><td class="on">双栏(内容+侧栏)</td><td class="on">双栏</td></tr>
+        <tr><td>Hero 漂浮层</td><td>隐藏(性能)</td><td>简化/隐藏</td><td>堆叠缩小</td><td>并排右侧</td><td>并排右侧</td></tr>
+        <tr><td>正文容器</td><td>满宽减padding</td><td>满宽减padding</td><td>68ch</td><td>68ch</td><td>68ch + TOC</td></tr>
+        <tr><td>详情页 TOC</td><td>隐藏</td><td>隐藏</td><td>隐藏</td><td>可选</td><td>右栏固定</td></tr>
+        <tr><td>卡片网格</td><td>1列</td><td>1列</td><td>1–2列</td><td>列表/2列</td><td>2–3列</td></tr>
+        <tr><td>表格</td><td>横向滚动</td><td>横向滚动</td><td>自适应</td><td>自适应</td><td>自适应</td></tr>
+        <tr><td>触控目标</td><td>≥44px</td><td>≥44px</td><td>≥44px</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>原则</h3>
+    <ul>
+      <li>桌面优先一张骨架，移动/平板由断点规则推导，实现期真机微调（对齐 D28）</li>
+      <li>重装饰（three.js 漂浮层、发光）在移动端直接砍，保性能与首屏</li>
+      <li>断点口径统一用 UnoCSS 默认 sm640 / md768 / lg1024 / xl1280，不自造</li>
+      <li>正文行宽恒定 68ch，靠居中留白而非拉宽保证可读性</li>
+    </ul>
+
+    <div class="note">说明：本页为设计规则表（桶A），非实现代码；落地时对应各页面的响应式类（如 <code>lg:grid-cols-3</code>、<code>hidden lg:block</code>）。</div>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+
+      // 实时视口 + 高亮命中断点列
+      var vp = document.getElementById('vp');
+      var ths = [].slice.call(document.querySelectorAll('th.bp'));
+      function upd(){
+        var w = window.innerWidth;
+        vp.textContent = '视口：' + w + 'px';
+        ths.forEach(function(th){
+          var min = +th.dataset.min, max = +th.dataset.max;
+          th.classList.toggle('on', w >= min && w <= max);
+        });
+      }
+      window.addEventListener('resize', upd); upd();
+    })();
+  </script>
+</body>
+</html>

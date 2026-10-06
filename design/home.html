@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stack Depth · Hero Mockup (D1 布局 + three.js 漂浮层)</title>
+  <style>
+    /* ============ 主题 token（青 + 炭黑母题） ============ */
+    :root[data-theme="dark"] {
+      --bg: #0b1120;
+      --bg-elev: #131a2a;
+      --surface: #0f1626;
+      --text: #edeff2;
+      --text-muted: #8b94a7;
+      --border: #223049;
+      --accent: #22d3ee;
+      --accent-strong: #67e8f9;
+      --accent-ink: #04222b;
+      --glow: rgba(34, 211, 238, 0.55);
+      --glow-soft: rgba(34, 211, 238, 0.18);
+      --chip-bg: rgba(34, 211, 238, 0.10);
+      --layer-fill: linear-gradient(135deg, rgba(34,211,238,0.10), rgba(15,22,38,0.35));
+    }
+    :root[data-theme="light"] {
+      --bg: #f6f7fb;
+      --bg-elev: #ffffff;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #0891b2;
+      --accent-strong: #0e7490;
+      --accent-ink: #ffffff;
+      --glow: rgba(8, 145, 178, 0.28);
+      --glow-soft: rgba(8, 145, 178, 0.12);
+      --chip-bg: rgba(8, 145, 178, 0.10);
+      --layer-fill: linear-gradient(135deg, rgba(8,145,178,0.10), rgba(255,255,255,0.65));
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+      transition: background .35s ease, color .35s ease;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+    /* ============ 顶栏 ============ */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: color-mix(in srgb, var(--bg) 82%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; letter-spacing: .2px; }
+    .brand .logo { width: 34px; height: 34px; display: block; filter: drop-shadow(0 0 6px var(--glow)); }
+    .nav-links { display: flex; align-items: center; gap: 26px; font-size: 15px; color: var(--text-muted); }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--text); font-weight: 600; }
+    .theme-toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); padding: 7px 12px; border-radius: 999px;
+      cursor: pointer; font-size: 13px; transition: .2s;
+    }
+    .theme-toggle:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow-soft); }
+
+    /* ============ Hero ============ */
+    .hero {
+      position: relative; overflow: hidden;
+      border: 1px solid var(--border); border-radius: 20px;
+      background:
+        radial-gradient(120% 120% at 85% 20%, var(--glow-soft), transparent 55%),
+        var(--surface);
+      margin-top: 28px;
+      display: grid; grid-template-columns: 1.15fr 0.85fr; align-items: center;
+      gap: 24px; padding: 56px 48px;
+    }
+    .hero h1 {
+      margin: 0; font-size: clamp(30px, 5vw, 52px); line-height: 1.08;
+      font-weight: 800; letter-spacing: -1px;
+    }
+    .hero h1 .hl { color: var(--accent); }
+    .hero p { margin: 18px 0 28px; color: var(--text-muted); max-width: 46ch; font-size: 16px; }
+    .cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent); color: var(--accent-ink);
+      padding: 12px 22px; border-radius: 999px; font-weight: 700; font-size: 15px;
+      box-shadow: 0 8px 30px var(--glow); transition: .2s;
+    }
+    .cta:hover { transform: translateY(-2px); box-shadow: 0 12px 40px var(--glow); }
+
+    /* ============ three.js 漂浮玻璃层（CSS 3D 复刻） ============ */
+    .hero-visual { position: relative; height: 340px; perspective: 1100px; }
+    .stack {
+      position: absolute; top: 50%; left: 50%;
+      width: 190px; height: 190px; margin: -95px 0 0 -95px;
+      transform-style: preserve-3d;
+      transform: rotateX(58deg) rotateZ(45deg);
+      animation: spin 22s linear infinite;
+    }
+    .stack.secondary {
+      width: 120px; height: 120px; margin: -60px 0 0 90px;
+      animation: spin 30s linear infinite reverse; opacity: .5;
+    }
+    .layer {
+      position: absolute; inset: 0; border-radius: 22px;
+      border: 1.5px solid var(--accent);
+      background: var(--layer-fill);
+      box-shadow: 0 0 26px var(--glow-soft), inset 0 0 18px var(--glow-soft);
+      animation: bob 4.5s ease-in-out infinite;
+    }
+    /* 每层沿 Z 轴拉开间距 → 形成“纵深堆叠” */
+    .layer:nth-child(1) { transform: translateZ(0px);   opacity: .35; }
+    .layer:nth-child(2) { transform: translateZ(34px);  opacity: .5;  animation-delay: .3s; }
+    .layer:nth-child(3) { transform: translateZ(68px);  opacity: .65; animation-delay: .6s; }
+    .layer:nth-child(4) { transform: translateZ(102px); opacity: .8;  animation-delay: .9s; }
+    .layer:nth-child(5) { transform: translateZ(136px); opacity: .92; animation-delay: 1.2s; }
+    .layer:nth-child(6) { transform: translateZ(170px); opacity: 1;   animation-delay: 1.5s;
+      box-shadow: 0 0 40px var(--glow), inset 0 0 22px var(--glow-soft); }
+    @keyframes spin { to { transform: rotateX(58deg) rotateZ(405deg); } }
+    @keyframes bob { 0%,100% { margin-top: 0; } 50% { margin-top: -6px; } }
+    @media (prefers-reduced-motion: reduce) {
+      .stack { animation: none; } .layer { animation: none; }
+    }
+
+    /* ============ 正文双栏 ============ */
+    .content { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; margin: 32px 0 64px; }
+    .section-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin: 0 0 14px; }
+    .cards { display: flex; flex-direction: column; gap: 14px; }
+    .card {
+      border: 1px solid var(--border); border-radius: 14px; background: var(--bg-elev);
+      padding: 18px 20px; transition: .2s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 30px var(--glow-soft); }
+    .card h3 { margin: 0 0 6px; font-size: 18px; }
+    .card .excerpt { margin: 0 0 12px; color: var(--text-muted); font-size: 14px; }
+    .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--text-muted); }
+    .chip {
+      background: var(--chip-bg); color: var(--accent-strong);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+      padding: 3px 10px; border-radius: 999px; font-size: 12px;
+    }
+    .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-muted); display: inline-block; }
+    aside .panel { border: 1px solid var(--border); border-radius: 14px; background: var(--bg-elev); padding: 18px 20px; }
+    aside .panel + .panel { margin-top: 16px; }
+    .tagcloud { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    footer { border-top: 1px solid var(--border); padding: 24px 0; color: var(--text-muted); font-size: 13px; text-align: center; }
+
+    /* ============ 响应式 ============ */
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; padding: 36px 26px; }
+      .hero-visual { height: 280px; order: -1; }
+      .content { grid-template-columns: 1fr; }
+      .nav-links { gap: 16px; }
+    }
+    @media (max-width: 520px) {
+      .nav-links a:not(.active) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <!-- 错位叠框 logo：白/青两框 -->
+        <svg class="logo" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--text)" stroke-width="2.4"/>
+          <rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--accent)" stroke-width="2.4"/>
+        </svg>
+        <span>Stack Depth</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#" class="active">Home</a>
+        <a href="#">Search</a>
+        <a href="#">Tags</a>
+        <button class="theme-toggle" id="themeToggle" type="button">
+          <span id="themeLabel">🌙 深色</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Hero：左文案 + 右 three.js 漂浮层 -->
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Deep dives<br />into the <span class="hl">stack</span>.</h1>
+        <p>一个多作者技术博客。从源码到系统，一层层往深处读 —— 阅读、搜索与评论。</p>
+        <a class="cta" href="#">Start reading →</a>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="stack secondary">
+          <span class="layer"></span><span class="layer"></span><span class="layer"></span>
+          <span class="layer"></span><span class="layer"></span><span class="layer"></span>
+        </div>
+        <div class="stack">
+          <span class="layer"></span><span class="layer"></span><span class="layer"></span>
+          <span class="layer"></span><span class="layer"></span><span class="layer"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 正文双栏：文章列表 + 标签侧栏 -->
+    <div class="content">
+      <section>
+        <h2 class="section-title">最新文章</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>Loop Versioning: 幂等发布的设计取舍</h3>
+            <p class="excerpt">从 append-only 版本表出发，聊聊发布原子性与回滚边界为什么值得单独建一张 current_version_id。</p>
+            <div class="meta"><span class="chip">后端</span><span class="chip">架构</span><span class="dot"></span><span>8 min read</span></div>
+          </article>
+          <article class="card">
+            <h3>Nuxt 4 SSR 下的认证：cookie + Nitro 代理</h3>
+            <p class="excerpt">浏览器不持 token，登录经服务端代理转发，顺带绕开 CORS。记录 httpOnly cookie 与 clientid 的配合细节。</p>
+            <div class="meta"><span class="chip">前端</span><span class="chip">SSR</span><span class="dot"></span><span>6 min read</span></div>
+          </article>
+          <article class="card">
+            <h3>Tag Rename / Merge：一次标签治理的事务设计</h3>
+            <p class="excerpt">关系迁移、去重、alias 展平——为什么标签合并必须放在一个显式事务里，以及边界情况怎么处理。</p>
+            <div class="meta"><span class="chip">数据库</span><span class="chip">事务</span><span class="dot"></span><span>5 min read</span></div>
+          </article>
+        </div>
+      </section>
+
+      <aside>
+        <h2 class="section-title">标签</h2>
+        <div class="panel">
+          <div class="tagcloud">
+            <span class="chip">Backend</span><span class="chip">DevOps</span>
+            <span class="chip">Rust</span><span class="chip">Async</span>
+            <span class="chip">架构</span><span class="chip">前端</span>
+            <span class="chip">数据库</span><span class="chip">源码</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 class="section-title" style="margin-bottom:10px">关于</h2>
+          <p style="margin:0;color:var(--text-muted);font-size:14px">Stack Depth —— 把技术一层层读到深处。此为纯静态设计 mockup，不接后端。</p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">Stack Depth · Hero Mockup 概念预览 · 不写入 blog-web 仓库</div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('themeToggle');
+      var label = document.getElementById('themeLabel');
+      function apply(t) {
+        root.setAttribute('data-theme', t);
+        label.textContent = t === 'dark' ? '🌙 深色' : '☀️ 浅色';
+        try { localStorage.setItem('sd-theme', t); } catch (e) {}
+      }
+      var saved = null;
+      try { saved = localStorage.getItem('sd-theme'); } catch (e) {}
+      apply(saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
+      btn.addEventListener('click', function () {
+        apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
+</body>
+</html>

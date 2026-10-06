@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>用户主页 · Stack Depth</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <link rel="stylesheet" href="./app.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap bar">
+      <a class="brand" href="./home.html"><svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg><span>Stack Depth</span></a>
+      <div class="actions">
+        <nav class="navlinks"><a href="./home.html">首页</a><a href="./tag.html">标签</a><a href="./search.html">搜索</a></nav>
+        <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+        <a href="./author-articles.html" class="avatar" style="width:32px;height:32px;font-size:14px" title="作者中心">S</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="profile-hero" style="margin-top:28px">
+      <div class="avatar" style="width:72px;height:72px;font-size:28px">S</div>
+      <div>
+        <h1>stackdepth</h1>
+        <p class="sub" style="margin:0 0 8px;color:var(--text-muted)">把技术一层层读到深处。关注后端架构、开发者体验与开源。</p>
+        <div class="meta"><span>📝 9 篇公开文章</span><span class="dot"></span><span>§9.1 资料 + §9.2 公开文章（authorId 过滤）</span></div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:26px">
+      <section>
+        <h2 class="sec-title">TA 的公开文章</h2>
+        <a class="acard" href="./article.html"><h3>Loop Versioning：幂等发布的设计取舍</h3><p>从 append-only 版本表出发，聊聊发布原子性与回滚边界。</p><div class="meta"><span class="tag">架构</span><span class="tag">数据库</span><span class="dot"></span><span>2026-10-05</span><span class="dot"></span><span>👁 128</span></div></a>
+        <a class="acard" href="./article.html"><h3>Nuxt 4 SSR 下的认证：cookie + Nitro 代理</h3><p>浏览器不持 token，登录经服务端代理转发，顺带绕开 CORS。</p><div class="meta"><span class="tag">前端</span><span class="tag">SSR</span><span class="dot"></span><span>2026-10-03</span><span class="dot"></span><span>👁 110</span></div></a>
+        <a class="acard" href="./article.html"><h3>Tag Rename / Merge：标签治理的事务设计</h3><p>关系迁移、去重、alias 展平为什么要放在一个显式事务里。</p><div class="meta"><span class="tag">数据库</span><span class="dot"></span><span>2026-10-01</span><span class="dot"></span><span>👁 96</span></div></a>
+        <div class="pager"><button>‹</button><button class="on">1</button><button>2</button><button>›</button></div>
+      </section>
+      <aside>
+        <div class="panel"><h2 class="sec-title">TA 常用标签</h2><div class="tagcloud"><span class="tag">架构 · 5</span><span class="tag">数据库 · 4</span><span class="tag">前端 · 3</span><span class="tag">事务 · 2</span></div></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site"><div class="wrap bar"><div>© 2026 Stack Depth · 把技术一层层读到深处</div><div class="links"><a href="./home.html">首页</a><a href="./search.html">搜索</a></div></div></footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" fill="none">
+  <!-- 双色版：后框中性 + 前框品牌青。内联进组件后，改这两个 CSS 变量即随主题切换；
+       独立打开时走 fallback。母题＝错位叠框（Stack）+ 前框发光（Depth）。 -->
+  <style>
+    .sd-back  { stroke: var(--logo-back,  #edeff2); }
+    .sd-front { stroke: var(--logo-front, #22d3ee); }
+  </style>
+  <rect class="sd-back"  x="6"  y="10" width="22" height="22" rx="6" stroke-width="2.6"/>
+  <rect class="sd-front" x="12" y="6"  width="22" height="22" rx="6" stroke-width="2.6"/>
+</svg>

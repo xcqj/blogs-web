@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>文章详情 · Stack Depth（交付物 B）</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: var(--lh-base); transition: background .35s, color .35s; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: var(--container); margin: 0 auto; padding: 0 20px; }
+
+    header { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .brand .logo { width: 32px; height: 32px; filter: drop-shadow(0 0 6px var(--glow)); }
+    .nav-links { display: flex; align-items: center; gap: 24px; font-size: 15px; color: var(--text-muted); }
+    .nav-links a { color: inherit; } .nav-links a.active { color: var(--text); font-weight: 600; }
+    .theme-toggle { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 14px; border-radius: var(--radius-full); cursor: pointer; font-size: 13px; }
+    .theme-toggle:hover { border-color: var(--accent); }
+
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: var(--text-sm); margin: var(--space-6) 0 var(--space-4); }
+    .back:hover { color: var(--accent); }
+
+    /* 文章主体：窄栏正文 + 右侧 TOC（xl 显示） */
+    .article { display: grid; grid-template-columns: minmax(0,1fr) 240px; gap: var(--space-8); align-items: start; }
+    .head h1 { font-size: var(--text-3xl); line-height: var(--lh-3xl); font-weight: 800; letter-spacing: -.5px; margin: 0 0 var(--space-4); max-width: 24ch; }
+    .meta-bar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding-bottom: var(--space-5); border-bottom: 1px solid var(--border); margin-bottom: var(--space-6); }
+    .avatar { width: 40px; height: 40px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--accent), var(--accent-strong)); display: flex; align-items: center; justify-content: center; color: var(--accent-ink); font-weight: 700; }
+    .who b { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .who span { font-size: var(--text-xs); color: var(--text-muted); }
+    .meta-bar .sep { width: 4px; height: 4px; border-radius: 50%; background: var(--text-muted); }
+    .meta-bar .m { font-size: var(--text-xs); color: var(--text-muted); }
+    .tag { background: var(--chip-bg); color: var(--accent-strong); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); padding: 3px 10px; border-radius: var(--radius-full); font-size: var(--text-xs); }
+
+    .cover { width: 100%; aspect-ratio: 16/8; border-radius: var(--radius-lg); border: 1px solid var(--border); margin-bottom: var(--space-6);
+      background: radial-gradient(120% 120% at 80% 20%, var(--glow-soft), transparent 55%), var(--surface); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: var(--text-sm); }
+
+    /* ---- prose 正文排版（这里就是"最贵"的定稿） ---- */
+    .prose { max-width: var(--measure); font-size: var(--text-base); line-height: var(--lh-base); }
+    .prose p { margin: 0 0 var(--space-5); }
+    .prose h2 { font-size: var(--text-xl); line-height: var(--lh-xl); font-weight: 700; margin: var(--space-8) 0 var(--space-4); scroll-margin-top: 80px; }
+    .prose h3 { font-size: var(--text-lg); font-weight: 600; margin: var(--space-6) 0 var(--space-3); }
+    .prose ul, .prose ol { margin: 0 0 var(--space-5); padding-left: 1.4em; }
+    .prose li { margin: var(--space-2) 0; }
+    .prose blockquote { margin: var(--space-6) 0; padding: var(--space-2) var(--space-5); border-left: 3px solid var(--accent); color: var(--text-muted); background: var(--surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .prose :not(pre) > code { font-family: var(--font-mono); font-size: .9em; background: var(--elevated); border: 1px solid var(--border); padding: .12em .4em; border-radius: 6px; }
+    .prose pre { background: var(--code-bg); color: var(--code-text); padding: var(--space-5); border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--border); margin: 0 0 var(--space-6); font-size: var(--text-sm); line-height: 1.6; }
+    .prose pre code { font-family: var(--font-mono); }
+    .prose hr { border: none; border-top: 1px solid var(--border); margin: var(--space-8) 0; }
+    .prose table { width: 100%; border-collapse: collapse; margin: 0 0 var(--space-6); font-size: var(--text-sm); }
+    .prose th, .prose td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .prose th { background: var(--surface); }
+
+    /* TOC */
+    .toc { position: sticky; top: 88px; font-size: var(--text-sm); }
+    .toc h4 { margin: 0 0 var(--space-3); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
+    .toc a { display: block; color: var(--text-muted); padding: 5px 0 5px 12px; border-left: 2px solid var(--border); }
+    .toc a:hover, .toc a.on { color: var(--accent); border-left-color: var(--accent); }
+    .toc .lvl3 { padding-left: 24px; }
+
+    /* 文末 */
+    .end-tags { margin: var(--space-8) 0 var(--space-6); display: flex; gap: 8px; flex-wrap: wrap; }
+    .prevnext { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-10); }
+    .pn { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); background: var(--elevated); }
+    .pn span { font-size: var(--text-xs); color: var(--text-muted); }
+    .pn b { display: block; font-weight: 600; margin-top: 4px; }
+    .pn.next { text-align: right; }
+
+    /* 评论 */
+    .comments { border-top: 1px solid var(--border); padding-top: var(--space-8); }
+    .comments h2 { font-size: var(--text-xl); margin: 0 0 var(--space-5); }
+    .cmt { display: flex; gap: var(--space-3); padding: var(--space-4) 0; border-bottom: 1px dashed var(--border); }
+    .cmt .avatar { width: 36px; height: 36px; font-size: 14px; }
+    .cmt .body { flex: 1; }
+    .cmt .body .top { display: flex; align-items: center; gap: 8px; font-size: var(--text-sm); }
+    .cmt .body .top b { font-weight: 600; }
+    .cmt .body .top span { color: var(--text-muted); font-size: var(--text-xs); }
+    .cmt .body p { margin: 6px 0 0; font-size: var(--text-sm); }
+    .cform { margin-top: var(--space-6); }
+    .cform textarea { width: 100%; min-height: 96px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); font-family: inherit; font-size: var(--text-sm); resize: vertical; }
+    .cform textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow-soft); }
+    .cform .row { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-3); }
+    .cform .hint { font-size: var(--text-xs); color: var(--text-muted); }
+    .btn-primary { background: var(--accent); color: var(--accent-ink); border: none; padding: 9px 18px; border-radius: var(--radius-full); font-weight: 600; cursor: pointer; box-shadow: var(--shadow-glow); }
+
+    footer { border-top: 1px solid var(--border); padding: var(--space-6) 0; color: var(--text-muted); font-size: var(--text-sm); text-align: center; margin-top: var(--space-10); }
+
+    @media (max-width: 900px) {
+      .article { grid-template-columns: 1fr; }
+      .toc { display: none; }
+      .prevnext { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg>
+        <span>Stack Depth</span>
+      </div>
+      <nav class="nav-links">
+        <a href="./home.html">首页</a>
+        <a href="#">标签</a>
+        <a href="#">搜索</a>
+        <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <a class="back" href="./home.html">← 返回文章列表</a>
+
+    <article class="article">
+      <div>
+        <div class="head">
+          <h1>Loop Versioning：幂等发布与版本回写的设计取舍</h1>
+          <div class="meta-bar">
+            <div class="avatar">S</div>
+            <div class="who"><b>stackdepth</b><span>作者</span></div>
+            <div class="sep"></div><div class="m">2026-10-05</div>
+            <div class="sep"></div><div class="m">约 8 分钟</div>
+            <div class="sep"></div><span class="tag">架构</span><span class="tag">数据库</span>
+          </div>
+        </div>
+
+        <div class="cover">封面图 · 16:8（@nuxt/image 接入前占位）</div>
+
+        <div class="prose">
+          <p>博客的「发布」不是一个布尔翻转，而是一串必须原子的动作：内容落库、生成新版本、回写 <code>current_version_id</code>、同步标签关系。本文从 <code>blog_article_version</code> 的 append-only 约束出发，聊聊为什么值得单独维护一个「当前版本指针」。</p>
+
+          <blockquote>版本表只允许 INSERT，禁止 UPDATE / DELETE —— 这是审计与回滚的地基，一旦破坏就再也补不回来。</blockquote>
+
+          <h2 id="s1">为什么是 append-only</h2>
+          <p>把每次「内容真正变化」的快照追加进版本表，好处是可追溯、可回滚、可 diff。代价是存储增长与「当前生效版本」需要显式指针。</p>
+          <ul>
+            <li>可追溯：任意历史版本可还原；</li>
+            <li>可回滚：把指针指回旧版本即可，无需改历史；</li>
+            <li>可 diff：相邻版本比对定位改动。</li>
+          </ul>
+
+          <h2 id="s2">发布的事务边界</h2>
+          <p>多表原子操作显式包在一个事务里，避免「版本写了但指针没回写」的中间态：</p>
+          <pre><code>@Transactional(rollbackFor = Exception.class)
+public void publish(Long articleId) {
+    // 1. 内容变化比对 → 2. INSERT 新版本
+    // 3. 回写 current_version_id → 4. 同步 tag 关系
+}</code></pre>
+
+          <h3 id="s2-1">内容变化才建版本</h3>
+          <p>只有 <code>title / summary / coverUrl / content</code> 实际变化时才创建新版本，避免草稿反复保存制造无意义版本。</p>
+
+          <h2 id="s3">可见性三条件</h2>
+          <p>公共可见必须同时满足三条件，任何公共查询都不得绕过：</p>
+          <table>
+            <thead><tr><th>字段</th><th>取值</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td>status</td><td>1</td><td>已发布</td></tr>
+              <tr><td>visibility</td><td>0</td><td>公开</td></tr>
+              <tr><td>del_flag</td><td>0</td><td>未删除</td></tr>
+            </tbody>
+          </table>
+
+          <hr />
+          <p>结论：<strong>版本指针 + 显式事务</strong> 是把「发布」这件小事做对的最低成本组合。</p>
+        </div>
+
+        <div class="end-tags"><span class="tag">架构</span><span class="tag">数据库</span><span class="tag">事务</span><span class="tag">RuoYi</span></div>
+
+        <nav class="prevnext">
+          <a class="pn" href="#"><span>← 上一篇</span><b>Nuxt 4 SSR 下的认证：cookie + Nitro 代理</b></a>
+          <a class="pn next" href="#"><span>下一篇 →</span><b>Tag Rename / Merge：标签治理的事务设计</b></a>
+        </nav>
+
+        <section class="comments">
+          <h2>评论 · 2</h2>
+          <div class="cmt">
+            <div class="avatar">L</div>
+            <div class="body"><div class="top"><b>liu</b><span>2 天前</span></div><p>把 current_version_id 单独拎出来这步讲清楚了，受教。</p></div>
+          </div>
+          <div class="cmt">
+            <div class="avatar">W</div>
+            <div class="body"><div class="top"><b>wang</b><span>5 小时前</span></div><p>想问下草稿反复保存时，内容变化比对是全文 diff 还是 hash？</p></div>
+          </div>
+          <form class="cform" onsubmit="return false">
+            <textarea placeholder="写下你的评论…（登录后可发表）"></textarea>
+            <div class="row" style="justify-content:flex-end"><button class="btn-primary">发表评论</button></div>
+          </form>
+        </section>
+      </div>
+
+      <!-- 右侧 TOC（xl 显示） -->
+      <aside class="toc">
+        <h4>目录</h4>
+        <a href="#s1" class="on">为什么是 append-only</a>
+        <a href="#s2">发布的事务边界</a>
+        <a href="#s2-1" class="lvl3">内容变化才建版本</a>
+        <a href="#s3">可见性三条件</a>
+      </aside>
+    </article>
+  </main>
+
+  <footer><div class="wrap">Stack Depth · 文章详情页 Mockup（交付物 B）· 不写入 blog-web 仓库</div></footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

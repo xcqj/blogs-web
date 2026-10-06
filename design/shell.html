@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>全站 Shell 与导航 · Stack Depth（桶A 第5点）</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: var(--lh-base); transition: background .35s, color .35s; }
+    a { color: var(--accent); text-decoration: none; }
+    .wrap { max-width: var(--container); margin: 0 auto; padding: 0 20px; }
+    .theme-toggle { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 14px; border-radius: var(--radius-full); cursor: pointer; font-size: 13px; }
+
+    /* 顶栏 */
+    .site-header { background: var(--surface); border-bottom: 1px solid var(--border); }
+    .site-header .bar { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .brand .logo { width: 32px; height: 32px; filter: drop-shadow(0 0 6px var(--glow)); }
+    .nav { display: flex; align-items: center; gap: 22px; font-size: 15px; color: var(--text-muted); }
+    .nav a.active { color: var(--text); font-weight: 600; }
+    .actions { display: flex; align-items: center; gap: 12px; }
+    .btn-login { background: var(--accent); color: var(--accent-ink); padding: 7px 16px; border-radius: var(--radius-full); font-size: 14px; font-weight: 600; }
+    .user { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .user .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,var(--accent),var(--accent-strong)); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+    /* 页脚 */
+    .site-footer { background: var(--surface); border-top: 1px solid var(--border); margin-top: 40px; }
+    .site-footer .bar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--text-muted); }
+    .site-footer .links { display: flex; gap: 18px; }
+
+    /* 说明区 */
+    .page-title { font-size: var(--text-2xl); margin: 36px 0 4px; }
+    .sub { color: var(--text-muted); margin: 0 0 28px; }
+    h3 { font-size: var(--text-lg); margin: 32px 0 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th, td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; }
+    th { background: var(--surface); font-weight: 600; }
+    code { font-family: var(--font-mono); background: var(--elevated); border: 1px solid var(--border); padding: .1em .4em; border-radius: 6px; font-size: .88em; }
+    .widths { display: flex; flex-direction: column; gap: 14px; }
+    .wbar { border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text-muted); }
+    .wbar.wide { max-width: var(--container); }
+    .wbar.narrow { max-width: var(--measure); }
+    .tag { background: var(--chip-bg); color: var(--accent-strong); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); padding: 2px 9px; border-radius: 999px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <!-- ① 顶栏（未登录态） -->
+  <header class="site-header">
+    <div class="wrap bar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg>
+        <span>Stack Depth</span>
+      </div>
+      <div class="actions">
+        <nav class="nav"><a href="#" class="active">首页</a><a href="#">标签</a><a href="#">搜索</a></nav>
+        <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+        <a class="btn-login" href="#">登录</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ② 顶栏（已登录态） -->
+  <header class="site-header" style="border-top:3px solid var(--accent)">
+    <div class="wrap bar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg>
+        <span>Stack Depth</span>
+      </div>
+      <div class="actions">
+        <nav class="nav"><a href="#" class="active">首页</a><a href="#">标签</a><a href="#">搜索</a></nav>
+        <button class="theme-toggle">🌙 深色</button>
+        <div class="user"><div class="avatar">S</div><span>stackdepth</span></div>
+        <a href="#" style="color:var(--text-muted);font-size:13px">退出</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">全站 Shell 与导航</h1>
+    <p class="sub">桶A 第 5 点 —— 顶栏/页脚/容器宽度/页面清单，全站共用一个 <code>default</code> 布局。</p>
+
+    <h3>容器宽度：两档</h3>
+    <div class="widths">
+      <div class="wbar wide">宽档 <code>--container 1080</code> —— 首页 / 列表 / 标签 / 搜索 / 用户页</div>
+      <div class="wbar narrow">窄档 <code>--measure 68ch</code> —— 文章正文（阅读优先）</div>
+    </div>
+
+    <h3>页面清单 → Shell 映射（S9）</h3>
+    <table>
+      <thead><tr><th>路由</th><th>页面</th><th>容器</th><th>数据层</th></tr></thead>
+      <tbody>
+        <tr><td><code>/</code></td><td>首页</td><td>宽 + 侧栏</td><td>公共 <code>/blog/public/**</code></td></tr>
+        <tr><td><code>/page/{n}</code></td><td>分页</td><td>宽 + 侧栏</td><td>公共</td></tr>
+        <tr><td><code>/post/{slug}</code></td><td>文章详情</td><td>窄（正文）</td><td>公共</td></tr>
+        <tr><td><code>/tag/{slug}</code></td><td>标签页</td><td>宽</td><td>公共</td></tr>
+        <tr><td><code>/search</code></td><td>搜索</td><td>宽</td><td>公共</td></tr>
+        <tr><td><code>/user/{userId}</code></td><td>用户主页</td><td>宽</td><td>公共</td></tr>
+        <tr><td>弹层</td><td>登录 / 评论</td><td>覆盖层</td><td>登录读者 <code>/blog/article|user/**</code></td></tr>
+        <tr><td><code>404</code></td><td>未找到</td><td>窄</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>导航约定</h3>
+    <p style="font-size:var(--text-sm);color:var(--text-muted)">
+      顶栏 3 项固定（静态路由，<b>不走菜单驱动</b>）；登录态只影响右侧操作区；
+      <span class="tag">禁止 /blog/admin/**</span> 治理在 plus-ui 后台，前台无入口。
+    </p>
+  </main>
+
+  <!-- ③ 页脚 -->
+  <footer class="site-footer">
+    <div class="wrap bar">
+      <div>© 2026 Stack Depth · 把技术一层层读到深处</div>
+      <div class="links"><a href="#">关于</a><a href="#">RSS</a><a href="#">GitHub</a><a href="#" style="color:var(--text-muted)">备案位</a></div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); [].forEach.call(document.querySelectorAll('.theme-toggle'),function(b){b.textContent=t==='dark'?'🌙 深色':'☀️ 浅色';}); try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      if(btn) btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

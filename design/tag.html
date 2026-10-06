@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>标签 · Stack Depth</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <link rel="stylesheet" href="./app.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap bar">
+      <a class="brand" href="./home.html"><svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg><span>Stack Depth</span></a>
+      <div class="actions">
+        <nav class="navlinks"><a href="./home.html">首页</a><a href="./tag.html" class="active">标签</a><a href="./search.html">搜索</a></nav>
+        <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+        <a href="./author-articles.html" class="avatar" style="width:32px;height:32px;font-size:14px" title="作者中心">S</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="profile-hero" style="margin-top:28px">
+      <div class="avatar" style="width:64px;height:64px;font-size:26px;background:var(--chip-bg);color:var(--accent-strong);border:1px solid var(--accent)">＃</div>
+      <div><h1>架构</h1><p class="sub" style="margin:0;color:var(--text-muted)">共 12 篇文章 · 按发布时间倒序（§7.4 / §5.1 tagSlug）</p></div>
+    </div>
+
+    <div class="grid2" style="margin-top:26px">
+      <section>
+        <a class="acard" href="./article.html"><h3>Loop Versioning：幂等发布的设计取舍</h3><p>从 append-only 版本表出发，聊聊发布原子性与回滚边界。</p><div class="meta"><span class="tag">架构</span><span class="tag">数据库</span><span class="dot"></span><span>2026-10-05</span><span class="dot"></span><span>👁 128</span></div></a>
+        <a class="acard" href="./article.html"><h3>Tag Rename / Merge：标签治理的事务设计</h3><p>关系迁移、去重、alias 展平为什么要放在一个显式事务里。</p><div class="meta"><span class="tag">架构</span><span class="tag">事务</span><span class="dot"></span><span>2026-10-01</span><span class="dot"></span><span>👁 96</span></div></a>
+        <a class="acard" href="./article.html"><h3>公共可见三条件：一次查询底座的设计</h3><p>status / visibility / del_flag 三条件如何内建到 selectPublicPage 不可绕过。</p><div class="meta"><span class="tag">架构</span><span class="dot"></span><span>2026-09-30</span><span class="dot"></span><span>👁 74</span></div></a>
+        <div class="pager"><button>‹</button><button class="on">1</button><button>2</button><button>3</button><button>›</button></div>
+      </section>
+      <aside>
+        <div class="panel"><h2 class="sec-title">热门标签</h2><div class="tagcloud"><span class="tag">后端 · 20</span><span class="tag">架构 · 12</span><span class="tag">前端 · 9</span><span class="tag">数据库 · 8</span><span class="tag">Rust · 5</span><span class="tag">DevOps · 4</span><span class="tag">事务 · 3</span></div></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site"><div class="wrap bar"><div>© 2026 Stack Depth · 把技术一层层读到深处</div><div class="links"><a href="./home.html">首页</a><a href="./search.html">搜索</a></div></div></footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

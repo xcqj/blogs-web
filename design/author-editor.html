@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>新建 / 编辑文章 · 作者中心 · Stack Depth</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <link rel="stylesheet" href="./app.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap bar">
+      <a class="brand" href="./home.html"><svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg><span>Stack Depth</span></a>
+      <div class="actions">
+        <nav class="navlinks"><a href="./home.html">首页</a><a href="./tag.html">标签</a><a href="./search.html">搜索</a><a href="./author-articles.html" class="active">作者中心</a></nav>
+        <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+        <a href="./profile.html" class="avatar" style="width:32px;height:32px;font-size:14px">S</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div><h1 style="font-size:var(--text-xl)">编辑文章</h1><p class="sub">正文编辑器 = WangEditor（<code>&lt;ClientOnly&gt;</code> 客户端加载，不进 SSR），产出 HTML 交后端 jsoup 净化</p></div>
+      <a class="btn-ghost" href="./author-articles.html">← 返回列表</a>
+    </div>
+
+    <div class="editor-grid">
+      <!-- 左：标题 + 编辑器 -->
+      <div>
+        <input class="title-input" value="Loop Versioning：幂等发布与版本回写的设计取舍" />
+        <div style="margin-top:14px">
+          <div class="ed-toolbar">
+            <span title="加粗"><b>B</b></span><span title="斜体"><i>I</i></span><span title="删除线"><s>S</s></span>
+            <span title="标题">H</span><span title="引用">❝</span><span title="行内代码">&lt;/&gt;</span><span title="代码块">{ }</span>
+            <span title="链接">🔗</span><span title="图片">🖼</span><span title="列表">≡</span><span title="有序列表">1.</span><span title="表格">▦</span><span title="分割线">—</span>
+          </div>
+          <div class="ed-canvas">
+            <div style="color:var(--text-muted);font-size:13px;margin-bottom:12px;border:1px dashed var(--border);border-radius:8px;padding:8px 12px">
+              ↑ 此处为 WangEditor 编辑区占位。真实实现由 <code>@wangeditor-next/editor-for-vue</code> 在客户端挂载，SSR 阶段渲染为空壳。
+            </div>
+            <p style="color:var(--text)">博客的「发布」不是一个布尔翻转，而是一串必须原子的动作：内容落库、生成新版本、回写 <code style="background:var(--surface);padding:0 4px;border-radius:4px">current_version_id</code>、同步标签关系……</p>
+            <blockquote style="border-left:3px solid var(--accent);margin:16px 0;padding:2px 16px;color:var(--text-muted)">版本表只允许 INSERT，禁止 UPDATE / DELETE。</blockquote>
+            <pre style="background:var(--code-bg);color:var(--code-text);padding:14px;border-radius:8px;overflow:auto;font-family:var(--font-mono);font-size:13px">@Transactional(rollbackFor = Exception.class)
+public void publish(Long articleId) { /* ... */ }</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右：发布设置 -->
+      <aside class="side-panel">
+        <div class="panel">
+          <div class="field">
+            <label>发布状态</label>
+            <div class="meta"><span class="badge draft">草稿</span><span class="hint" style="margin:0">保存后点击「发布」即 PUBLISHED</span></div>
+          </div>
+          <div class="field">
+            <label>封面图</label>
+            <div class="cover-drop">点击 / 拖拽上传（复用 /resource/oss/upload）</div>
+          </div>
+          <div class="field">
+            <label>标签（1~6 个）</label>
+            <div class="chips-input">
+              <span class="tag">架构 <i>×</i></span><span class="tag">数据库 <i>×</i></span><input placeholder="输入后回车…" />
+            </div>
+            <div class="hint">输入即联想，已存在复用、不存在随文自动入库</div>
+          </div>
+          <div class="field">
+            <label>摘要</label>
+            <textarea class="textarea" style="min-height:72px">从 append-only 版本表出发，聊聊发布原子性与回滚边界。</textarea>
+          </div>
+        </div>
+        <div class="panel">
+          <div style="display:flex;gap:10px">
+            <button class="btn-ghost" style="flex:1">保存草稿</button>
+            <button class="btn-primary" style="flex:1;justify-content:center">发布</button>
+          </div>
+          <div class="hint" style="margin-top:12px">字数 1,280 · 当前 v3</div>
+          <button class="btn-ghost" style="width:100%;margin-top:10px">🕘 历史版本（只读查看，不可修改）</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site"><div class="wrap bar"><div>© 2026 Stack Depth · 作者中心（S12 / D29）</div><div class="links"><a href="./author-articles.html">我的文章</a><a href="./home.html">返回前台</a></div></div></footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

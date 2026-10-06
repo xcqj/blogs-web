@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>个人资料 · 作者中心 · Stack Depth</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <link rel="stylesheet" href="./app.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap bar">
+      <a class="brand" href="./home.html"><svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg><span>Stack Depth</span></a>
+      <div class="actions">
+        <nav class="navlinks"><a href="./home.html">首页</a><a href="./tag.html">标签</a><a href="./search.html">搜索</a><a href="./author-articles.html" class="active">作者中心</a></nav>
+        <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+        <a href="./profile.html" class="avatar" style="width:32px;height:32px;font-size:14px">S</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" style="max-width:720px">
+    <div class="page-head"><div><h1>个人资料</h1><p class="sub">走 <code>GET/PUT /blog/user/profile</code>（契约 §8）</p></div></div>
+
+    <div class="panel">
+      <div class="field" style="display:flex;align-items:center;gap:18px">
+        <div class="avatar" style="width:72px;height:72px;font-size:28px">S</div>
+        <div><button class="btn-ghost">更换头像</button><div class="hint">头像/昵称实时取自 sys_user，不复制到博客资料（契约 §9.1）</div></div>
+      </div>
+      <div class="field">
+        <label>昵称</label>
+        <input class="input" value="stackdepth" disabled style="opacity:.6" />
+        <div class="hint">昵称在 RuoYi 用户中心修改，此处只读展示</div>
+      </div>
+      <div class="field">
+        <label>个人简介（bio）</label>
+        <textarea class="textarea">把技术一层层读到深处。关注后端架构、开发者体验与开源。</textarea>
+        <div class="hint">展示在你的公开主页 /user/{userId} 与文章作者卡片</div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn-ghost">取消</button>
+        <button class="btn-primary">保存资料</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site"><div class="wrap bar"><div>© 2026 Stack Depth · 作者中心（S12 / D29）</div><div class="links"><a href="./author-articles.html">我的文章</a><a href="./user.html">我的公开主页</a></div></div></footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

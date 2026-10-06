@@ -1,0 +1,105 @@
+/* =====================================================================
+   Stack Depth · 设计 Token + 主题规范（桶A 交付物 A）
+   单一来源：语义变量。深浅两套靠 [data-theme] 切换，SSR 无闪烁由
+   @nuxtjs/color-mode 在 <html> 上打 class / data-theme 决定。
+   落地映射见文件末尾注释（写进 uno.config.ts 的 theme.colors）。
+   本文件在 blog-web/.cache/preview/ 下，仅设计预览，不进仓库。
+   ===================================================================== */
+
+/* ---------- 主题无关的排版 / 间距 / 圆角 / 阴影 ---------- */
+:root {
+  /* 字体：中文走系统栈，不加载中文 webfont（保 SSR 首屏） */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+  /* 字号阶梯（modular，基准 16，正文行高 1.7 利于长文阅读） */
+  --text-xs:   12px; --lh-xs: 1.5;
+  --text-sm:   14px; --lh-sm: 1.6;
+  --text-base: 16px; --lh-base: 1.7;   /* 正文 */
+  --text-lg:   18px; --lh-lg: 1.6;     /* 卡片标题 */
+  --text-xl:   20px; --lh-xl: 1.5;
+  --text-2xl:  24px; --lh-2xl: 1.35;   /* 页标题 */
+  --text-3xl:  30px; --lh-3xl: 1.25;
+  --text-4xl:  38px; --lh-4xl: 1.15;   /* Hero */
+  --font-regular: 400; --font-medium: 500; --font-semibold: 600;
+  --font-bold: 700; --font-extrabold: 800;
+
+  /* 正文测量宽度（prose 行宽，可读性 65–75ch） */
+  --measure: 68ch;
+  /* 容器宽度：列表/首页宽档 */
+  --container: 1080px;
+
+  /* 间距阶梯（4px 基准） */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-8: 48px; --space-10: 64px; --space-12: 96px;
+
+  /* 圆角 */
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 20px; --radius-full: 999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 10px 30px rgba(0,0,0,.10);
+}
+
+/* ---------- 深色主题（默认） ---------- */
+:root, :root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg:            #0b1120;  /* 页面底 */
+  --surface:       #0f1626;  /* hero / 面板 */
+  --elevated:      #131a2a;  /* 卡片 */
+  --text:          #edeff2;
+  --text-muted:    #8b94a7;  /* 辅助/meta */
+  --border:        #223049;
+  --accent:        #22d3ee;  /* 品牌青：CTA、链接、hover */
+  --accent-strong: #67e8f9;  /* 强调态 */
+  --accent-ink:    #04222b;  /* accent 上的文字 */
+  --chip-bg:       rgba(34,211,238,.10);
+  --glow:          rgba(34,211,238,.55);
+  --glow-soft:     rgba(34,211,238,.18);
+  --shadow-glow:   0 8px 30px var(--glow);
+  /* 代码块两版都用深底（开发者阅读习惯） */
+  --code-bg:       #0d1526;
+  --code-text:     #e2e8f0;
+  /* logo 双色 */
+  --logo-back:     #edeff2;
+  --logo-front:    #22d3ee;
+}
+
+/* ---------- 浅色主题 ---------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:            #f6f7fb;
+  --surface:       #ffffff;
+  --elevated:      #ffffff;
+  --text:          #0f172a;
+  --text-muted:    #64748b;
+  --border:        #e2e8f0;
+  --accent:        #0891b2;  /* 压暗的青，保证小字对比度 */
+  --accent-strong: #0e7490;
+  --accent-ink:    #ffffff;
+  --chip-bg:       rgba(8,145,178,.10);
+  --glow:          rgba(8,145,178,.28);
+  --glow-soft:     rgba(8,145,178,.12);
+  --shadow-glow:   0 8px 24px var(--glow);
+  --code-bg:       #0f172a;
+  --code-text:     #e2e8f0;
+  --logo-back:     #0f172a;
+  --logo-front:    #0891b2;
+}
+
+/* =====================================================================
+   落地映射（写进 blog-web/uno.config.ts，示意，勿在此文件改）：
+   theme: {
+     colors: {
+       bg: 'var(--bg)', surface: 'var(--surface)', elevated: 'var(--elevated)',
+       text: 'var(--text)', muted: 'var(--text-muted)', border: 'var(--border)',
+       primary: 'var(--accent)', 'primary-strong': 'var(--accent-strong)',
+     },
+     fontFamily: { sans: 'var(--font-sans)', mono: 'var(--font-mono)' },
+     fontSize: { /* 用上面 --text-* 阶梯覆盖或新增语义键 */ },
+     borderRadius: { sm:'var(--radius-sm)', md:'var(--radius-md)', lg:'var(--radius-lg)' },
+   }
+   之后模板里 `bg-surface text-muted rounded-lg` 等原子类即随主题自动切换。
+   可访问性：正文 --text on --bg、链接 --accent 需 ≥4.5:1；大字/UI ≥3:1。
+   ===================================================================== */

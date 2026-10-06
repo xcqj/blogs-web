@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>状态版式 · Stack Depth（桶A 第7点）</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: var(--lh-base); transition: background .35s, color .35s; }
+    a { color: var(--accent); text-decoration: none; }
+    .wrap { max-width: var(--container); margin: 0 auto; padding: 0 20px 60px; }
+    .top { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .brand .logo { width: 30px; height: 30px; filter: drop-shadow(0 0 6px var(--glow)); }
+    .theme-toggle { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 14px; border-radius: var(--radius-full); cursor: pointer; font-size: 13px; }
+    h1 { font-size: var(--text-2xl); margin: 20px 0 4px; }
+    .sub { color: var(--text-muted); margin: 0 0 30px; }
+    h3 { font-size: var(--text-lg); margin: 34px 0 12px; }
+    .cap { color: var(--text-muted); font-size: var(--text-sm); margin: -6px 0 14px; }
+    .demo { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--elevated); padding: 28px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* 骨架屏 */
+    .sk-card { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; background: var(--surface); }
+    .sk { border-radius: 6px; background: linear-gradient(90deg, var(--border) 25%, var(--surface) 37%, var(--border) 63%); background-size: 400% 100%; animation: shimmer 1.4s infinite linear; }
+    .sk.title { height: 20px; width: 60%; margin-bottom: 12px; }
+    .sk.line { height: 12px; width: 100%; margin-bottom: 8px; }
+    .sk.line.s { width: 40%; }
+    .sk.chip { display:inline-block; height: 18px; width: 60px; margin-right: 8px; border-radius: 999px; }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+    @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+    /* 空 / 错误 / 404 */
+    .state { text-align: center; padding: 40px 20px; }
+    .state .art { width: 96px; height: 96px; margin: 0 auto 18px; display: flex; align-items: center; justify-content: center; }
+    .state .art svg { width: 88px; height: 88px; }
+    .state h4 { margin: 0 0 6px; font-size: var(--text-lg); }
+    .state p { margin: 0 0 20px; color: var(--text-muted); font-size: var(--text-sm); }
+    .btn-primary { background: var(--accent); color: var(--accent-ink); border: none; padding: 10px 20px; border-radius: var(--radius-full); font-weight: 600; cursor: pointer; box-shadow: var(--shadow-glow); }
+    .btn-ghost { border: 1px solid var(--border); background: transparent; color: var(--text); padding: 10px 20px; border-radius: var(--radius-full); font-weight: 600; cursor: pointer; margin-left: 10px; }
+    .code404 { font-size: 64px; font-weight: 800; letter-spacing: -2px; background: linear-gradient(135deg, var(--accent), var(--accent-strong)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg>
+        <span>Stack Depth · 状态版式</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+    </div>
+
+    <h1>状态版式</h1>
+    <p class="sub">桶A 第 7 点 —— 加载 / 空 / 错误 / 404，各定义一次全站复用。加载用<b>骨架屏</b>而非转圈，防布局跳动。</p>
+
+    <h3>① 加载态 · 列表骨架屏</h3>
+    <p class="cap">占位尺寸与真实卡片一致，数据到达前不跳动。</p>
+    <div class="demo" style="display:flex;flex-direction:column;gap:14px;background:var(--bg)">
+      <div class="sk-card"><div class="sk title"></div><div class="sk line"></div><div class="sk line s"></div><div style="margin-top:12px"><span class="sk chip"></span><span class="sk chip"></span></div></div>
+      <div class="sk-card"><div class="sk title" style="width:48%"></div><div class="sk line"></div><div class="sk line s" style="width:55%"></div><div style="margin-top:12px"><span class="sk chip"></span></div></div>
+    </div>
+
+    <h3>② 空态</h3>
+    <p class="cap">图标 + 文案 + 操作。变体：列表空 / 搜索无结果 / 标签下无文章。</p>
+    <div class="demo">
+      <div class="state">
+        <div class="art"><svg viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--text-muted)" stroke-width="2" opacity=".5"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--accent)" stroke-width="2"/></svg></div>
+        <h4>还没有文章</h4>
+        <p>这个列表暂时是空的，去别处看看或稍后再来。</p>
+        <button class="btn-primary">返回首页</button>
+      </div>
+    </div>
+
+    <h3>③ 错误态 & ④ 404</h3>
+    <div class="grid2" style="margin-top:12px">
+      <div class="demo">
+        <div class="state">
+          <div class="art"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--accent)" stroke-width="2"/><path d="M12 7v6M12 16.5v.5" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h4>加载失败</h4>
+          <p>网络异常或服务暂不可用，请稍后重试。</p>
+          <button class="btn-primary">重试</button>
+        </div>
+      </div>
+      <div class="demo">
+        <div class="state">
+          <div class="code404">404</div>
+          <h4 style="margin-top:10px">页面走丢了</h4>
+          <p>你要找的内容不存在，或已被作者隐藏。</p>
+          <button class="btn-primary">回首页</button><button class="btn-ghost">去搜索</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>

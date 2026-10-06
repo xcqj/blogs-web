@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stack Depth · 设计 Token 规范（交付物 A）</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./tokens.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: var(--lh-base); transition: background .35s, color .35s; }
+    .wrap { max-width: var(--container); margin: 0 auto; padding: 0 20px; }
+    header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .brand .logo { width: 32px; height: 32px; filter: drop-shadow(0 0 6px var(--glow)); }
+    .theme-toggle { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 14px; border-radius: var(--radius-full); cursor: pointer; font-size: 13px; }
+    .theme-toggle:hover { border-color: var(--accent); }
+    h1 { font-size: var(--text-3xl); line-height: var(--lh-3xl); margin: 40px 0 4px; letter-spacing: -.5px; }
+    .sub { color: var(--text-muted); margin: 0 0 32px; }
+    section { margin: 0 0 40px; }
+    h2 { font-size: var(--text-xl); margin: 0 0 6px; }
+    .cap { color: var(--text-muted); font-size: var(--text-sm); margin: 0 0 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .swatch { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .swatch .chip { height: 64px; }
+    .swatch .lbl { padding: 8px 10px; font-size: 12px; }
+    .swatch .lbl b { display: block; font-weight: 600; }
+    .swatch .lbl span { color: var(--text-muted); }
+    .type-row { display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px dashed var(--border); }
+    .type-row .meta { width: 150px; flex: none; color: var(--text-muted); font-size: 12px; font-family: var(--font-mono); }
+    .space-bars { display: flex; align-items: flex-end; gap: 10px; }
+    .space-bars .bar { background: var(--accent); border-radius: 4px; opacity: .85; }
+    .space-bars .item { text-align: center; font-size: 11px; color: var(--text-muted); }
+    .radii { display: flex; gap: 16px; flex-wrap: wrap; }
+    .radii .box { width: 72px; height: 72px; background: var(--surface); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); }
+    .btns { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .btn-primary { background: var(--accent); color: var(--accent-ink); padding: 11px 20px; border-radius: var(--radius-full); font-weight: 600; box-shadow: var(--shadow-glow); }
+    .btn-ghost { border: 1px solid var(--border); padding: 11px 20px; border-radius: var(--radius-full); }
+    .tag { background: var(--chip-bg); color: var(--accent-strong); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; }
+    footer { border-top: 1px solid var(--border); padding: 24px 0; color: var(--text-muted); font-size: 13px; text-align: center; margin-top: 24px; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="22" height="22" rx="6" stroke="var(--logo-back)" stroke-width="2.6"/><rect x="12" y="6" width="22" height="22" rx="6" stroke="var(--logo-front)" stroke-width="2.6"/></svg>
+        <span>Stack Depth · Design Tokens</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle">🌙 深色</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>设计 Token 规范</h1>
+    <p class="sub">桶A 交付物 A —— 语义色 / 排版阶梯 / 间距 / 圆角，深浅两套同源于 <code>:root[data-theme]</code>。点右上角切换。</p>
+
+    <section>
+      <h2>语义色</h2>
+      <p class="cap">命名而非色值；写进 uno 的 theme.colors 后，<code>bg-surface text-muted</code> 等原子类随主题自动切换。</p>
+      <div class="grid">
+        <div class="swatch"><div class="chip" style="background:var(--bg)"></div><div class="lbl"><b>--bg</b><span>页面底</span></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--surface)"></div><div class="lbl"><b>--surface</b><span>hero/面板</span></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--elevated)"></div><div class="lbl"><b>--elevated</b><span>卡片</span></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--text)"></div><div class="lbl"><b>--text</b><span>正文</span></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--text-muted)"></div><div class="lbl"><b>--text-muted</b><span>辅助/meta</span></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--border)"></div><div class="lbl"><b>--border</b><span>描边</span></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--accent)"></div><div class="lbl"><b>--accent</b><span>品牌青/CTA</span></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--accent-strong)"></div><div class="lbl"><b>--accent-strong</b><span>强调态</span></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--code-bg)"></div><div class="lbl"><b>--code-bg</b><span>代码块(恒深)</span></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>排版阶梯</h2>
+      <p class="cap">基准 16，正文行高 1.7；语义：meta=sm / 正文=base / 卡片标题=lg / 页标题=2xl / Hero=4xl。</p>
+      <div class="type-row"><div class="meta">4xl · 38 · Hero</div><div style="font-size:var(--text-4xl);line-height:var(--lh-4xl);font-weight:800">Deep dives into the stack</div></div>
+      <div class="type-row"><div class="meta">3xl · 30 · H1</div><div style="font-size:var(--text-3xl);line-height:var(--lh-3xl);font-weight:800">文章标题示例 Heading</div></div>
+      <div class="type-row"><div class="meta">2xl · 24 · 页标题</div><div style="font-size:var(--text-2xl);line-height:var(--lh-2xl);font-weight:700">页面级标题</div></div>
+      <div class="type-row"><div class="meta">xl · 20 · H2</div><div style="font-size:var(--text-xl);line-height:var(--lh-xl);font-weight:700">二级标题小节</div></div>
+      <div class="type-row"><div class="meta">lg · 18 · 卡片标题</div><div style="font-size:var(--text-lg);line-height:var(--lh-lg);font-weight:600">列表卡片标题</div></div>
+      <div class="type-row"><div class="meta">base · 16 · 正文</div><div style="font-size:var(--text-base);line-height:var(--lh-base)">正文段落，长文阅读的行高与字距在这里定稿。</div></div>
+      <div class="type-row"><div class="meta">sm · 14 · 辅助</div><div style="font-size:var(--text-sm);color:var(--text-muted)">摘要 / 次要说明</div></div>
+      <div class="type-row"><div class="meta">xs · 12 · meta</div><div style="font-size:var(--text-xs);color:var(--text-muted)">日期 · 阅读时长 · 标签</div></div>
+    </section>
+
+    <section>
+      <h2>间距阶梯</h2>
+      <p class="cap">4px 基准，避免随手写 margin。</p>
+      <div class="space-bars">
+        <div class="item"><div class="bar" style="width:4px;height:4px"></div>1</div>
+        <div class="item"><div class="bar" style="width:8px;height:8px"></div>2</div>
+        <div class="item"><div class="bar" style="width:12px;height:12px"></div>3</div>
+        <div class="item"><div class="bar" style="width:16px;height:16px"></div>4</div>
+        <div class="item"><div class="bar" style="width:24px;height:24px"></div>5</div>
+        <div class="item"><div class="bar" style="width:32px;height:32px"></div>6</div>
+        <div class="item"><div class="bar" style="width:48px;height:48px"></div>8</div>
+        <div class="item"><div class="bar" style="width:64px;height:64px"></div>10</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>圆角</h2>
+      <div class="radii">
+        <div class="box" style="border-radius:var(--radius-sm)">sm 8</div>
+        <div class="box" style="border-radius:var(--radius-md)">md 12</div>
+        <div class="box" style="border-radius:var(--radius-lg)">lg 16</div>
+        <div class="box" style="border-radius:var(--radius-xl)">xl 20</div>
+        <div class="box" style="border-radius:var(--radius-full)">full</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>组件基元</h2>
+      <div class="btns">
+        <span class="btn-primary">Start reading</span>
+        <span class="btn-ghost">次要按钮</span>
+        <span class="tag">Backend</span><span class="tag">架构</span><span class="tag">Rust</span>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="wrap">Stack Depth · Design Tokens 预览 · 不写入 blog-web 仓库</div></footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t==='dark'?'🌙 深色':'☀️ 浅色'; try{localStorage.setItem('sd-theme',t);}catch(e){} }
+      var s=null; try{s=localStorage.getItem('sd-theme');}catch(e){}
+      apply(s||'dark');
+      btn.onclick=function(){ apply(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    })();
+  </script>
+</body>
+</html>
