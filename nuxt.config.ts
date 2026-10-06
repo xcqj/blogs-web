@@ -8,8 +8,21 @@ export default defineNuxtConfig({
 
   modules: [
     // UnoCSS：读取根目录 uno.config.ts，自动注入样式（@unocss/nuxt 内置 virtual css）
-    '@unocss/nuxt'
+    '@unocss/nuxt',
+    // 深浅主题：默认跟随系统、可手动切；偏好写 cookie 供 SSR 读取，首屏无闪烁
+    '@nuxtjs/color-mode'
   ],
+
+  // 在 <html> 上打 class="dark" / "light"（与 tokens.css 的 :root.light 选择器对应）
+  colorMode: {
+    preference: 'system',
+    fallback: 'dark',
+    classSuffix: '',
+    storage: 'cookie',
+    storageKey: 'sd-color-mode',
+    // 每个请求都读 cookie，SSR 直接产出正确主题 class（首屏无闪烁的关键）
+    emitOnAllHTTPRequests: true
+  },
 
   // 全局样式：设计 token 单一来源（变量 + 基础层），UnoCSS 语义类消费之
   css: ['~/assets/css/tokens.css'],
