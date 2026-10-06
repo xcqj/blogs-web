@@ -114,3 +114,17 @@ body {
 ::selection {
   background: var(--glow-soft);
 }
+
+/* Hero 面板底（青辉径向 + surface）：首页 hero 与用户资料 hero 共用，避免内联样式 */
+.surface-hero {
+  background: var(--hero-bg);
+}
+
+/* 响应式规则（design/responsive.html）：<640 触控目标 ≥44px（仅 sm 以下，桌面不放大） */
+@media (max-width: 639px) {
+  .btn-primary,
+  .btn-ghost,
+  button[type='submit'] {
+    min-height: 44px;
+  }
+}

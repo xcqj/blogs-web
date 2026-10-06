@@ -1,58 +1,76 @@
 <script setup lang="ts">
+// /search —— §6 公共搜索。keyword 与 page 都走 query，可分享/可前进后退；SSR 出结果首屏。
 import type { ArticleSummary, PageResult } from '~/types/blog'
 
-// /search —— §6 公共搜索。keyword 来自 query，SSR 取数（结果进首屏，利于 SEO/分享）。
 const route = useRoute()
 const router = useRouter()
+
 const keyword = computed(() => String(route.query.keyword || '').trim())
+const page = computed(() => Math.max(1, Number(route.query.page) || 1))
+const pageSize = 10
 const input = ref(keyword.value)
 watch(keyword, (v) => (input.value = v))
 
-const pageSize = 20
-const { data } = await useAsyncData(
-  `search-${keyword.value}`,
+const { data, status, refresh } = await useAsyncData(
+  `search-${keyword.value}-${page.value}`,
   () =>
     keyword.value
       ? $fetch<PageResult<ArticleSummary>>('/api/blog/public/search', {
-          query: { keyword: keyword.value, pageNum: 1, pageSize }
+          query: { keyword: keyword.value, pageNum: page.value, pageSize }
         })
       : Promise.resolve({ rows: [], total: 0 } as PageResult<ArticleSummary>),
-  { watch: [keyword] }
+  { watch: [keyword, page] }
 )
 
 function submit() {
   const kw = input.value.trim()
-  if (!kw) return
-  router.push({ path: '/search', query: { keyword: kw } })
+  // 空关键词不查后端（后端会返回「搜索关键字不能为空」业务错误）
+  router.replace(kw ? { path: '/search', query: { keyword: kw } } : { path: '/search' })
 }
 
-useSeoMeta({ title: () => (keyword.value ? `搜索：${keyword.value} · 博客前台` : '搜索') })
+useSeoMeta({ title: () => (keyword.value ? `搜索：${keyword.value}` : '搜索') })
 </script>
 
 <template>
   <section>
-    <form class="mx-auto flex max-w-xl gap-2" @submit.prevent="submit">
+    <form class="mx-auto mt-2 flex max-w-xl gap-2" @submit.prevent="submit">
       <input
         v-model="input"
         type="search"
         placeholder="搜索文章标题 / 摘要 / 正文…"
-        class="min-w-0 flex-1 rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+        class="min-w-0 flex-1 rounded-md border border-border bg-surface px-4 py-2.5 text-base text-text outline-none transition focus:border-primary"
       />
-      <button type="submit" class="rounded bg-primary px-4 py-2 text-sm text-white hover:opacity-90">搜索</button>
+      <button type="submit" class="btn-primary">搜索</button>
     </form>
 
-    <div class="mt-6">
-      <!-- 有关键词才展示结果区 -->
+    <div class="mt-8">
       <template v-if="keyword">
-        <p class="mb-3 text-sm text-gray-500">
-          “{{ keyword }}” 的搜索结果：共 {{ data?.total ?? 0 }} 篇
-        </p>
-        <div class="space-y-3">
-          <ArticleCard v-for="a in data?.rows" :key="a.articleId" :article="a" />
-          <p v-if="!data?.rows?.length" class="py-10 text-center text-sm text-gray-400">没有找到相关文章</p>
-        </div>
+        <p class="mb-4 text-sm text-muted">“{{ keyword }}” 共 {{ data?.total ?? 0 }} 篇</p>
+
+        <ArticleListSkeleton v-if="status === 'pending'" :count="3" />
+        <ErrorState v-else-if="status === 'error'" description="搜索失败，请稍后重试。">
+          <button class="btn-primary" @click="refresh">重试</button>
+        </ErrorState>
+        <template v-else>
+          <div class="space-y-3.5">
+            <ArticleCard v-for="a in data?.rows" :key="a.articleId" :article="a" />
+          </div>
+          <EmptyState
+            v-if="!data?.rows?.length"
+            title="没有找到相关文章"
+            description="换个关键词试试，或去标签页逛逛。"
+          >
+            <NuxtLink to="/tags" class="btn-ghost mt-1">逛标签</NuxtLink>
+          </EmptyState>
+          <AppPagination
+            :page="page"
+            :total="data?.total ?? 0"
+            :page-size="pageSize"
+            :link-for="(n) => ({ path: '/search', query: { keyword, ...(n > 1 ? { page: n } : {}) } })"
+          />
+        </template>
       </template>
-      <p v-else class="py-10 text-center text-sm text-gray-400">输入关键词开始搜索</p>
+      <p v-else class="py-10 text-center text-sm text-muted">输入关键词开始搜索</p>
     </div>
   </section>
 </template>

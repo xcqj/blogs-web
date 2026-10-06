@@ -121,3 +121,12 @@
   background: var(--surface);
   font-weight: 600;
 }
+
+/* 响应式（design/responsive.html「表格：xs/sm 横向滚动」）：窄屏让宽表可横滚，不撑破 68ch */
+@media (max-width: 639px) {
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

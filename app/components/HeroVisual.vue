@@ -27,7 +27,9 @@ const layerStyle = (i: number) => ({
 <style scoped>
 .hero-visual {
   position: relative;
-  height: 340px;
+  /* 高度由外层容器按断点控制（md 缩小 / lg 并排），组件自身跟随父高 */
+  height: 100%;
+  min-height: 240px;
   perspective: 1100px;
 }
 .stack {

@@ -1,35 +1,40 @@
 <script setup lang="ts">
+// /page/{n} —— 文章分页列表（§5.1）。数字分页见 AppPagination；容器沿用布局宽档。
 import type { ArticleSummary, PageResult } from '~/types/blog'
 
 const route = useRoute()
-const pageNum = computed(() => Math.max(1, Number(route.params.n) || 1))
+const page = computed(() => Math.max(1, Number(route.params.n) || 1))
 const pageSize = 10
 
-const { data: page } = await useAsyncData(
-  `page-articles-${pageNum.value}`,
-  () => $fetch<PageResult<ArticleSummary>>('/api/blog/public/articles', {
-    query: { pageNum: pageNum.value, pageSize }
-  }),
-  { watch: [pageNum] }
+const { data, status, refresh } = await useAsyncData(
+  `page-articles-${page.value}`,
+  () =>
+    $fetch<PageResult<ArticleSummary>>('/api/blog/public/articles', {
+      query: { pageNum: page.value, pageSize }
+    }),
+  { watch: [page] }
 )
 
-const totalPages = computed(() => Math.ceil((page.value?.total ?? 0) / pageSize))
+useSeoMeta({ title: () => `文章列表 第 ${page.value} 页` })
 </script>
 
 <template>
-  <section class="space-y-3">
-    <h1 class="text-xl font-bold">文章列表 · 第 {{ pageNum }} 页</h1>
-    <ArticleCard v-for="a in page?.rows" :key="a.articleId" :article="a" />
-    <p v-if="!page?.rows?.length" class="py-10 text-center text-sm text-gray-400">暂无文章</p>
+  <section>
+    <header class="mb-5 flex flex-wrap items-baseline justify-between gap-3">
+      <h1 class="text-2xl font-semibold">最新文章</h1>
+      <p class="text-sm text-muted">共 {{ data?.total ?? 0 }} 篇 · 第 {{ page }} 页</p>
+    </header>
 
-    <nav class="flex items-center justify-center gap-3 pt-4 text-sm">
-      <NuxtLink v-if="pageNum > 1" :to="`/page/${pageNum - 1}`" class="rounded border px-3 py-1 hover:border-primary">
-        上一页
-      </NuxtLink>
-      <span class="text-gray-400">{{ pageNum }} / {{ totalPages }}</span>
-      <NuxtLink v-if="pageNum < totalPages" :to="`/page/${pageNum + 1}`" class="rounded border px-3 py-1 hover:border-primary">
-        下一页
-      </NuxtLink>
-    </nav>
+    <ArticleListSkeleton v-if="status === 'pending'" :count="4" />
+    <ErrorState v-else-if="status === 'error'" description="文章加载失败，请稍后重试。">
+      <button class="btn-primary" @click="refresh">重试</button>
+    </ErrorState>
+    <template v-else>
+      <div class="space-y-3.5">
+        <ArticleCard v-for="a in data?.rows" :key="a.articleId" :article="a" />
+      </div>
+      <EmptyState v-if="!data?.rows?.length" title="还没有文章" description="稍后再来看看。" />
+      <AppPagination :page="page" :total="data?.total ?? 0" :page-size="pageSize" :link-for="(n) => `/page/${n}`" />
+    </template>
   </section>
 </template>
