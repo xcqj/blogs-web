@@ -18,6 +18,9 @@ export default defineNuxtConfig({
     apiBase: 'http://localhost:8081',
     // web 客户端 client_id（docs/blog_s9_web_client.sql），由 .env 注入，仅服务端可见
     appClientId: '',
+    // api-decrypt 加密链路密钥（server-only，勿泄漏到浏览器）：请求 RSA 公钥 / 响应 RSA 私钥
+    rsaPublicKey: '',
+    rsaPrivateKey: '',
     public: {
       siteName: '博客前台'
     }
