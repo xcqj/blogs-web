@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const { logged, profile, logout } = useAuth()
 const { show: showLogin } = useLoginModal()
-const siteName = useRuntimeConfig().public.siteName
 
 const nav = [
   { label: '首页', to: '/' },
@@ -12,9 +11,7 @@ const nav = [
 <template>
   <header class="border-b border-gray-200 bg-white">
     <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-      <NuxtLink to="/" class="text-lg font-bold text-primary">
-        {{ siteName }}
-      </NuxtLink>
+      <AppBrand />
 
       <nav class="flex items-center gap-4 text-sm">
         <NuxtLink

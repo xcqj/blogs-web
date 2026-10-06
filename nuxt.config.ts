@@ -38,7 +38,17 @@ export default defineNuxtConfig({
     rsaPublicKey: '',
     rsaPrivateKey: '',
     public: {
-      siteName: '博客前台'
+      siteName: 'Stack Depth'
+    }
+  },
+
+  // 品牌资源：内嵌 prefers-color-scheme 的 SVG favicon（无需 JS 自动切深浅），ico 兜底老浏览器
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'alternate icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
     }
   }
 })
