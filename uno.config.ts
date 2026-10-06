@@ -44,7 +44,8 @@ export default defineConfig({
       'primary-strong': 'var(--accent-strong)',
       'primary-ink': 'var(--accent-ink)',
       chip: 'var(--chip-bg)',
-      code: 'var(--code-bg)'
+      code: 'var(--code-bg)',
+      danger: 'var(--danger)'
     },
     fontFamily: {
       sans: 'var(--font-sans)',

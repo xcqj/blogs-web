@@ -44,10 +44,10 @@ async function submit() {
 
 <template>
   <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" @click.self="hide">
-    <div class="w-full max-w-sm rounded-lg bg-white p-5 shadow-lg">
+    <div class="w-full max-w-sm rounded-lg border border-border bg-elevated p-5 shadow-md">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-base font-semibold">登录</h2>
-        <button class="text-gray-400 hover:text-gray-600" @click="hide">✕</button>
+        <button class="text-muted transition hover:text-text" @click="hide">✕</button>
       </div>
 
       <form class="space-y-3" @submit.prevent="submit">
@@ -56,14 +56,14 @@ async function submit() {
           type="text"
           placeholder="用户名"
           autocomplete="username"
-          class="w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+          class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text outline-none transition focus:border-primary"
         />
         <input
           v-model="form.password"
           type="password"
           placeholder="密码"
           autocomplete="current-password"
-          class="w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+          class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text outline-none transition focus:border-primary"
         />
 
         <div v-if="captchaEnabled" class="flex items-center gap-2">
@@ -72,25 +72,21 @@ async function submit() {
             type="text"
             placeholder="验证码"
             autocomplete="off"
-            class="min-w-0 flex-1 rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
+            class="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm text-text outline-none transition focus:border-primary"
           />
           <!-- base64 验证码图，点击刷新；不缓存 -->
           <img
             v-if="captchaImg"
             :src="`data:image/png;base64,${captchaImg}`"
             alt="验证码"
-            class="h-9 w-24 cursor-pointer rounded border border-gray-200"
+            class="h-9 w-24 cursor-pointer rounded-md border border-border"
             title="点击刷新"
             @click="refreshCaptcha"
           />
         </div>
 
-        <p v-if="error" class="text-xs text-red-500">{{ error }}</p>
-        <button
-          type="submit"
-          :disabled="loading"
-          class="w-full rounded bg-primary py-2 text-sm text-white hover:opacity-90 disabled:opacity-50"
-        >
+        <p v-if="error" class="text-xs text-danger">{{ error }}</p>
+        <button type="submit" :disabled="loading" class="btn-primary w-full">
           {{ loading ? '登录中…' : '登录' }}
         </button>
       </form>

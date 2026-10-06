@@ -1,0 +1,123 @@
+/* =====================================================================
+   正文排版（design/article.html 的 .prose 定稿，桶A 第6点）
+   - 全部走 tokens.css 变量，无魔法值；限宽 68ch 保可读行宽
+   - preset-typography 的规则用 :where() 零特异性，本文件同名选择器可直接覆盖
+   - 代码块两版主题都用深底（--code-bg/--code-text，开发者阅读习惯）
+   ===================================================================== */
+
+.prose {
+  max-width: var(--measure);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  color: var(--text);
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose p {
+  margin: 0 0 var(--space-5);
+}
+
+.prose h2 {
+  font-size: var(--text-xl);
+  line-height: var(--lh-xl);
+  font-weight: 700;
+  margin: var(--space-8) 0 var(--space-4);
+  scroll-margin-top: 80px;
+}
+
+.prose h3 {
+  font-size: var(--text-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 var(--space-5);
+  padding-left: 1.4em;
+}
+
+.prose li {
+  margin: var(--space-2) 0;
+}
+
+.prose blockquote {
+  margin: var(--space-6) 0;
+  padding: var(--space-2) var(--space-5);
+  border-left: 3px solid var(--accent);
+  color: var(--text-muted);
+  background: var(--surface);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  padding: 0.12em 0.4em;
+  border-radius: 6px;
+}
+
+.prose pre {
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  overflow: auto;
+  border: 1px solid var(--border);
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.prose pre code {
+  font-family: var(--font-mono);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.prose a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.prose a:hover {
+  text-decoration: underline;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: var(--space-8) 0;
+}
+
+.prose img {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-sm);
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.prose th {
+  background: var(--surface);
+  font-weight: 600;
+}

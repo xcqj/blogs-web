@@ -32,17 +32,13 @@ async function submit() {
         v-model="content"
         rows="3"
         placeholder="写下你的评论…"
-        class="w-full rounded border border-gray-300 p-3 text-sm outline-none focus:border-primary"
+        class="w-full rounded-md border border-border bg-surface p-4 text-sm text-text outline-none transition resize-y focus:border-primary focus:shadow-[0_0_0_3px_var(--glow-soft)]"
       />
-      <div class="mt-2 flex items-center gap-3">
-        <button
-          :disabled="submitting || !content.trim()"
-          class="rounded bg-primary px-4 py-1.5 text-sm text-white hover:opacity-90 disabled:opacity-50"
-          @click="submit"
-        >
+      <div class="mt-3 flex items-center gap-3">
+        <button :disabled="submitting || !content.trim()" class="btn-primary" @click="submit">
           {{ submitting ? '提交中…' : '发表评论' }}
         </button>
-        <span v-if="err" class="text-xs text-red-500">{{ err }}</span>
+        <span v-if="err" class="text-xs text-danger">{{ err }}</span>
       </div>
     </template>
     <button v-else class="text-sm text-primary hover:underline" @click="showLogin">登录后可发表评论</button>
