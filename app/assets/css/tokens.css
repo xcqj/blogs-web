@@ -20,10 +20,15 @@
   --text-2xl: 24px;     --lh-2xl: 1.35;
   --text-3xl: 30px;     --lh-3xl: 1.25;
   --text-4xl: 38px;     --lh-4xl: 1.15;
+  /* Hero 展示字号（源 design/home.html 的 clamp，收进 token 避免页面魔法值） */
+  --text-display: clamp(30px, 5vw, 52px); --lh-display: 1.08;
 
   /* 正文测量行宽 / 列表容器宽 */
   --measure: 68ch;
   --container: 1080px;
+
+  /* Hero 背景：青辉径向 + 面板底色（引用主题变量，随深浅自动切换） */
+  --hero-bg: radial-gradient(120% 120% at 85% 20%, var(--glow-soft), transparent 55%), var(--surface);
 
   /* 圆角 */
   --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 20px; --radius-full: 999px;
@@ -50,6 +55,7 @@
   --glow: rgb(34 211 238 / 0.55);
   --glow-soft: rgb(34 211 238 / 0.18);
   --shadow-glow: 0 8px 30px var(--glow);
+  --layer-fill: linear-gradient(135deg, rgb(34 211 238 / 0.1), rgb(15 22 38 / 0.35));
   --code-bg: #0d1526;
   --code-text: #e2e8f0;
   --logo-back: #edeff2;
@@ -74,6 +80,7 @@
   --glow: rgb(8 145 178 / 0.28);
   --glow-soft: rgb(8 145 178 / 0.12);
   --shadow-glow: 0 8px 24px var(--glow);
+  --layer-fill: linear-gradient(135deg, rgb(8 145 178 / 0.1), rgb(255 255 255 / 0.65));
   --code-bg: #0f172a;
   --code-text: #e2e8f0;
   --logo-back: #0f172a;

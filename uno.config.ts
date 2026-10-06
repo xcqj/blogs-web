@@ -26,6 +26,8 @@ export default defineConfig({
     'btn-ghost': 'inline-flex items-center justify-center gap-2 rounded-full border border-border bg-transparent px-4 py-2 text-sm font-semibold text-text transition hover:border-primary',
     // 标签 chip
     'sd-chip': 'inline-flex items-center rounded-full border border-[var(--chip-border)] bg-chip px-2.5 py-0.5 text-xs text-primary-strong',
+    // meta 行小圆点分隔符（design .dot）
+    'sd-dot': 'inline-block h-1 w-1 shrink-0 rounded-full bg-muted',
     // 次级文本 / 小标题
     'sd-muted': 'text-sm text-muted',
     'sd-eyebrow': 'text-xs uppercase tracking-[1.5px] text-muted'
@@ -57,7 +59,8 @@ export default defineConfig({
       xl: ['var(--text-xl)', { lineHeight: 'var(--lh-xl)' }],
       '2xl': ['var(--text-2xl)', { lineHeight: 'var(--lh-2xl)' }],
       '3xl': ['var(--text-3xl)', { lineHeight: 'var(--lh-3xl)' }],
-      '4xl': ['var(--text-4xl)', { lineHeight: 'var(--lh-4xl)' }]
+      '4xl': ['var(--text-4xl)', { lineHeight: 'var(--lh-4xl)' }],
+      display: ['var(--text-display)', { lineHeight: 'var(--lh-display)' }]
     },
     borderRadius: {
       sm: 'var(--radius-sm)',
