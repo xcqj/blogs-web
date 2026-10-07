@@ -50,5 +50,10 @@ export default defineNuxtConfig({
         { rel: 'alternate icon', type: 'image/x-icon', href: '/favicon.ico' }
       ]
     }
+  },
+
+  // 部署：显式锁定 node-server 产物（`node .output/server/index.mjs` 直接可跑，容器化用）
+  nitro: {
+    preset: 'node-server'
   }
 })

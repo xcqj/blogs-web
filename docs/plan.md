@@ -58,12 +58,12 @@
 
 ### 2.3 alias 301 实测
 
-- [ ] 造一个 alias 标签（经 plus-ui 治理端 §13 merge/rename 或直接 SQL），验证 `/tag/{aliasSlug}` → 301 → `/tag/{canonicalSlug}`（`server/middleware/alias-tag-redirect` 已就位，仅缺链路实测）。
+- [x] 造一个 alias 标签（经 plus-ui 治理端 §13 merge/rename 或直接 SQL），验证 `/tag/{aliasSlug}` → 301 → `/tag/{canonicalSlug}`（`server/middleware/alias-tag-redirect` 已就位，仅缺链路实测）。（2026-10-07 M4 实测通过：库里已有治理期留下的 alias，无需造数据——`js`→`javascript`、`thinkphp`→`php`、`spring-boot`→`java` 均 301 且 Location 正确；中文 canonical 正确百分号编码；canonical 本身 200 无重定向环；跟随后列表正常渲染）
 
 ### 2.4 部署（对应 ROADMAP S9"部署"项）
 
-- [ ] `nuxt.config` 设 `nitro.output: 'node-server'` + blog-web `Dockerfile`。
-- [ ] `RuoYi-Vue-Plus/script/docker/docker-compose` 新增 blog-web 服务 + `docs/architecture.md` 部署图同步（后端仓库仅 infra/文档，**零后端代码改动**）。
+- [x] `nuxt.config` 设 `nitro.output: 'node-server'` + blog-web `Dockerfile`。（2026-10-07 M4：`nitro.preset: 'node-server'`，产物 nitro.json 已确认；多阶段 Dockerfile + `.dockerignore` 排除 .env/node_modules/design；`node .output/server/index.mjs` 可直接跑）
+- [x] `RuoYi-Vue-Plus/script/docker/docker-compose` 新增 blog-web 服务 + `docs/architecture.md` 部署图同步（后端仓库仅 infra/文档，**零后端代码改动**）。（2026-10-07 M4：`web` 服务用 `profiles: ["web"]` 门控，默认 `up -d` 仍只三件套（已用 `compose config --services` 双验）；`NUXT_API_BASE` 走 host.docker.internal:8081，密钥经 env 透传不入库）
 
 ### 2.5 验收（对应 ROADMAP S9"验收"项，D27/D28）
 
