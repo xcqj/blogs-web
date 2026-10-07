@@ -65,6 +65,11 @@
   --logo-back: #edeff2;
   --logo-front: #22d3ee;
   --danger: #e0685f;
+  --danger-bg: rgb(224 104 95 / 0.12);
+  /* 状态徽标（作者中心 S12）：草稿=中性、用户隐藏=琥珀、管理员下线=红 */
+  --warn: #d9a441;
+  --warn-bg: rgb(217 164 65 / 0.12);
+  --muted-bg: rgb(139 148 167 / 0.14);
 }
 
 /* ---------- 浅色（color-mode 打 class，或 mockup 用 data-theme） ---------- */
@@ -91,6 +96,10 @@
   --logo-back: #0f172a;
   --logo-front: #0891b2;
   --danger: #b91c1c;
+  --danger-bg: rgb(185 28 28 / 0.08);
+  --warn: #b45309;
+  --warn-bg: rgb(180 83 9 / 0.1);
+  --muted-bg: rgb(100 116 139 / 0.12);
 }
 
 /* ---------- 基础层：底色/正文/链接跟随 token ---------- */
@@ -145,6 +154,7 @@ body {
 @media (max-width: 639px) {
   .btn-primary,
   .btn-ghost,
+  .sd-act,
   button[type='submit'] {
     min-height: 44px;
   }

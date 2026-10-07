@@ -34,6 +34,14 @@ export default defineConfig({
     'sd-hint': 'mt-1.5 text-xs text-muted',
     // meta 行小圆点分隔符（design .dot）
     'sd-dot': 'inline-block h-1 w-1 shrink-0 rounded-full bg-muted',
+    // 作者中心（S12，源 design/app.css .arow/.tabs/.badge/.arow .r button）
+    'sd-row': 'flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-elevated p-4 sm:flex-nowrap sm:gap-4',
+    'sd-badge': 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold',
+    'sd-act': 'rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs text-muted transition hover:border-primary hover:text-text disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted',
+    'sd-act-primary': 'sd-act border-primary bg-primary text-primary-ink hover:!text-primary-ink',
+    'sd-act-danger': 'sd-act hover:border-danger hover:text-danger',
+    'sd-tab': 'border-b-2 border-transparent px-3.5 py-2.5 text-sm text-muted transition hover:text-text',
+    'sd-tab-on': 'sd-tab border-primary text-text font-semibold',
     // 次级文本 / 小标题
     'sd-muted': 'text-sm text-muted',
     'sd-eyebrow': 'text-xs uppercase tracking-[1.5px] text-muted'
@@ -51,7 +59,11 @@ export default defineConfig({
       'primary-ink': 'var(--accent-ink)',
       chip: 'var(--chip-bg)',
       code: 'var(--code-bg)',
-      danger: 'var(--danger)'
+      danger: 'var(--danger)',
+      'danger-bg': 'var(--danger-bg)',
+      warn: 'var(--warn)',
+      'warn-bg': 'var(--warn-bg)',
+      'muted-bg': 'var(--muted-bg)'
     },
     fontFamily: {
       sans: 'var(--font-sans)',

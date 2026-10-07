@@ -1,15 +1,151 @@
 <script setup lang="ts">
-// 作者中心入口占位（D29/S12）。本轮桶A 只做全站 shell 的「登录态才显示作者中心」，
-// 我的文章列表 / WangEditor 编辑页 / 发布·隐藏·删除动作属后续独立切片 S12，故此处仅占位不留死链。
-definePageMeta({ layout: 'default' })
-useSeoMeta({ title: '作者中心' })
+// /me —— 作者中心·我的文章（S12 / D29，design/author-articles.html 基线）。
+// 全部走 /api/blog/article/**（Nitro 注入 cookie token + clientid）→ 后端 /blog/article/my 等，
+// 归属与权限由后端按 author_id 强制校验；前端不传 authorId（红线）。
+import type { AuthorArticle } from '~/types/author'
+import type { PageResult } from '~/types/blog'
+
+const { logged, ready } = useRequireAuth()
+
+const route = useRoute()
+const router = useRouter()
+const pageSize = 10
+const page = computed(() => Math.max(1, Number(route.query.page) || 1))
+const tab = computed(() => {
+  const t = String(route.query.tab || 'all')
+  return TABS.some((x) => x.key === t) ? t : 'all'
+})
+
+/** tab → 后端过滤参数（status/visibility 语义见契约 §3；已隐藏与管理员下线分开，因后端一次只能过滤一个 visibility） */
+const TABS = [
+  { key: 'all', label: '全部', q: {} },
+  { key: 'draft', label: '草稿', q: { status: '0' } },
+  { key: 'published', label: '已发布', q: { status: '1', visibility: '0' } },
+  { key: 'hidden', label: '我隐藏的', q: { visibility: '1' } },
+  { key: 'offline', label: '已下线', q: { visibility: '2' } }
+] as const
+
+function filterOf(key: string): Record<string, string> {
+  return (TABS.find((t) => t.key === key)?.q ?? {}) as Record<string, string>
+}
+
+const empty = () => ({ rows: [], total: 0 }) as PageResult<AuthorArticle>
+
+const { data: list, status: listStatus, refresh: refreshList } = await useAsyncData(
+  `me-articles-${tab.value}-${page.value}`,
+  () =>
+    logged.value
+      ? $fetch<PageResult<AuthorArticle>>('/api/blog/article/my', {
+          query: { pageNum: page.value, pageSize, ...filterOf(tab.value) }
+        })
+      : Promise.resolve(empty()),
+  { watch: [tab, page, logged] }
+)
+
+// 各 tab 计数：pageSize=1 只取 total，一次并发拉齐（动作后随列表一起刷新）
+const { data: counts, refresh: refreshCounts } = await useAsyncData(
+  'me-tab-counts',
+  () =>
+    logged.value
+      ? Promise.all(
+          TABS.map((t) =>
+            $fetch<PageResult<AuthorArticle>>('/api/blog/article/my', {
+              query: { pageNum: 1, pageSize: 1, ...filterOf(t.key) }
+            }).then((r) => [t.key, r.total] as const)
+          )
+        ).then(Object.fromEntries)
+      : Promise.resolve({} as Record<string, number>),
+  { watch: [logged] }
+)
+
+function go(next: string, pageNo = 1) {
+  router.replace({ path: '/me', query: { ...(next === 'all' ? {} : { tab: next }), ...(pageNo > 1 ? { page: pageNo } : {}) } })
+}
+
+const busy = ref(false)
+const notice = ref('')
+async function action(kind: 'publish' | 'hide' | 'show' | 'delete', a: AuthorArticle) {
+  if (busy.value) return
+  busy.value = true
+  notice.value = ''
+  try {
+    if (kind === 'delete') {
+      await $fetch(`/api/blog/article/${a.articleId}`, { method: 'DELETE' })
+    } else {
+      await $fetch(`/api/blog/article/${a.articleId}/${kind}`, { method: 'POST' })
+    }
+    await Promise.all([refreshList(), refreshCounts()])
+  } catch (e: any) {
+    // 越权/状态不允许由后端判定，前端只如实转达
+    notice.value = e?.statusMessage || e?.data?.msg || '操作失败，请稍后重试'
+  } finally {
+    busy.value = false
+  }
+}
+
+const editTarget = (id?: string) => (id ? `/me/${id}/edit` : '/me/new')
+
+useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
 </script>
 
 <template>
-  <section class="sd-card p-8 text-center">
-    <span class="i-mdi:rocket-launch-outline mx-auto block text-4xl text-primary" aria-hidden="true" />
-    <h1 class="mt-3 text-2xl font-semibold">作者中心</h1>
-    <p class="mt-2 text-sm text-muted">发文 / 编辑 / 发布与隐藏等自助能力将在 S12 切片落地，当前为入口占位。</p>
-    <NuxtLink to="/" class="btn-primary mt-6 inline-flex">返回阅读</NuxtLink>
+  <section>
+    <header class="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-semibold">我的文章</h1>
+        <p class="mt-1 text-sm text-muted">作者中心 · 服务端按 author_id 隔离，仅显示你自己的文章</p>
+      </div>
+      <NuxtLink :to="editTarget()" class="btn-primary">＋ 新建文章</NuxtLink>
+    </header>
+
+    <!-- 未登录：守卫已唤起登录弹层，这里给占位说明，不发无谓请求 -->
+    <ErrorState v-if="ready && !logged" title="请先登录" description="作者中心需要登录后访问，登录框已为你打开。">
+      <NuxtLink to="/" class="btn-ghost">返回首页</NuxtLink>
+    </ErrorState>
+
+    <template v-else>
+      <nav class="-mt-2 mb-4 flex flex-wrap gap-1.5 border-b border-border">
+        <button
+          v-for="t in TABS"
+          :key="t.key"
+          :class="tab === t.key ? 'sd-tab-on' : 'sd-tab'"
+          @click="go(t.key)"
+        >
+          {{ t.label }}<span class="ml-1 text-xs text-muted">{{ counts?.[t.key] ?? '·' }}</span>
+        </button>
+      </nav>
+
+      <p v-if="notice" class="mb-3 rounded-md bg-danger-bg px-3 py-2 text-sm text-danger">{{ notice }}</p>
+
+      <ArticleListSkeleton v-if="listStatus === 'pending'" :count="4" />
+      <template v-else>
+        <div class="space-y-3">
+          <AuthorArticleRow
+            v-for="a in list?.rows"
+            :key="a.articleId"
+            :article="a"
+            :busy="busy"
+            @edit="router.push(editTarget(a.articleId))"
+            @publish="action('publish', a)"
+            @hide="action('hide', a)"
+            @show="action('show', a)"
+            @delete="action('delete', a)"
+          />
+        </div>
+        <EmptyState
+          v-if="!list?.rows?.length"
+          :title="logged ? '这里还没有文章' : '未登录'"
+          description="新建一篇文章开始写作；草稿不会出现在读者前台。"
+        >
+          <NuxtLink to="/me/new" class="btn-primary mt-1">写第一篇</NuxtLink>
+        </EmptyState>
+        <AppPagination
+          :page="page"
+          :total="list?.total ?? 0"
+          :page-size="pageSize"
+          :link-for="(n) => ({ path: '/me', query: { ...(tab === 'all' ? {} : { tab }), ...(n > 1 ? { page: n } : {}) } })"
+        />
+      </template>
+    </template>
   </section>
 </template>
