@@ -111,14 +111,22 @@
 
 > 基线在 `design/`（**参考与规范，非逐像素照抄**，实现纪律见 `AGENTS.md`）；每步一个 commit 标 S9。
 
-- [ ] `uno.config.ts` 落 token：`theme.colors` 用 `var(--…)`（青+炭黑深浅两套，源 `design/tokens.css`）、覆盖 `theme.fontSize`、`radius`；主题变量单一来源 `:root[data-theme]`
-- [ ] 接 `@nuxtjs/color-mode`：默认跟随系统 + 可手动切，cookie 存偏好保 SSR 无闪烁；配 `color-scheme`；主题切换按钮 `<ClientOnly>`
-- [ ] logo/favicon 接入：`AppHeader` 内联 SVG（双色随主题）替换纯文字品牌；`public/favicon.svg`（内嵌 `prefers-color-scheme`）
-- [ ] 全站 shell：header（首页/标签/搜索 + **登录态才显示"作者中心"**）/ footer / 容器两档（列表 1080 / 正文 68ch）
-- [ ] 首页 `home` 按 `design/home.html` 定稿版式（静态 hero；three.js 属桶B 不做，保留 `<ClientOnly>` 槽位）
-- [ ] 详情页 `article` 正文 prose 版式（限宽 68ch、代码块、meta 条、评论区结构）按 `design/article.html`
-- [ ] 状态组件：骨架屏 / EmptyState / 错误 / 404（按 `design/states.html`）全站复用一套
-- [ ] 响应式规则落地（按 `design/responsive.html` 表：<640 汉堡、hero 背景移动端隐藏等）
+- [x] `uno.config.ts` 落 token：`theme.colors` 用 `var(--…)`（青+炭黑深浅两套，源 `design/tokens.css`）、覆盖 `theme.fontSize`、`radius`；主题变量单一来源 `:root[data-theme]`
+- [x] 接 `@nuxtjs/color-mode`：默认跟随系统 + 可手动切，cookie 存偏好保 SSR 无闪烁；配 `color-scheme`；主题切换按钮 `<ClientOnly>`
+- [x] logo/favicon 接入：`AppHeader` 内联 SVG（双色随主题）替换纯文字品牌；`public/favicon.svg`（内嵌 `prefers-color-scheme`）
+- [x] 全站 shell：header（首页/标签/搜索 + **登录态才显示"作者中心"**）/ footer / 容器两档（列表 1080 / 正文 68ch）
+- [x] 首页 `home` 按 `design/home.html` 定稿版式（静态 hero；three.js 属桶B 不做，保留 `<ClientOnly>` 槽位）
+- [x] 详情页 `article` 正文 prose 版式（限宽 68ch、代码块、meta 条、评论区结构）按 `design/article.html`
+- [x] 状态组件：骨架屏 / EmptyState / 错误 / 404（按 `design/states.html`）全站复用一套
+- [x] 响应式规则落地（按 `design/responsive.html` 表：<640 汉堡、hero 背景移动端隐藏等）
+
+**桶A 落地实况与偏差（2026-10-07，8 步各一 commit + 1 个验收修复 commit）**：
+
+- 新增两个契约支撑页使导航不成死链：`/tags`（§7.5 标签列表，顶栏「标签」落点）、`/me`（D29 作者中心**入口占位**，功能仍属 S12）。
+- **未做并备案**：详情页 TOC 与「上一篇/下一篇」——契约无对应接口且 §2.9 本步未列；桌面正文改为居中（`mx-auto`）替代 TOC 占位。若将来要 TOC/上下篇，需先补后端接口或约定客户端解析。
+- 验收修复的两条根因（已进代码，非照抄所致）：① `@unocss/nuxt` 未注入 preflight → 缺 `box-sizing:border-box`，`.sd-wrap` 在 390 视口溢出 40px（全站），已在 `tokens.css` 基础层补重置与链接默认样式归零；② preset-typography 的 `.prose{color:var(--un-prose-body);max-width:65ch}` 后注入覆盖 → 深色正文对比度仅 1.83:1，改用 `.prose.prose` 提特异性，修复后 16.35:1。
+- 浏览器复验通过：手机零溢出、汉堡完整、桌面正文左右留白对称、深色/浅色双向 + cookie `sd-color-mode` 首屏无闪烁。
+- ⚠️ 待人工复核一项：子代理报深色下标签 chip 文字 3.51:1（低于正文 AA 4.5:1），但按 token 深色 `--accent-strong` 应为 `#67e8f9`（高对比），疑似采样于浅色态；请在浏览器深色态目视确认 `#Java` 等 chip 是否偏暗。
 
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 
