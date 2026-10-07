@@ -26,6 +26,12 @@ export default defineConfig({
     'btn-ghost': 'inline-flex items-center justify-center gap-2 rounded-full border border-border bg-transparent px-4 py-2 text-sm font-semibold text-text transition hover:border-primary',
     // 标签 chip
     'sd-chip': 'inline-flex items-center rounded-full border border-[var(--chip-border)] bg-chip px-2.5 py-0.5 text-xs text-primary-strong',
+    // 表单控件（源 design/app.css .input/.textarea/.field/.hint）：S12 作者中心表单前置，避免各处各写一套
+    'sd-input': 'w-full rounded-md border border-border bg-surface px-3.5 py-2.5 text-base text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--glow-soft)]',
+    'sd-textarea': 'w-full min-h-30 resize-y rounded-md border border-border bg-surface px-3.5 py-3 text-sm text-text outline-none transition focus:border-primary focus:shadow-[0_0_0_3px_var(--glow-soft)]',
+    'sd-field': 'mb-4.5',
+    'sd-label': 'mb-1.5 block text-sm font-semibold text-muted',
+    'sd-hint': 'mt-1.5 text-xs text-muted',
     // meta 行小圆点分隔符（design .dot）
     'sd-dot': 'inline-block h-1 w-1 shrink-0 rounded-full bg-muted',
     // 次级文本 / 小标题

@@ -43,7 +43,7 @@ useSeoMeta({
         v-model="input"
         type="search"
         placeholder="搜索文章标题 / 摘要 / 正文…"
-        class="min-w-0 flex-1 rounded-md border border-border bg-surface px-4 py-2.5 text-base text-text outline-none transition focus:border-primary"
+        class="sd-input min-w-0 flex-1"
       />
       <button type="submit" class="btn-primary">搜索</button>
     </form>

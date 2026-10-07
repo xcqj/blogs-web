@@ -32,7 +32,7 @@ async function submit() {
         v-model="content"
         rows="3"
         placeholder="写下你的评论…"
-        class="w-full rounded-md border border-border bg-surface p-4 text-sm text-text outline-none transition resize-y focus:border-primary focus:shadow-[0_0_0_3px_var(--glow-soft)]"
+        class="sd-textarea"
       />
       <div class="mt-3 flex items-center gap-3">
         <button :disabled="submitting || !content.trim()" class="btn-primary" @click="submit">

@@ -126,7 +126,8 @@
 - **未做并备案**：详情页 TOC 与「上一篇/下一篇」——契约无对应接口且 §2.9 本步未列；桌面正文改为居中（`mx-auto`）替代 TOC 占位。若将来要 TOC/上下篇，需先补后端接口或约定客户端解析。
 - 验收修复的两条根因（已进代码，非照抄所致）：① `@unocss/nuxt` 未注入 preflight → 缺 `box-sizing:border-box`，`.sd-wrap` 在 390 视口溢出 40px（全站），已在 `tokens.css` 基础层补重置与链接默认样式归零；② preset-typography 的 `.prose{color:var(--un-prose-body);max-width:65ch}` 后注入覆盖 → 深色正文对比度仅 1.83:1，改用 `.prose.prose` 提特异性，修复后 16.35:1。
 - 浏览器复验通过：手机零溢出、汉堡完整、桌面正文左右留白对称、深色/浅色双向 + cookie `sd-color-mode` 首屏无闪烁。
-- ⚠️ 待人工复核一项：子代理报深色下标签 chip 文字 3.51:1（低于正文 AA 4.5:1），但按 token 深色 `--accent-strong` 应为 `#67e8f9`（高对比），疑似采样于浅色态；请在浏览器深色态目视确认 `#Java` 等 chip 是否偏暗。
+- 表单控件 shortcut 化（2026-10-07，S12 前置）：源 `design/app.css` 的 `.input/.textarea/.field/.hint` 落为 uno shortcut `sd-input`/`sd-textarea`/`sd-field`/`sd-label`/`sd-hint`，`LoginModal`/`CommentForm`/`search`/`tags` 四处已改为引用（原各写一套 class 已清零）。S12 作者中心的标题框/封面/标签 chips/侧栏面板直接复用，不再新增控件写法分叉。字号取 token 阶梯值（input=`text-base` 兼防 iOS 聚焦缩放，textarea=`text-sm`），未引入魔法值。
+- ~~⚠️ 待人工复核：深色下标签 chip 3.51:1~~ **已结案（非缺陷）**：静态判定 `.sd-chip{color:var(--accent-strong)}`，深色块 `--accent-strong:#67e8f9`、浅色块才是 `#0e7490`；子代理报的 `rgb(14,116,144)` 正是浅色值，且其记录显示当时 `htmlClass=light`（它自己也在任务4 里点了切换），属采样态错配。深色真实对比度为高值，无需改动；用户浏览器目视如仍偏暗再议。
 
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 

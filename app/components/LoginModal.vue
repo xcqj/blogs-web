@@ -56,14 +56,14 @@ async function submit() {
           type="text"
           placeholder="用户名"
           autocomplete="username"
-          class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text outline-none transition focus:border-primary"
+          class="sd-input"
         />
         <input
           v-model="form.password"
           type="password"
           placeholder="密码"
           autocomplete="current-password"
-          class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text outline-none transition focus:border-primary"
+          class="sd-input"
         />
 
         <div v-if="captchaEnabled" class="flex items-center gap-2">
@@ -72,7 +72,7 @@ async function submit() {
             type="text"
             placeholder="验证码"
             autocomplete="off"
-            class="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm text-text outline-none transition focus:border-primary"
+            class="sd-input min-w-0 flex-1"
           />
           <!-- base64 验证码图，点击刷新；不缓存 -->
           <img
