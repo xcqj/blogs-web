@@ -6,10 +6,15 @@
    ===================================================================== */
 
 .prose {
-  max-width: var(--measure);
   font-size: var(--text-base);
   line-height: var(--lh-base);
+}
+
+/* preset-typography 的 .prose{color:var(--un-prose-body);max-width:65ch} 注入在本文件之后，
+   同特异性会覆盖 —— 用双类提到 (0,2,0) 稳定压制，保证正文色跟随主题且行宽 68ch */
+.prose.prose {
   color: var(--text);
+  max-width: var(--measure);
 }
 
 .prose > :first-child {

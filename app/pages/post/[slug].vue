@@ -37,7 +37,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <article v-if="article" class="sd-measure">
+  <article v-if="article" class="sd-measure mx-auto">
     <NuxtLink to="/" class="mb-6 inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-primary">
       <span class="i-mdi:arrow-left" aria-hidden="true" />返回文章列表
     </NuxtLink>

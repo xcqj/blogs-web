@@ -94,6 +94,27 @@
 }
 
 /* ---------- 基础层：底色/正文/链接跟随 token ---------- */
+/* UnoCSS preflight 在 @unocss/nuxt 下未注入，必须自带盒模型重置：
+   否则 w-full + px-* 会按 content-box 计算，导致 .sd-wrap 等容器在小屏溢出视口 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 链接不套浏览器默认蓝+下划线（与 design/app.css 一致），颜色由 token 与各组件类决定 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 html {
   background: var(--bg);
   color: var(--text);

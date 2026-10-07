@@ -18,10 +18,10 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
 
 <template>
   <header class="sticky top-0 z-50 border-b border-border bg-surface">
-    <div class="sd-wrap flex h-16 items-center justify-between gap-4">
+    <div class="sd-wrap flex h-16 items-center justify-between gap-3">
       <AppBrand />
 
-      <div class="flex items-center gap-3">
+      <div class="flex shrink-0 items-center gap-2 sm:gap-3">
         <!-- 桌面导航 -->
         <nav class="hidden items-center gap-5 text-sm md:flex">
           <NuxtLink
@@ -56,7 +56,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
 
         <!-- 移动汉堡按钮（<768） -->
         <button
-          class="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted transition hover:border-primary hover:text-text md:hidden"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-muted transition hover:border-primary hover:text-text md:hidden"
           :aria-expanded="menuOpen"
           aria-label="打开导航菜单"
           @click="menuOpen = !menuOpen"

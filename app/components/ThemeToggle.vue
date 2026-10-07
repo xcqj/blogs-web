@@ -17,11 +17,12 @@ function toggle() {
 <template>
   <button
     type="button"
-    class="flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 text-xs text-text transition hover:border-primary"
+    class="flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 text-xs text-text transition hover:border-primary sm:px-3"
     :aria-label="isLight ? '切换到深色' : '切换到浅色'"
     @click="toggle"
   >
     <span :class="isLight ? 'i-mdi:white-balance-sunny' : 'i-mdi:moon-waning-crescent'" aria-hidden="true" />
-    <span>{{ isLight ? '浅色' : '深色' }}</span>
+    <!-- 窄屏只留图标，避免顶栏内容超宽造成横向溢出（design/responsive.html xs/sm 行） -->
+    <span class="hidden sm:inline">{{ isLight ? '浅色' : '深色' }}</span>
   </button>
 </template>
