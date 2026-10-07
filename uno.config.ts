@@ -93,6 +93,11 @@ export default defineConfig({
       }
     }),
     presetIcons({
+      // ⚠️ unocss v66 的 presetIcons 默认入口（universal）不再自动从 node_modules 解析集合，
+      // 必须显式注册，否则 i-mdi:* 一条 CSS 都不会生成（图标变空元素）。集合已装 @iconify-json/mdi。
+      collections: {
+        mdi: () => import('@iconify-json/mdi/icons.json').then((m) => m.default)
+      },
       scale: 1.2,
       extraProperties: {
         'display': 'inline-block',

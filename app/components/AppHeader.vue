@@ -35,9 +35,12 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
           </NuxtLink>
         </nav>
 
-        <ClientOnly>
-          <ThemeToggle />
-        </ClientOnly>
+        <!-- 主题切换：仅桌面出现在顶栏；窄屏收进下方抽屉菜单 -->
+        <div class="hidden md:block">
+          <ClientOnly>
+            <ThemeToggle />
+          </ClientOnly>
+        </div>
 
         <template v-if="logged">
           <NuxtLink
@@ -81,6 +84,12 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         <NuxtLink v-if="logged" to="/me" class="py-2.5 text-sm text-muted transition hover:text-text">
           作者中心
         </NuxtLink>
+        <!-- 窄屏：主题切换收在菜单内 -->
+        <div class="mt-2 border-t border-border py-3">
+          <ClientOnly>
+            <ThemeToggle />
+          </ClientOnly>
+        </div>
       </div>
     </nav>
   </header>
