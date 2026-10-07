@@ -28,7 +28,12 @@ function submit() {
   router.replace(kw ? { path: '/search', query: { keyword: kw } } : { path: '/search' })
 }
 
-useSeoMeta({ title: () => (keyword.value ? `搜索：${keyword.value}` : '搜索') })
+// 搜索结果是带 query 的薄页，禁止被索引避免 SEO 稀释；正文本身仍 SSR 输出
+useSeoMeta({
+  title: () => (keyword.value ? `搜索：${keyword.value}` : '搜索'),
+  description: () => (keyword.value ? `关键词「${keyword.value}」的搜索结果。` : '按关键词搜索文章。'),
+  robots: 'noindex,follow'
+})
 </script>
 
 <template>

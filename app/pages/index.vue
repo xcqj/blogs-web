@@ -12,7 +12,10 @@ const { data: hot } = await useAsyncData('home-hot-tags', () => $fetch<TagItem[]
 const siteName = useRuntimeConfig().public.siteName
 useSeoMeta({
   title: () => `${siteName} · 把技术一层层读到深处`,
-  description: '多作者技术博客前台：阅读、搜索与评论。'
+  description: '多作者技术博客前台：阅读、搜索与评论。',
+  ogTitle: () => siteName,
+  ogDescription: '多作者技术博客前台：阅读、搜索与评论。',
+  ogType: 'website'
 })
 </script>
 

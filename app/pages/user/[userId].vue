@@ -21,7 +21,13 @@ const { data: articles, status } = await useAsyncData(
   { watch: [userId, page] }
 )
 
-useSeoMeta({ title: () => (user.value ? `${user.value.nickName} · 作者主页` : '用户主页') })
+useSeoMeta({
+  title: () => (user.value ? `${user.value.nickName} · 作者主页` : '用户主页'),
+  description: () => (user.value ? `${user.value.nickName} 的公开文章与简介。` : '用户主页。'),
+  ogTitle: () => (user.value?.nickName ? `${user.value.nickName} · 作者主页` : '用户主页'),
+  ogDescription: () => user.value?.bio || user.value?.nickName || '',
+  ogType: 'profile'
+})
 </script>
 
 <template>

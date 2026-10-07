@@ -32,7 +32,10 @@ const siteName = useRuntimeConfig().public.siteName
 
 useSeoMeta({
   title: () => (version.value?.title ? `${version.value.title} · ${siteName}` : '文章'),
-  description: () => version.value?.summary || ''
+  description: () => version.value?.summary || '',
+  ogTitle: () => version.value?.title || '文章',
+  ogDescription: () => version.value?.summary || '',
+  ogType: 'article'
 })
 </script>
 

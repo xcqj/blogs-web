@@ -48,6 +48,13 @@ const layerStyle = (i: number) => ({
   margin: -60px 0 0 90px;
   opacity: 0.45;
 }
+
+/* md 档「堆叠缩小」：次要叠层位移会超出视口被裁切，lg 起才并排展示（design/responsive.html） */
+@media (max-width: 1023px) {
+  .stack--secondary {
+    display: none;
+  }
+}
 .layer {
   position: absolute;
   inset: 0;

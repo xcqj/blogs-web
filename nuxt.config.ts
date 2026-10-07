@@ -42,12 +42,17 @@ export default defineNuxtConfig({
     }
   },
 
-  // 品牌资源：内嵌 prefers-color-scheme 的 SVG favicon（无需 JS 自动切深浅），ico 兜底老浏览器
+  // 品牌资源与全站 head 基线（M5 SEO：lang 必给，主题色随深浅）
   app: {
     head: {
+      htmlAttrs: { lang: 'zh-CN' },
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
         { rel: 'alternate icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ],
+      meta: [
+        { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0b1120' },
+        { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#f6f7fb' }
       ]
     }
   },

@@ -67,8 +67,8 @@
 
 ### 2.5 验收（对应 ROADMAP S9"验收"项，D27/D28）
 
-- [ ] 移动端视口检查：桌面骨架 + UnoCSS 默认断点 sm640/md768 推导，真机无横向溢出（D28 只拍一张桌面骨架，移动/平板由断点规则推导）。
-- [ ] SEO 首屏：view-source 含正文与元信息（SSR 生效）。
+- [x] 移动端视口检查：桌面骨架 + UnoCSS 默认断点 sm640/md768 推导，真机无横向溢出（D28 只拍一张桌面骨架，移动/平板由断点规则推导）。（2026-10-07 M5 浏览器实测：7 档宽度 360/390/414/640/768/1024/1280 × 6 条路由 = **42 组零真实横向溢出**；断点行为 16 个观测点全部对齐 `design/responsive.html`（汉堡 <768 / 桌面导航 ≥768 / hero 视觉 <768 隐藏 / 正文侧栏 <1024 单列 ≥1024 双栏）；汉堡展开不新增溢出、正文 16px/行高 28px、深色顶栏三元素无重叠且不超视口。附带修正：md 档次要叠层几何超出被裁切的问题，按规则表「md 堆叠缩小」在 <1024 隐藏 `stack--secondary`）
+- [x] SEO 首屏：view-source 含正文与元信息（SSR 生效）。（2026-10-07 M5：修复三处真缺陷——`<html>` 无 lang（现 `lang="zh-CN"`）、全站无 og 标签（五页补 ogTitle/ogDescription/ogType：website/article/profile）、tag/search/user 缺 description；搜索页加 `robots=noindex,follow` 防薄页被索引；`theme-color` 随深浅双投。实测各页首屏 HTML 含文章卡片/标题/计数与 `.prose p` 正文，非仅 `__NUXT_DATA__`。sitemap/结构化数据归 ⏸ `@nuxtjs/seo`）
 
 ### 2.6 可选增强（⏸ 按需 / MVP 后再定，不纳入本轮承诺）
 

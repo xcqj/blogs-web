@@ -17,7 +17,13 @@ const { data, status, refresh } = await useAsyncData(
   { watch: [slug, page] }
 )
 
-useSeoMeta({ title: () => `标签 · ${slugText.value}` })
+useSeoMeta({
+  title: () => `标签 · ${slugText.value}`,
+  description: () => `标签「${slugText.value}」下的公开文章列表。`,
+  ogTitle: () => `标签 · ${slugText.value}`,
+  ogDescription: () => `标签「${slugText.value}」下的公开文章列表。`,
+  ogType: 'website'
+})
 </script>
 
 <template>
