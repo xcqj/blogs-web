@@ -43,9 +43,10 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         </div>
 
         <template v-if="logged">
+          <!-- 窄屏：作者中心与退出收进抽屉，顶栏只留头像（省空间、避免拥挤） -->
           <NuxtLink
             to="/me"
-            class="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs text-muted transition hover:border-primary hover:text-text sm:flex"
+            class="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs text-muted transition hover:border-primary hover:text-text md:flex"
           >
             <span class="i-mdi:pencil-box-outline" aria-hidden="true" />作者中心
           </NuxtLink>
@@ -53,7 +54,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
             <AppAvatar :name="profile?.nickName" :src="profile?.avatarUrl" size="sm" />
             <span class="hidden text-sm sm:inline">{{ profile?.nickName || '已登录' }}</span>
           </NuxtLink>
-          <button class="text-xs text-muted transition hover:text-text" @click="logout">退出</button>
+          <button class="hidden text-xs text-muted transition hover:text-text md:inline" @click="logout">退出</button>
         </template>
         <button v-else class="btn-primary !px-4 !py-1.5 !text-xs" @click="showLogin">登录</button>
 
@@ -81,9 +82,14 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
         >
           {{ item.label }}
         </NuxtLink>
-        <NuxtLink v-if="logged" to="/me" class="py-2.5 text-sm text-muted transition hover:text-text">
-          作者中心
-        </NuxtLink>
+        <template v-if="logged">
+          <NuxtLink to="/me" class="flex items-center gap-1.5 py-2.5 text-sm text-muted transition hover:text-text">
+            <span class="i-mdi:pencil-box-outline" aria-hidden="true" />作者中心
+          </NuxtLink>
+          <button class="py-2.5 text-left text-sm text-muted transition hover:text-text" @click="logout">
+            退出登录
+          </button>
+        </template>
         <!-- 窄屏：主题切换收在菜单内 -->
         <div class="mt-2 border-t border-border py-3">
           <ClientOnly>
