@@ -9,7 +9,7 @@
  */
 const ALLOW: ReadonlyArray<{ method: string; re: RegExp }> = [
   { method: 'GET', re: /^my$/ }, // §3.2 我的文章列表
-  { method: 'POST', re: /^$/ }, // §3.1 创建（草稿）
+  { method: 'POST', re: /^$/ }, // §3.1 创建（草稿）——实际由 index.post.ts 承接（catch-all 不匹配零段），此条兜底
   { method: 'GET', re: /^[\w-]+$/ }, // §3.3 我的文章详情
   { method: 'PUT', re: /^[\w-]+$/ }, // §3.4 保存（内容变化则建新版本）
   { method: 'DELETE', re: /^[\w-]+$/ }, // §3.8 逻辑删除

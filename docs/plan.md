@@ -89,12 +89,14 @@
 
 > D29 修订 D24：blog-web 增设作者中心，登录用户前台自助管理**自己的**文章，全部走 `/blog/article/**`，**零后端改动**；复用已登录 `web` 会话，无需二次登录。
 
-- [ ] 我的文章列表：`GET /blog/article/my`（status/visibility/keyword + 分页），行内动作 发布/hide/show/delete
-- [ ] 新建/编辑页：`POST /blog/article`（草稿）/ `PUT /blog/article/{id}`；**编辑器 WangEditor `@wangeditor-next/editor` + `@wangeditor-next/editor-for-vue` 6.4.1**，`<ClientOnly>` + 按需加载（`ssr:false`），产出 HTML（后端 jsoup 净化），**不上 Markdown**
-- [ ] 封面/正文传图：复用 `/resource/oss/upload`（契约 §2.4）+ `oss://` 引用解析（照 plus-ui `src/utils/ossContent.ts`）
-- [ ] 发布/隐藏/重新公开/删除：`POST /blog/article/{id}/publish|hide|show`、`DELETE /{id}`（服务端按 author_id 校验）
-- [ ] 版本只读（可选）：`GET /blog/article/{id}/versions[/vId]` 嵌详情子视图
-- [ ] 边界：禁 `/blog/admin/**`（平台治理仍 plus-ui）；作者中心页 CSR 为主、不进读者首屏/SEO；不信任前端 authorId
+- [x] 我的文章列表：`GET /blog/article/my`（status/visibility/keyword + 分页），行内动作 发布/hide/show/delete（2026-10-08 S12-1：`/me` 5 个状态 tab + pageSize=1 并发取计数 + 数字分页 + 骨架/空/错误态；动作可见性严格按契约状态机与 D13，ADMIN_HIDDEN 编辑禁用仅可删；删除两步确认不用 window.confirm）
+- [x] 新建/编辑页：`POST /blog/article`（草稿）/ `PUT /blog/article/{id}`；**编辑器 WangEditor `@wangeditor-next/editor` + `@wangeditor-next/editor-for-vue` 6.4.1**（与 plus-ui 同版本，无格式分叉），`<ClientOnly>` + 路由 `ssr:false` 按需加载（实测 WangEditor 独立 chunk 661KB，不进读者首屏 bundle），产出 HTML（后端 jsoup 净化），**不上 Markdown**；字段按 §2.8 锁定：**无 slug、无定时发布**。（2026-10-08 S12-2：`/me/new` + `/me/{id}/edit` 共用 `ArticleForm`；新建后自动转编辑路由避免重复创建；保存与发布为两个动作）
+- [~] 封面/正文传图：复用 `/resource/oss/upload`（契约 §2.4）经 Nitro 代理（`server/api/resource/oss/upload.post.ts`）。⚠️ **与 plus-ui 的有意偏差（待你定）**：正文与封面均**存真实 OSS URL**，不写 `oss://{ossId}` 标记——因为解析标记的 `/resource/oss/listByIds` 是**需登录**接口，匿名读者无法解析会看到破图（即 S10 已备案的遗留项）。代价：URL 时效属平台层问题（与封面同源）。若要改回 oss:// 方案，需后端提供公共解析能力（突破零后端改动）。
+- [x] 发布 / 隐藏 / 重新公开 / 删除：`POST /blog/article/{id}/publish|hide|show`、`DELETE /{id}`（服务端按 author_id 校验；代理层已实测无 cookie → 401）
+- [ ] 版本只读（可选）：`GET /blog/article/{id}/versions[/vId]` 嵌详情子视图（代理已包在 `[...path].ts` 白名单内，缺 UI）
+- [x] 边界：禁 `/blog/admin/**`（平台治理仍 plus-ui）；作者中心页 CSR 为主、不进读者首屏/SEO（`/me/**` 均 `robots=noindex`）；不信任前端 authorId（代理层只透传，归属后端定）
+
+**S12 代理层两个坑（已修，备案）**：① Nitro 的 `[...path]` catch-all **不匹配零段路径**，`POST /api/blog/article`（创建）会 404，需单独 `index.post.ts`；② 作者侧 10 个端点若逐个建文件会重复同一段 authed 转发，改用 `[...path].ts` + **方法/路径白名单**，既 DRY 又锁死可调用面。
 
 依赖：S2–S8 后端接口就绪 + S9 `web` 认证链路就位。
 
