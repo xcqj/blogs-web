@@ -18,6 +18,11 @@ logs
 .fleet
 .idea
 
+# 仓库根不放图片产物：设计基线在 design/，浏览器验收截图属临时副产物（勿提交）
+/*.png
+/*.jpg
+/*.jpeg
+
 # Local env files
 .env
 .env.*
