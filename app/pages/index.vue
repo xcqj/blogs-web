@@ -69,24 +69,32 @@ useSeoMeta({
         </div>
       </section>
 
+      <!-- 侧栏标题与左列「最新文章」同规格并提到面板外：
+           两列顶部结构一致，标题对标题、卡片对第一张卡片自然对齐（不靠魔法值 margin） -->
       <aside class="space-y-4">
-        <div class="sd-card p-5">
-          <h2 class="sd-eyebrow mb-3">热门标签</h2>
-          <div class="flex flex-wrap gap-2">
-            <TagChip v-for="t in hot" :key="t.tagId" :slug="t.slug" :name="`${t.name} · ${t.articleCount ?? 0}`" />
-            <span v-if="!hot?.length" class="text-xs text-muted">暂无</span>
+        <div>
+          <h2 class="sd-eyebrow mb-4">热门标签</h2>
+          <div class="sd-card p-5">
+            <div class="flex flex-wrap gap-2">
+              <TagChip v-for="t in hot" :key="t.tagId" :slug="t.slug" :name="`${t.name} · ${t.articleCount ?? 0}`" />
+              <span v-if="!hot?.length" class="text-xs text-muted">暂无</span>
+            </div>
           </div>
         </div>
-        <div class="sd-card p-5">
-          <h2 class="sd-eyebrow mb-3">精选标签</h2>
-          <div class="flex flex-wrap gap-2">
-            <TagChip v-for="t in featured" :key="t.tagId" :slug="t.slug" :name="t.name" />
-            <span v-if="!featured?.length" class="text-xs text-muted">暂无</span>
+        <div>
+          <h2 class="sd-eyebrow mb-4">精选标签</h2>
+          <div class="sd-card p-5">
+            <div class="flex flex-wrap gap-2">
+              <TagChip v-for="t in featured" :key="t.tagId" :slug="t.slug" :name="t.name" />
+              <span v-if="!featured?.length" class="text-xs text-muted">暂无</span>
+            </div>
           </div>
         </div>
-        <div class="sd-card p-5">
-          <h2 class="sd-eyebrow mb-3">关于</h2>
-          <p class="text-sm text-muted">{{ siteName }} · 多作者技术博客前台，基于 Nuxt 4 SSR。</p>
+        <div>
+          <h2 class="sd-eyebrow mb-4">关于</h2>
+          <div class="sd-card p-5">
+            <p class="text-sm text-muted">{{ siteName }} · 多作者技术博客前台，基于 Nuxt 4 SSR。</p>
+          </div>
         </div>
       </aside>
     </div>
