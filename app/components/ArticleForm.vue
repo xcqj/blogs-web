@@ -18,7 +18,8 @@ const detail = ref<AuthorArticleDetail | null>(null);
 const loading = ref(false);
 const saving = ref(false);
 const error = ref('');
-const notice = ref('');
+// 保存/发布结果走全站 toast（L3），不再占用页内横幅位置
+const toast = useToast();
 const drawerOpen = ref(false);
 
 const isEdit = computed(() => !!props.articleId);
@@ -105,14 +106,17 @@ async function submit(publish: boolean) {
   if (!canSave.value) return;
   saving.value = true;
   error.value = '';
-  notice.value = '';
   try {
     const id = await persist();
     if (publish && id) {
       await $fetch(`/api/blog/article/${id}/publish`, { method: 'POST' });
     }
     markSaved();
-    notice.value = publish ? '已保存并发布' : '已保存草稿';
+    toast.ok(
+      publish ? '已发布' : '已保存草稿',
+      publish ? '读者已可在列表与搜索中看到它' : '仅你自己可见，可继续编辑',
+      { key: 'article-save', action: isEdit.value ? undefined : { label: '去编辑', to: `/me/${id}/edit` } }
+    );
     if (!isEdit.value && id) {
       // 新建成功后切到编辑路由，后续保存走 PUT 而不是重复创建
       await router.replace(`/me/${id}/edit`);
@@ -121,6 +125,7 @@ async function submit(publish: boolean) {
     }
   } catch (e: any) {
     error.value = apiErrorText(e, '保存失败，请检查标题/正文/标签（1~6 个）');
+    toast.err('保存失败', error.value, { key: 'article-save' });
   } finally {
     saving.value = false;
   }
@@ -162,7 +167,6 @@ async function submit(publish: boolean) {
     <p v-if="readOnly" class="mb-3 rounded-md bg-danger-bg px-3 py-2 text-sm text-danger">
       该文章已被管理员下线，作者不可编辑或自行恢复；如需处理请联系平台管理。
     </p>
-    <p v-if="notice" class="mb-3 rounded-md bg-chip px-3 py-2 text-sm text-primary-strong">{{ notice }}</p>
     <p v-if="error" class="mb-3 rounded-md bg-danger-bg px-3 py-2 text-sm text-danger">{{ error }}</p>
 
     <div v-if="loading" class="sd-card p-6 text-sm text-muted">加载文章数据…</div>

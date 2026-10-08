@@ -22,20 +22,21 @@ watch(prof, (p) => {
 });
 
 const saving = ref(false);
-const notice = ref('');
 const error = ref('');
+// 保存结果走全站 toast（L3）
+const toast = useToast();
 
 async function save() {
   if (saving.value) return;
   saving.value = true;
-  notice.value = '';
   error.value = '';
   try {
     await $fetch('/api/blog/user/profile', { method: 'PUT', body: { bio: bio.value.trim() } });
     if (prof.value) prof.value.bio = bio.value.trim() || null;
-    notice.value = '已保存';
+    toast.ok('资料已保存', '公开主页与作者卡片会同步更新', { key: 'profile' });
   } catch (e: any) {
     error.value = apiErrorText(e, '保存失败');
+    toast.err('保存失败', error.value, { key: 'profile' });
   } finally {
     saving.value = false;
   }
@@ -43,7 +44,6 @@ async function save() {
 
 function reset() {
   bio.value = prof.value?.bio ?? '';
-  notice.value = '';
 }
 
 useSeoMeta({ title: '个人资料 · 作者中心', robots: 'noindex,follow' });
@@ -95,7 +95,6 @@ useSeoMeta({ title: '个人资料 · 作者中心', robots: 'noindex,follow' });
         </div>
       </div>
 
-      <p v-if="notice" class="rounded-md bg-chip px-3 py-2 text-sm text-primary-strong">{{ notice }}</p>
       <p v-if="error" class="rounded-md bg-danger-bg px-3 py-2 text-sm text-danger">{{ error }}</p>
 
       <div class="flex justify-end gap-2 border-t border-border pt-4">

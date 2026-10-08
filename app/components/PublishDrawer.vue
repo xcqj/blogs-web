@@ -26,30 +26,20 @@ function fillSummaryFromContent() {
   summary.value = text.slice(0, 80);
 }
 
-// 交互补强（2026-10-08 复验发现缺失）：ESC 关闭 + 开启时锁背景滚动。
-// 监听只在 onMounted/onUnmounted 注册，不在服务端路径触 DOM。
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') emit('close');
-}
-function lockBodyScroll(open: boolean) {
-  document.body.style.overflow = open ? 'hidden' : '';
-}
-watch(() => props.open, lockBodyScroll);
-onMounted(() => {
-  window.addEventListener('keydown', onKeydown);
-  if (props.open) lockBodyScroll(true);
-});
-onUnmounted(() => {
-  window.removeEventListener('keydown', onKeydown);
-  if (props.open) lockBodyScroll(false);
-});
+// 交互统一走 useModalA11y（L3）：ESC 关闭 + 背景滚动锁 + 焦点圈定与归还，
+// 与登录弹层/确认框共用同一实现（之前两处各写一套且都缺 focus trap）。
+const panelEl = ref<HTMLElement>();
+useModalA11y({ isOpen: () => props.open, container: () => panelEl.value, onClose: () => emit('close') });
 </script>
 
 <template>
   <Transition name="sd-drawer">
     <div v-if="open" class="fixed inset-0 z-50">
-      <div class="absolute inset-0 bg-black/45" @click="emit('close')" />
-      <aside class="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-border bg-elevated shadow-md">
+      <div class="absolute inset-0 bg-[var(--scrim)] backdrop-blur-[6px]" @click="emit('close')" />
+      <aside
+        ref="panelEl"
+        class="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-border bg-elevated shadow-e3"
+      >
         <header class="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <h2 class="text-base font-semibold">更多设置</h2>
           <button class="sd-act" @click="emit('close')">关闭 ✕</button>

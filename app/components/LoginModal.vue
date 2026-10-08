@@ -24,16 +24,10 @@ async function refreshCaptcha() {
 // 打开弹层时拉取验证码（仅客户端，LoginModal 由 <ClientOnly> 包裹，SSR-safe）
 watch(open, (v) => { if (v) refreshCaptcha() }, { immediate: true })
 
-// 交互补强（2026-10-08）：ESC 关闭 + 打开时锁背景滚动，避免背后页面跟着滚
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape' && open.value) hide()
-}
-watch(open, (v) => { document.body.style.overflow = v ? 'hidden' : '' })
-onMounted(() => window.addEventListener('keydown', onKeydown))
-onUnmounted(() => {
-  window.removeEventListener('keydown', onKeydown)
-  if (open.value) document.body.style.overflow = ''
-})
+// 交互统一走 useModalA11y（L3）：ESC 关闭 + 背景滚动锁 + 焦点圈定与归还。
+// 不再自写 addEventListener，避免与抽屉/确认框三处各缺一样。
+const modalEl = ref<HTMLElement>();
+useModalA11y({ isOpen: () => open.value, container: () => modalEl.value, onClose: hide });
 
 async function submit() {
   if (loading.value) return
@@ -54,11 +48,11 @@ async function submit() {
 </script>
 
 <template>
-  <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" @click.self="hide">
-    <div class="w-full max-w-sm rounded-lg border border-border bg-elevated p-5 shadow-md">
+  <div v-if="open" class="sd-scrim z-50 flex items-center justify-center px-4" @click.self="hide">
+    <div ref="modalEl" class="w-full max-w-sm rounded-lg border border-border bg-elevated p-5 shadow-e3">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-base font-semibold">登录</h2>
-        <button class="text-muted transition hover:text-text" @click="hide">✕</button>
+        <button class="rounded-sm p-1.5 text-dim transition hover:bg-raised hover:text-text" aria-label="关闭登录框" @click="hide">✕</button>
       </div>
 
       <form class="space-y-3" @submit.prevent="submit">
@@ -66,6 +60,7 @@ async function submit() {
           v-model="form.username"
           type="text"
           placeholder="用户名"
+          aria-label="用户名"
           autocomplete="username"
           class="sd-input"
         />
@@ -73,6 +68,7 @@ async function submit() {
           v-model="form.password"
           type="password"
           placeholder="密码"
+          aria-label="密码"
           autocomplete="current-password"
           class="sd-input"
         />

@@ -29,20 +29,8 @@ const canShow = computed(() => !isDraft.value && isUserHidden.value)
 
 const updated = computed(() => (props.article.updateTime || props.article.publishedAt || '').slice(0, 10))
 
-// 删除两步确认（不用 window.confirm，保持 SSR 安全）；离开时清掉待确认计时
-const armDelete = ref(false)
-let timer: ReturnType<typeof setTimeout> | undefined
-function askDelete() {
-  armDelete.value = true
-  clearTimeout(timer)
-  timer = setTimeout(() => (armDelete.value = false), 5000)
-}
-function doDelete() {
-  clearTimeout(timer)
-  armDelete.value = false
-  emit('delete')
-}
-onBeforeUnmount(() => clearTimeout(timer))
+// 删除不再用行内两步确认：改为 emit('delete') 由父级弹 useConfirm() 确认框（L3）。
+// 好处：能同时说清「删哪篇、会发生什么」，并与登录弹层共用同一套焦点/ESC 行为。
 </script>
 
 <template>
@@ -71,15 +59,9 @@ onBeforeUnmount(() => clearTimeout(timer))
       <button v-if="canPublish" class="sd-act-primary" :disabled="busy" @click="emit('publish')">发布</button>
       <button v-if="canHide" class="sd-act" :disabled="busy" @click="emit('hide')">隐藏</button>
       <button v-if="canShow" class="sd-act-primary" :disabled="busy" @click="emit('show')">重新公开</button>
-      <button
-        v-if="!armDelete"
-        class="sd-act-danger"
-        :disabled="busy"
-        @click="askDelete"
-      >
+      <button class="sd-act-danger" :disabled="busy" @click="emit('delete')">
         删除
       </button>
-      <button v-else class="sd-act-danger font-semibold" :disabled="busy" @click="doDelete">确认删除？</button>
     </div>
   </div>
 </template>

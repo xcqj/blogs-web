@@ -63,21 +63,37 @@ function go(next: string, pageNo = 1) {
 }
 
 const busy = ref(false)
-const notice = ref('')
+// 反馈体系（L3）：动作结果走 toast，不可逆的删除走阻断式确认框
+const toast = useToast()
+const ask = useConfirm()
+
+/** 动作的人话标签，用于 toast 标题 */
+const ACTION_LABEL = { publish: '发布', hide: '隐藏', show: '重新公开', delete: '删除' } as const
+
 async function action(kind: 'publish' | 'hide' | 'show' | 'delete', a: AuthorArticle) {
   if (busy.value) return
+  if (kind === 'delete') {
+    const ok = await ask({
+      title: '删除这篇文章？',
+      body: '删除后文章与其全部历史版本将不再展示（逻辑删除，平台管理员可从后台恢复）。',
+      target: `《${a.title}》 · 最后更新 ${(a.updateTime || a.publishedAt || '').slice(0, 10) || '未知'}`,
+      confirmText: '确认删除',
+      danger: true
+    })
+    if (!ok) return
+  }
   busy.value = true
-  notice.value = ''
   try {
     if (kind === 'delete') {
       await $fetch(`/api/blog/article/${a.articleId}`, { method: 'DELETE' })
     } else {
       await $fetch(`/api/blog/article/${a.articleId}/${kind}`, { method: 'POST' })
     }
+    toast.ok(`${ACTION_LABEL[kind]}成功`, `《${a.title}》已更新`, { key: 'article-action' })
     await Promise.all([refreshList(), refreshCounts()])
   } catch (e: any) {
-    // 越权/状态不允许由后端判定，前端只如实转达
-    notice.value = apiErrorText(e, '操作失败，请稍后重试')
+    // 越权/状态不允许由后端判定，前端只如实转达（错误类不自动消失）
+    toast.err(`${ACTION_LABEL[kind]}失败`, apiErrorText(e, '操作失败，请稍后重试'), { key: 'article-action' })
   } finally {
     busy.value = false
   }
@@ -118,7 +134,6 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
         </button>
       </nav>
 
-      <p v-if="notice" class="mb-3 rounded-md bg-danger-bg px-3 py-2 text-sm text-danger">{{ notice }}</p>
 
       <ArticleListSkeleton v-if="listStatus === 'pending'" :count="4" />
       <template v-else>

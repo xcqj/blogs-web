@@ -84,7 +84,12 @@ export default defineConfig({
     'sd-elev-2': 'shadow-e2',
     'sd-elev-3': 'shadow-e3',
     // 遮罩层：深色下必须够黑 + 模糊，否则背景仍清晰、弹层浮不起来
-    'sd-scrim': 'fixed inset-0 bg-[var(--scrim)] backdrop-blur-[6px]'
+    'sd-scrim': 'fixed inset-0 bg-[var(--scrim)] backdrop-blur-[6px]',
+    // Toast 内部件（action 与关闭钮）：默认不可见，hover 才出底色
+    'sd-toast-act':
+      'shrink-0 self-center rounded-sm px-2 py-1 text-xs font-semibold text-primary-fg transition-[background,color] duration-150 ease-out hover:bg-soft',
+    'sd-toast-x':
+      'shrink-0 rounded-sm border-0 bg-transparent p-1 text-dim transition-[background,color] duration-150 ease-out hover:bg-raised hover:text-text cursor-pointer'
   },
   theme: {
     colors: {
