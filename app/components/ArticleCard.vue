@@ -15,24 +15,24 @@ const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10
   <article class="sd-card card-hover flex gap-4 p-4">
     <!-- 缩略图固定不拉伸：w-40 h-28 = 160×112（10:7，对齐掘金）；窄屏隐藏，无图不预留空位 -->
     <NuxtLink v-if="article.coverUrl" :to="`/post/${article.articleId}`" class="hidden shrink-0 sm:block">
-      <img :src="article.coverUrl" :alt="article.title" class="h-28 w-40 rounded-md object-cover" />
+      <img :src="article.coverUrl" :alt="article.title" class="sd-thumb h-28 w-40" />
     </NuxtLink>
 
     <div class="min-w-0 flex-1">
       <NuxtLink
         :to="`/post/${article.articleId}`"
-        class="block truncate text-lg font-semibold transition hover:text-primary"
+        class="block truncate text-lg font-bold tracking-[var(--ls-title)] transition hover:text-primary"
       >
         {{ article.title }}
       </NuxtLink>
       <!-- 摘要截 1 行：用 truncate（nowrap+ellipsis）而非 line-clamp-1——后者依赖 -webkit-box，
-           新版 Chromium 已改由标准 line-clamp 接管并可能不出省略号；min-h-7 保留行高，
-           避免无摘要的条目塔成矮行导致列表行高不齐 -->
-      <p class="mt-1 min-h-7 truncate text-sm text-muted">
+           新版 Chromium 已改由标准 line-clamp 接管并可能不出省略号。
+           无摘要时整行不渲染（上版用 min-h-7 预留行高，实测在无摘要条目里造成一大块死白） -->
+      <p v-if="article.summary" class="mt-1 truncate text-sm text-muted">
         {{ article.summary }}
       </p>
       <!-- 标签与元信息同行（右端），不再单独占一行 -->
-      <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted">
+      <div class="mt-2.5 flex flex-wrap items-center gap-2 text-xs text-muted">
         <span>{{ article.authorName }}</span>
         <span class="sd-dot" />
         <span>{{ displayDate }}</span>

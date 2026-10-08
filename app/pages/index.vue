@@ -24,14 +24,15 @@ useSeoMeta({
     <!-- Hero -->
     <section class="surface-hero relative overflow-hidden rounded-xl border border-border p-6 md:grid md:grid-cols-[1.15fr_0.85fr] md:items-center md:gap-6 md:p-12">
       <div>
-        <h1 class="text-display font-extrabold tracking-tight">
+        <h1 class="text-display font-extrabold tracking-[var(--ls-display)]">
           把技术读到<br class="hidden sm:block" />
           <span class="text-primary">深处</span>
         </h1>
         <p class="mt-4 max-w-[46ch] text-muted">
           {{ siteName }} —— 一个多作者技术博客。从源码到系统，一层层往深处读：阅读、搜索与评论。
         </p>
-        <a href="#latest" class="btn-primary mt-7">开始阅读 →</a>
+        <!-- 主 CTA 用黄底黑字（sun-summit 的签名用法），次级动作才用描边按钮 -->
+        <a href="#latest" class="btn-cta btn-lg mt-7">开始阅读 →</a>
       </div>
       <!-- 纵深叠层：< 768 隐藏（性能与首屏，见 design/responsive.html），md 缩小 / lg 并排；three.js 属桶B -->
       <div class="hidden md:block md:h-64 lg:h-80">
