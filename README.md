@@ -104,6 +104,14 @@ SHOT_TOKEN=<blog-web-token 值> node shot.mjs --only=editor   # 作者中心页�
 
 每次运行会**先清空** `design/shots/`，避免旧命名与新版截图混在一起。
 
+配套 `contrast.mjs`：token 对比度检查器，把“文字看不看得清”变成数字（WCAG 2.1，正文 ≥ 4.5:1，大字/图形 ≥ 3:1）：
+
+```bash
+node tooling/shot/contrast.mjs     # 改一个色值就重跑，确认没改坏可读性
+```
+
+设计对比稿在 `design/polish-compare.html`（Before/After 并排，可切主题、真点 hover 与 Toast）。
+
 ### WSL 免 root 环境准备（本机已配好；重装后照此恢复）
 
 精简 WSL Ubuntu 上的无头 Chromium 会缺两类东西，**都不需要 sudo**，解包到本目录即可（`.libs/`、`.fonts/` 已 gitignore）：
