@@ -32,24 +32,27 @@ const ratio = (fg, bg, base) => {
 
 const THEMES = {
   dark: {
-    bg: '#0a0f1c', surface: '#0f1626', elevated: '#151d30',
-    ink: '#e9eef8', ink2: '#9fadc4', ink3: '#6c7a94',
-    accent: '#22d3ee', accentInk: '#04222b', accentSoft: 'rgba(34,211,238,.13)'
+    bg: '#050406', surface: '#0d0b10', elevated: '#141118',
+    ink: '#f2eff5', ink2: '#a9a2b4', ink3: '#857e94',
+    accent: '#786397', accentInk: '#ffffff', accentSoft: 'rgba(120,99,151,.18)',
+    accentFg: '#c0abdc'
   },
   light: {
-    bg: '#f5f7fa', surface: '#ffffff', elevated: '#ffffff',
-    ink: '#0f172a', ink2: '#475569', ink3: '#8494ab',
-    accent: '#0e7490', accentInk: '#ffffff', accentSoft: '#e2f4f8'
+    bg: '#f9f8fa', surface: '#ffffff', elevated: '#ffffff',
+    ink: '#0b090e', ink2: '#565061', ink3: '#6f6880',
+    accent: '#7d689d', accentInk: '#ffffff', accentSoft: '#f0ebf6',
+    accentFg: '#5b4a74'
   }
 };
 // [前景, 背景, 场景, 门槛, 背景所落的 base（默认 surface）]
 const CASES = [
   ['ink', 'surface', '正文 / 卡片', 4.5],
   ['ink2', 'surface', '摘要 / 次级文字', 4.5],
-  ['ink3', 'surface', 'meta / 三级文字', 3],
+  // meta 是 12.5px 小字，必须走 4.5 正文标准（3:1 只适用于大字/图形/图标）
+  ['ink3', 'surface', 'meta / 三级文字', 4.5],
   ['accentInk', 'accent', '主按钮文字', 4.5],
-  ['accent', 'surface', '链接 / 标题 hover', 3],
-  ['accent', 'accentSoft', 'chip 文字', 4.5, 'surface'],
+  ['accentFg', 'surface', '链接 / 标题 hover', 4.5],
+  ['accentFg', 'accentSoft', 'chip 文字', 4.5, 'surface'],
   ['ink', 'bg', '正文 / 页面底', 4.5]
 ];
 

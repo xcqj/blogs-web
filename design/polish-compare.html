@@ -12,33 +12,39 @@
    本文件是设计验证稿，不是落地代码；拍板后按 §9 清单改 tokens.css 与 uno shortcuts。
    ============================================================ */
 :root[data-theme='dark']{
-  --bg:#0a0f1c; --surface:#0f1626; --elevated:#151d30; --raised:#1b2539;
-  --ink:#e9eef8; --ink-2:#9fadc4; --ink-3:#6c7a94;
-  --rule:rgba(255,255,255,.075); --rule-2:rgba(255,255,255,.14);
-  --accent:#22d3ee; --accent-hi:#5ce3f7; --accent-lo:#12aac2;
-  --accent-ink:#04222b; --accent-soft:rgba(34,211,238,.13); --accent-line:rgba(34,211,238,.32);
+  /* 色板来源：Realtime Colors 用户选组（紫 primary + 玫瑰棕 secondary/accent）
+     它只给 5 个角色，surface/elevated/ink-2/ink-3/rule/soft/line 均为按机制派生 */
+  --bg:#050406; --surface:#0d0b10; --elevated:#141118; --raised:#1c1822;
+  --ink:#f2eff5; --ink-2:#a9a2b4; --ink-3:#857e94;
+  --rule:rgba(242,239,245,.08); --rule-2:rgba(242,239,245,.16);
+  --accent:#786397; --accent-hi:#8f7ab0; --accent-lo:#5f4d7c;
+  --accent-ink:#ffffff; --accent-fg:#c0abdc; --accent-soft:rgba(120,99,151,.18); --accent-line:rgba(156,132,190,.42);
+  --rose:#6c4f47; --rose-fg:#c9a99f;
+  --ph-1:#41355a; --ph-2:#2a2338;
   --danger:#e0685f; --danger-soft:rgba(224,104,95,.14);
   --warn:#d9a441; --warn-soft:rgba(217,164,65,.14);
-  --e1:0 1px 2px rgba(0,0,0,.30); --e2:0 2px 4px rgba(0,0,0,.22),0 8px 20px -6px rgba(0,0,0,.45);
-  --e3:0 4px 8px rgba(0,0,0,.28),0 24px 60px -12px rgba(0,0,0,.65);
-  --scrim:rgba(3,7,15,.72);
+  --e1:0 1px 2px rgba(0,0,0,.40); --e2:0 2px 4px rgba(0,0,0,.30),0 8px 20px -6px rgba(0,0,0,.55);
+  --e3:0 4px 8px rgba(0,0,0,.35),0 24px 60px -12px rgba(0,0,0,.75);
+  --scrim:rgba(2,1,3,.76);
 }
 :root[data-theme='light']{
-  --bg:#f5f7fa; --surface:#ffffff; --elevated:#ffffff; --raised:#f2f5f9;
-  --ink:#0f172a; --ink-2:#475569; --ink-3:#8494ab;
-  --rule:rgba(15,23,42,.09); --rule-2:rgba(15,23,42,.16);
-  --accent:#0e7490; --accent-hi:#155e75; --accent-lo:#1e4f61;
-  --accent-ink:#ffffff; --accent-soft:#e2f4f8; --accent-line:rgba(14,116,144,.30);
+  --bg:#f9f8fa; --surface:#ffffff; --elevated:#ffffff; --raised:#f2eff4;
+  --ink:#0b090e; --ink-2:#565061; --ink-3:#6f6880;
+  --rule:rgba(11,9,14,.10); --rule-2:rgba(11,9,14,.18);
+  --accent:#7d689d; --accent-hi:#6c5889; --accent-lo:#5b4a74;
+  --accent-ink:#ffffff; --accent-fg:#5b4a74; --accent-soft:#f0ebf6; --accent-line:rgba(125,104,157,.32);
+  --rose:#b99b93; --rose-fg:#8a6a62;
+  --ph-1:#ded4ea; --ph-2:#c8b8d8;
   --danger:#b91c1c; --danger-soft:#fdeaea;
   --warn:#b45309; --warn-soft:#fdf3e2;
   /* 注：浅色下 --accent-hi/lo 是“更暗一档”（与深色方向相反），语义是“hover / active 各变一档”而非“变亮” */
-  --e1:0 1px 2px rgba(15,23,42,.06); --e2:0 2px 4px rgba(15,23,42,.06),0 8px 20px -8px rgba(15,23,42,.14);
-  --e3:0 4px 10px rgba(15,23,42,.08),0 24px 50px -12px rgba(15,23,42,.20);
-  --scrim:rgba(15,23,42,.42);
+  --e1:0 1px 2px rgba(11,9,14,.06); --e2:0 2px 4px rgba(11,9,14,.06),0 8px 20px -8px rgba(11,9,14,.14);
+  --e3:0 4px 10px rgba(11,9,14,.08),0 24px 50px -12px rgba(11,9,14,.20);
+  --scrim:rgba(11,9,14,.44);
 }
 :root{
-  /* 圆角族——改成掘金式小圆角：输入框/按钮/卡片统一 4px 上下，只有 chip 与头像用胶囊 */
-  --r-sm:3px; --r:4px; --r-lg:8px; --r-full:999px;
+  /* 圆角族——再小一档（用户反馈）：控件 2px、卡片/弹层 4px，只有 chip 与头像保留胶囊 */
+  --r-sm:2px; --r:2px; --r-lg:4px; --r-full:999px;
   /* 正文字号（已定 B）：17px / 1.65，落地时写进 --text-base 与 prose */
   --fs-body:17px; --lh-body:1.65;
   --t-fast:140ms; --t:200ms; --t-slow:280ms;
@@ -59,7 +65,7 @@ h3{font-size:14px;margin:0 0 12px;color:var(--ink-2);font-weight:600}
 @media(max-width:900px){.pair{grid-template-columns:1fr}}
 .pane{border:1px solid var(--rule);border-radius:var(--r-lg);background:var(--surface);overflow:hidden}
 .pane>header{padding:10px 16px;font-size:12.5px;font-weight:700;letter-spacing:.02em;color:var(--ink-3);border-bottom:1px solid var(--rule);background:var(--raised)}
-.pane.after>header{color:var(--accent);background:var(--accent-soft)}
+.pane.after>header{color:var(--accent-fg);background:var(--accent-soft)}
 .pane>div{padding:20px 16px}
 .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .row+.row{margin-top:14px}
@@ -95,7 +101,7 @@ h3{font-size:14px;margin:0 0 12px;color:var(--ink-2);font-weight:600}
 .btn-secondary:hover{background:var(--raised);box-shadow:inset 0 0 0 1px var(--accent-line)}
 .btn-secondary:active{background:var(--surface)}
 .btn-ghost{background:transparent;color:var(--ink-2)}
-.btn-ghost:hover{background:var(--accent-soft);color:var(--accent)}
+.btn-ghost:hover{background:var(--accent-soft);color:var(--accent-fg)}
 .btn-danger{background:var(--danger-soft);color:var(--danger);box-shadow:inset 0 0 0 1px rgba(224,104,95,.28)}
 .btn-danger:hover{background:var(--danger);color:#fff}
 .btn-sm{height:30px;font-size:13px;padding:0 10px;border-radius:var(--r-sm)}
@@ -117,15 +123,15 @@ h3{font-size:14px;margin:0 0 12px;color:var(--ink-2);font-weight:600}
 /* 已定 ②B：保留轻微上浮（-2px），但不再靠 glow 撑场 */
 .card:hover{background:var(--elevated);box-shadow:var(--e2),inset 0 0 0 1px var(--rule-2);transform:translateY(-2px)}
 .card h4{margin:0;font-size:var(--fs-body);font-weight:700;line-height:1.35;letter-spacing:-.005em;transition:color var(--t-fast) var(--ease-out)}
-.card:hover h4{color:var(--accent)}
+.card:hover h4{color:var(--accent-fg)}
 .card p{margin:5px 0 0;color:var(--ink-2);font-size:14.5px;line-height:1.6}
 .meta{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12.5px;color:var(--ink-3)}
 .meta .dot{width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.6}
-.thumb{width:132px;height:92px;border-radius:var(--r);flex:none;background:linear-gradient(135deg,#2b4a53,#1d3341);box-shadow:inset 0 0 0 1px var(--rule)}
-.chip{border:0;background:var(--accent-soft);color:var(--accent);border-radius:var(--r-full);padding:4px 10px;font:600 12.5px/1.5 var(--sans);transition:background var(--t-fast) var(--ease-out)}
+.thumb{width:132px;height:92px;border-radius:var(--r);flex:none;background:linear-gradient(135deg,var(--ph-1),var(--ph-2));box-shadow:inset 0 0 0 1px var(--rule)}
+.chip{border:0;background:var(--accent-soft);color:var(--accent-fg);border-radius:var(--r-full);padding:4px 10px;font:600 12.5px/1.5 var(--sans);transition:background var(--t-fast) var(--ease-out)}
 a.chip:hover{background:var(--accent);color:var(--accent-ink)}
 .badge{border-radius:var(--r-sm);padding:3px 8px;font:600 12px/1.5 var(--sans)}
-.badge-ok{background:var(--accent-soft);color:var(--accent)}
+.badge-ok{background:var(--accent-soft);color:var(--accent-fg)}
 .badge-warn{background:var(--warn-soft);color:var(--warn)}
 .badge-mut{background:var(--raised);color:var(--ink-2)}
 .scrim{background:var(--scrim);backdrop-filter:blur(6px);padding:22px;border-radius:var(--r-lg);display:flex;justify-content:center}
@@ -148,14 +154,15 @@ a.chip:hover{background:var(--accent);color:var(--accent-ink)}
 table{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:12px}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
 th{color:var(--ink-3);font-weight:600;font-size:12px;letter-spacing:.02em}
-td code{font:12px/1.5 var(--mono);color:var(--accent);background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent-soft);padding:1px 5px;border-radius:var(--r-sm)}
 .hero{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1),inset 0 0 0 1px var(--rule);padding:34px 30px;margin-top:18px;position:relative;overflow:hidden}
 .hero:after{content:"";position:absolute;right:-40px;top:-30px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,var(--accent-soft),transparent 68%)}
 .hero h2{margin:0;font-size:32px;line-height:1.18;letter-spacing:-.02em;position:relative}
 .hero p{color:var(--ink-2);max-width:52ch;position:relative;font-size:var(--fs-body);line-height:var(--lh-body)}
 .stack{position:absolute;right:34px;top:34px;width:150px;height:110px;opacity:.85}
 .stack i{position:absolute;left:0;right:0;height:26px;border:1px solid var(--accent-line);border-radius:var(--r);background:var(--accent-soft)}
-.stack i:nth-child(1){top:0}.stack i:nth-child(2){top:20px;left:14px;right:-14px}.stack i:nth-child(3){top:40px;left:28px;right:-28px}.stack i:nth-child(4){top:60px;left:42px;right:-42px}
+.stack i:nth-child(1){top:0}.stack i:nth-child(2){top:20px;left:14px;right:-14px;border-color:var(--rose);background:transparent}
+.stack i:nth-child(3){top:40px;left:28px;right:-28px}.stack i:nth-child(4){top:60px;left:42px;right:-42px;border-color:var(--rose);background:transparent}
 .side{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1),inset 0 0 0 1px var(--rule);padding:18px}
 .side h3{margin:0 0 12px;font-size:13px;color:var(--ink-3);font-weight:700;letter-spacing:.02em}
 .grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;margin-top:18px}
@@ -168,14 +175,14 @@ td code{font:12px/1.5 var(--mono);color:var(--accent);background:var(--accent-so
   <div class="top">
     <div>
       <h1>Stack Depth · 质感改造对比稿</h1>
-      <p class="sub">机制取自 <b>jason.blog</b>（色阶分层 / 半透明分隔线 / 无边框按钮 / 克制圆角 / 极低动效），色相保留本站品牌（深色玻璃 + 青蓝）。左 Before = 现网真实样式，右 After = 建议样式。</p>
+      <p class="sub">色板已换成你在 <b>Realtime Colors</b> 选的紫 + 玫瑰棕（它只给 5 个角色，surface / elevated / ink-2 / ink-3 / rule / soft / line 均按机制派生）；布局与版式不动。左 Before = 现网真实样式（含旧青色），右 After = 建议样式。</p>
       <p class="note">本文件仅用于设计验证，不是落地代码。拍板后按 §9 清单改 <code>tokens.css</code> + <code>uno.config.ts</code> shortcuts，不动页面结构。</p>
     </div>
     <button class="btn btn-secondary" id="themeBtn" style="height:34px">切换深 / 浅色</button>
   </div>
 
   <h2>§1 色板与分层（质感的地基）</h2>
-  <p class="note">jason.blog 的做法：<b>不用阴影</b>，靠 <code>paper → paper-2 → rule</code> 三档色阶分层；文字用 <code>ink / ink-2 / ink-3</code> 三档同色系明度阶梯。我们照搬这个机制，但换成冷色青蓝系，并保留极弱阴影（深色下纯靠色阶会糊成一片）。</p>
+  <p class="note">jason.blog 的做法：<b>不用阴影</b>，靠 <code>paper → paper-2 → rule</code> 三档色阶分层；文字用 <code>ink / ink-2 / ink-3</code> 三档同色系明度阶梯。我们沿用你选的紫 + 玫瑰棕，把它的<b>机制</b>套上来：从你给的 background/text 派生出 surface / elevated / raised 三层底与 ink-2 / ink-3 两级文字，并保留极弱阴影（纯黑底上光靠色阶会糊成一片）。</p>
   <div class="sw" id="sw"></div>
 
   <h2>§2 按钮族：从"四种混排"收敛到"4 变体 × 3 尺寸"</h2>
@@ -249,7 +256,7 @@ td code{font:12px/1.5 var(--mono);color:var(--accent);background:var(--accent-so
       <div class="card" style="margin-top:12px"><div style="min-width:0"><h4>31231</h4><p>1111</p>
         <div class="meta"><span>admin</span><i class="dot"></i><span>2026-10-05</span><i class="dot"></i><span>0 阅读</span><span style="margin-left:auto"><span class="chip">全新标签aaaaaaa</span></span></div>
       </div></div>
-      <p class="note">改动：① 边框改 <code>inset 0 0 0 1px rgba(255,255,255,.075)</code>（半透明，自动适配任何底色）；② 卡片圆角收到 <b>8px</b>、缩略图 <b>4px</b>（掘金式小圆角）；③ hover 背景提一档 + 阴影升一级 + 标题变主题色，<b>并保留 -2px 轻微上浮</b>（已定 ②B）；④ 标签并入 meta 行右端并降饱和；⑤ 标题 17px / 摘要 14.5px（已定 ③B）。</p>
+      <p class="note">改动：① 边框改半透明 <code>inset 0 0 0 1px var(--rule)</code>（深色为白 8%、浅色为黑 10%，自动适配底色）；② 圆角再收一档：卡片 <b>4px</b>、缩略图 <b>2px</b>；③ hover 背景提一档 + 阴影升一级 + 标题变 <code>--accent-fg</code>，<b>并保留 -2px 轻微上浮</b>（已定 ②B）；④ 标签并入 meta 行右端，改用 <code>--accent-soft</code> 底 + <code>--accent-fg</code> 字（不再高饱和地抢正文）；⑤ 标题 17px / 摘要 14.5px（已定 ③B）。</p>
     </div></div>
   </div>
 
@@ -326,13 +333,13 @@ td code{font:12px/1.5 var(--mono);color:var(--accent);background:var(--accent-so
   <h2>§9 落地清单（拍板后我做的事）</h2>
   <table>
     <tr><th>步骤</th><th>改什么</th><th>不动什么</th></tr>
-    <tr><td>1. token 层</td><td><code>tokens.css</code>：补 <code>--ink-3</code>、<code>--rule</code> 改半透明、<code>--accent-soft/line</code>、<code>--e1/e2/e3</code>、<code>--r-*</code>、<code>--t-*</code>；深浅各一版</td><td>页面结构、路由、取数</td></tr>
+    <tr><td>1. token 层</td><td><code>tokens.css</code>：换紫/玫瑰棕色板，补 <code>--ink-3</code>、<code>--accent-fg</code>、<code>--rose</code>、<code>--rule</code> 改半透明、<code>--accent-soft/line</code>、<code>--e1/e2/e3</code>、<code>--r-*</code>、<code>--t-*</code>；深浅各一版</td><td>页面结构、路由、取数</td></tr>
     <tr><td>2. shortcut 层</td><td><code>uno.config.ts</code>：<code>btn</code> 四变体 + 三尺寸 + 五态；<code>sd-input</code> 改 inset 边与 ring；新增 <code>sd-search</code>、<code>sd-elev-1/2/3</code></td><td>组件划分</td></tr>
     <tr><td>3. 基建</td><td><code>useToast()</code> + <code>&lt;AppToaster&gt;</code>；<code>useModalA11y()</code>（ESC/滚动锁/focus trap/焦点归还，登录弹层与抽屉共用）</td><td>业务逻辑</td></tr>
     <tr><td>4. 逐页替换</td><td>列表卡 / 详情页 / 标签页 / 搜索页 / 作者中心 / 弹层，每页一 commit + 重拍 shots 对比</td><td>契约与接口</td></tr>
     <tr><td>5. 验收</td><td><code>node tooling/shot/shot.mjs</code> 全量 44 张，逐张与本轮基线并排看；退出码必须回 0</td><td>—</td></tr>
   </table>
-  <p class="note" style="margin-bottom:60px"><b>已定结论（2026-10-08）</b>：① 圆角改用<b>掘金式小圆角</b> —— <code>--r-sm 3 / --r 4 / --r-lg 8</code>，输入框与按钮 4px、卡片与弹层 8px，<b>只有 chip 与头像保留胶囊</b>；② 卡片 hover <b>保留 -2px 轻微上浮</b>；③ 正文 <b>17px / 1.65</b>。<br>本稿已按这三条更新，请刷新看圆角效果；若还偏大，下一档就是全站 2px / 直角（jason.blog 的语言）。</p>
+  <p class="note" style="margin-bottom:60px"><b>已定结论（2026-10-09 更新）</b>：① 圆角再收一档 —— <code>--r-sm 2 / --r 2 / --r-lg 4</code>，控件 2px、卡片与弹层 4px，<b>只有 chip 与头像保留胶囊</b>；② 卡片 hover <b>保留 -2px 轻微上浮</b>；③ 正文 <b>17px / 1.65</b>；④ 色板换成 Realtime Colors 的<b>紫 + 玫瑰棕</b>，并新增 <code>--accent-fg</code>（前景强调）与 <code>--rose</code>（次强调装饰层）两个角色。<br><b>连带影响（落地时必须一起改，否则品牌会互相打架）</b>：现品牌母题是“青 + 炭黑”，换色后 <code>logo-duotone.svg</code> 的 <code>--logo-back/front</code>、<code>favicon.svg</code>（内嵌 prefers-color-scheme 且写死青色）、<code>design/README.md</code> 的“青 + 炭黑”描述、<code>tokens.css</code> 末尾映射注释全部要同步。</p>
 
 </div>
 <div id="toasts"></div>
@@ -343,7 +350,7 @@ new MutationObserver(renderSw).observe(document.documentElement,{attributes:true
 function toast(kind,title,desc){const box=document.getElementById('toasts');const el=document.createElement('div');el.className='toast'+(kind==='err'?' err':'');
   el.innerHTML='<div style="min-width:0"><b></b><span></span></div>';el.querySelector('b').textContent=title;el.querySelector('span').textContent=desc;
   box.appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),220)},3200)}
-function renderSw(){const g=getComputedStyle(document.documentElement);const list=[['bg','页面底'],['surface','卡片面'],['elevated','抬升面 / 输入框'],['raised','hover 面'],['ink','文字 1 档'],['ink-2','文字 2 档'],['ink-3','文字 3 档'],['rule','半透明分隔线'],['accent','主色'],['accent-soft','主色浅底'],['accent-line','focus ring'],['danger','危险'],['warn','警告']];
+function renderSw(){const g=getComputedStyle(document.documentElement);const list=[['bg','页面底'],['surface','卡片面'],['elevated','抬升面 / 输入框'],['raised','hover 面'],['ink','文字 1 档'],['ink-2','文字 2 档'],['ink-3','文字 3 档'],['rule','半透明分隔线'],['accent','主色（按钮底）'],['accent-fg','前景强调（链接/chip）'],['accent-soft','主色浅底'],['accent-line','focus ring'],['rose','次强调（装饰层）'],['danger','危险'],['warn','警告']];
   document.getElementById('sw').innerHTML=list.map(([k,label])=>{const v=g.getPropertyValue('--'+k).trim();return '<div class="chip-sw"><i style="background:'+v+'"></i><b>'+label+'</b><span>'+k+' '+v+'</span></div>'}).join('')}
 renderSw();
 </script>
