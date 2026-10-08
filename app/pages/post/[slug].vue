@@ -46,7 +46,7 @@ useSeoMeta({
     </NuxtLink>
 
     <header>
-      <h1 class="max-w-[24ch] text-3xl font-extrabold leading-tight tracking-tight">{{ version?.title }}</h1>
+      <h1 class="max-w-[24ch] text-3xl font-extrabold leading-[var(--lh-3xl)] tracking-[var(--ls-h1)]">{{ version?.title }}</h1>
 
       <!-- meta 条：头像 + 作者 + 日期 + 阅读量 + 标签 -->
       <div class="mt-4 flex flex-wrap items-center gap-3 border-b border-border pb-5">
@@ -71,19 +71,15 @@ useSeoMeta({
       v-if="version?.coverUrl"
       :src="version.coverUrl"
       :alt="version?.title"
-      class="mt-6 aspect-[16/8] w-full rounded-lg border border-border object-cover"
+      class="mt-6 aspect-[16/8] w-full rounded-lg border border-border object-cover [filter:var(--thumb-filter)]"
     />
 
     <!-- 正文：后端已净化 HTML → v-html + prose（prose.css 走 token 定稿，限宽 68ch） -->
     <div class="prose mt-8" v-html="version?.content" />
 
-    <div v-if="article.tags?.length" class="mt-8 flex flex-wrap gap-2">
-      <TagChip v-for="t in article.tags" :key="t.tagId" :slug="t.slug" :name="t.name" />
-    </div>
-
-    <!-- 评论区：§10.1 列表 + §10.2 发表（CSR） -->
+    <!-- 评论区：§10.1 列表 + §10.2 发表（CSR）；标签已在 meta 条出现，不再重复一份 -->
     <section class="mt-10 border-t border-border pt-8">
-      <h2 class="mb-4 text-xl font-semibold">评论 {{ comments?.total ?? 0 }}</h2>
+      <h2 class="mb-4 text-xl font-bold tracking-[var(--ls-title)]">评论 {{ comments?.total ?? 0 }}</h2>
       <CommentList :items="comments?.rows" />
       <EmptyState v-if="!comments?.rows?.length" title="还没有评论" description="成为第一个讨论这篇的人。" />
       <CommentForm :article-id="articleId" @posted="refreshComments" />

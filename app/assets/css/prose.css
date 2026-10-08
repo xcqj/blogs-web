@@ -29,6 +29,7 @@
   font-size: var(--text-xl);
   line-height: var(--lh-xl);
   font-weight: 700;
+  letter-spacing: var(--ls-h2);
   margin: var(--space-8) 0 var(--space-4);
   scroll-margin-top: 80px;
 }
@@ -37,6 +38,8 @@
   font-size: var(--text-lg);
   line-height: var(--lh-lg);
   font-weight: 600;
+  letter-spacing: var(--ls-title);
+  scroll-margin-top: 80px;
   margin: var(--space-6) 0 var(--space-3);
 }
 
@@ -50,13 +53,32 @@
   margin: var(--space-2) 0;
 }
 
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+/* 中文正文禁用假斜体：preset-typography 默认给 blockquote 加 italic 与引号，
+   中文斜体是机械倾斜、可读性差，且自动引号与中文引号重复 */
+.prose strong {
+  font-weight: 700;
+}
+
 .prose blockquote {
   margin: var(--space-6) 0;
   padding: var(--space-2) var(--space-5);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--accent-fg);
   color: var(--text-muted);
   background: var(--surface);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  /* preset-typography 默认给 blockquote 加 italic 与自动引号：
+     中文斜体是机械假斜体、可读性差，且自动引号与中文引号重复，均关掉 */
+  font-style: normal;
+  font-weight: 400;
+}
+
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: none;
 }
 
 .prose :not(pre) > code {
@@ -65,7 +87,7 @@
   background: var(--elevated);
   border: 1px solid var(--border);
   padding: 0.12em 0.4em;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .prose pre {
@@ -88,7 +110,7 @@
 }
 
 .prose a {
-  color: var(--accent);
+  color: var(--accent-fg);
   text-decoration: none;
 }
 

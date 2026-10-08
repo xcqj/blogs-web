@@ -38,14 +38,11 @@ useSeoMeta({
 
 <template>
   <section>
-    <form class="mx-auto mt-2 flex max-w-xl gap-2" @submit.prevent="submit">
-      <input
-        v-model="input"
-        type="search"
-        placeholder="搜索文章标题 / 摘要 / 正文…"
-        class="sd-input min-w-0 flex-1"
-      />
-      <button type="submit" class="btn-primary">搜索</button>
+    <!-- 一体化搜索框（sd-search）：与标签页同一控件，不再"框是框、按钮是按钮" -->
+    <form class="sd-search mx-auto mt-2 max-w-xl" @submit.prevent="submit">
+      <span class="i-mdi:magnify shrink-0 text-dim" aria-hidden="true" />
+      <input v-model="input" type="search" placeholder="搜索文章标题 / 摘要 / 正文…" />
+      <button type="submit" class="btn-primary btn-sm">搜索</button>
     </form>
 
     <div class="mt-8">

@@ -36,7 +36,7 @@ const updated = computed(() => (props.article.updateTime || props.article.publis
 <template>
   <div class="sd-row">
     <div class="min-w-0 flex-1">
-      <h3 class="truncate text-lg font-semibold">{{ article.title }}</h3>
+      <h3 class="truncate text-lg font-bold tracking-[var(--ls-title)]">{{ article.title }}</h3>
       <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted">
         <StatusBadge :status="article.status" :visibility="article.visibility" />
         <TagChip v-for="t in article.tags" :key="t.tagId" :slug="t.slug" :name="t.name" />

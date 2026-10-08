@@ -132,12 +132,14 @@
   --accent-press: #2f4150;
   --accent-ink: #ffffff;
   --accent-fg: #4b6272;
-  --accent-soft: #e9f2f7;
+  --accent-soft: #dbe8f2;
   --accent-line: rgb(88 124 146 / 0.4);
+  /* ⚠️ --accent-soft 要与 --bg 拉开：两者曾同为 #e9f2f7，
+     导致 chip 直接放在页面底（如详情页 meta 行）时背景隐形、看起来像普通文本 */
   --cta: #ffe87d;
   --cta-strong: #fbd75a;
   --cta-ink: #1a1c1c;
-  --chip-bg: #e9f2f7;
+  --chip-bg: #dbe8f2;
   --chip-border: rgb(75 98 114 / 0.24);
   --glow: rgb(75 98 114 / 0.2);
   --glow-soft: rgb(75 98 114 / 0.08);

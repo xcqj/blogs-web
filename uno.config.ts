@@ -49,9 +49,10 @@ export default defineConfig({
       'h-9.5 w-full rounded-md border border-border-strong bg-elevated px-3 text-base text-text outline-none transition-[border-color,box-shadow,background] duration-150 ease-out placeholder:text-dim focus:border-primary focus:shadow-[0_0_0_3px_var(--accent-line)] disabled:opacity-45',
     'sd-textarea':
       'w-full min-h-30 resize-y rounded-md border border-border-strong bg-elevated px-3.5 py-3 text-sm text-text outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-dim focus:border-primary focus:shadow-[0_0_0_3px_var(--accent-line)] disabled:opacity-45',
-    // 搜索框一体化：放大镜 + 输入 + 内嵌按钮共享圆角与 ring（不再"框是框、按钮是按钮"）
+    // 搜索框一体化：放大镜 + 输入 + 内嵌按钮共享圆角与 ring（不再"框是框、按钮是按钮"）。
+    // 内部 input 的无边框/透明底/占位色由本 shortcut 统一给，调用方只写宽度类。
     'sd-search':
-      'flex h-9.5 items-center gap-2 rounded-md border border-border-strong bg-elevated pr-1 pl-3 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-primary focus-within:shadow-[0_0_0_3px_var(--accent-line)]',
+      'flex h-9.5 items-center gap-2 rounded-md border border-border-strong bg-elevated pr-1 pl-3 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-primary focus-within:shadow-[0_0_0_3px_var(--accent-line)] [&_input]:min-w-0 [&_input]:flex-1 [&_input]:appearance-none [&_input]:border-0 [&_input]:bg-transparent [&_input]:text-base [&_input]:text-text [&_input]:outline-none [&_input]:placeholder:text-dim',
     'sd-field': 'mb-4.5',
     'sd-label': 'mb-1.5 block text-sm font-semibold text-muted',
     'sd-hint': 'mt-1.5 text-xs text-dim',

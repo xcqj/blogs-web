@@ -8,7 +8,8 @@ const badge = computed(() => {
   if (props.status === '0') return { label: '草稿', cls: 'border-transparent bg-muted-bg text-muted' }
   if (props.visibility === '2') return { label: '管理员下线', cls: 'border-transparent bg-danger-bg text-danger' }
   if (props.visibility === '1') return { label: '已隐藏', cls: 'border-transparent bg-warn-bg text-warn' }
-  return { label: '已发布', cls: 'border-[var(--chip-border)] bg-chip text-primary-strong' }
+  // 已发布是正面态：用与 chip 同族的 soft/fg 三件套，不再拉边框
+  return { label: '已发布', cls: 'border-transparent bg-soft text-primary-fg' }
 })
 </script>
 

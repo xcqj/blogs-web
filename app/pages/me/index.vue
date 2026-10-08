@@ -108,7 +108,7 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
   <section>
     <header class="mb-5 flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-semibold">我的文章</h1>
+        <h1 class="text-2xl font-bold tracking-[var(--ls-h2)]">我的文章</h1>
         <p class="mt-1 text-sm text-muted">作者中心 · 服务端按 author_id 隔离，仅显示你自己的文章</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">

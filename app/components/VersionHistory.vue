@@ -66,7 +66,7 @@ function close() {
           <div class="min-w-0">
             <p class="truncate text-sm">
               <span class="font-semibold">v{{ v.versionNo }}</span>
-              <span v-if="v.versionNo === currentVersionNo" class="sd-badge ml-2 border-[var(--chip-border)] bg-chip text-primary-strong">当前</span>
+              <span v-if="v.versionNo === currentVersionNo" class="sd-badge ml-2 bg-soft text-primary-fg">当前</span>
               <span class="ml-2 text-muted">{{ v.title }}</span>
             </p>
             <p class="sd-hint">{{ v.createTime }}</p>
@@ -78,7 +78,7 @@ function close() {
     </div>
 
     <!-- 快照查看层 -->
-    <div v-if="snapshot" class="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 sm:p-8" @click.self="close">
+    <div v-if="snapshot" class="fixed inset-0 z-50 flex items-start justify-center bg-[var(--scrim)] p-4 backdrop-blur-[6px] sm:p-8" @click.self="close">
       <div class="flex max-h-full w-full max-w-3xl flex-col overflow-hidden rounded-lg border border-border bg-elevated">
         <header class="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
           <div class="min-w-0">

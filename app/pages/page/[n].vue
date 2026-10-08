@@ -21,7 +21,7 @@ useSeoMeta({ title: () => `文章列表 第 ${page.value} 页` })
 <template>
   <section>
     <header class="mb-5 flex flex-wrap items-baseline justify-between gap-3">
-      <h1 class="text-2xl font-semibold">最新文章</h1>
+      <h1 class="text-2xl font-bold tracking-[var(--ls-h2)]">最新文章</h1>
       <p class="text-sm text-muted">共 {{ data?.total ?? 0 }} 篇 · 第 {{ page }} 页</p>
     </header>
 

@@ -52,7 +52,7 @@ useSeoMeta({ title: '个人资料 · 作者中心', robots: 'noindex,follow' });
 <template>
   <section class="mx-auto max-w-2xl">
     <header class="mb-5">
-      <h1 class="text-2xl font-semibold">个人资料</h1>
+      <h1 class="text-2xl font-bold tracking-[var(--ls-h2)]">个人资料</h1>
       <p class="mt-1 text-sm text-muted">走 §8 <code>GET/PUT /blog/user/profile</code>，仅个人简介可编辑</p>
     </header>
 

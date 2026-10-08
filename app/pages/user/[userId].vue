@@ -36,7 +36,7 @@ useSeoMeta({
     <div v-if="user" class="surface-hero flex items-center gap-4 rounded-lg border border-border p-6">
       <AppAvatar :name="user.nickName" :src="user.avatarUrl" size="lg" />
       <div class="min-w-0">
-        <h1 class="text-2xl font-semibold">{{ user.nickName }}</h1>
+        <h1 class="text-2xl font-bold tracking-[var(--ls-h2)]">{{ user.nickName }}</h1>
         <p class="mt-1 text-sm text-muted">{{ user.bio || '这个人很懒，什么都没写～' }}</p>
       </div>
     </div>

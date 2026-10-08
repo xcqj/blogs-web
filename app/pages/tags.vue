@@ -29,17 +29,14 @@ useSeoMeta({ title: () => (keyword.value ? `标签 · ${keyword.value}` : '全�
   <section>
     <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-semibold">{{ keyword ? `标签：${keyword}` : '全部标签' }}</h1>
+        <h1 class="text-2xl font-bold tracking-[var(--ls-h2)]">{{ keyword ? `标签：${keyword}` : '全部标签' }}</h1>
         <p class="mt-1 text-sm text-muted">共 {{ data?.total ?? 0 }} 个标签</p>
       </div>
-      <form class="flex gap-2" @submit.prevent="submit">
-        <input
-          v-model="input"
-          type="search"
-          placeholder="按名称或 slug 过滤"
-          class="sd-input w-56"
-        />
-        <button type="submit" class="btn-primary">过滤</button>
+      <!-- 一体化搜索框（sd-search）：放大镜 + 输入 + 内嵌按钮共享圆角与 focus ring -->
+      <form class="sd-search w-72" @submit.prevent="submit">
+        <span class="i-mdi:magnify shrink-0 text-dim" aria-hidden="true" />
+        <input v-model="input" type="search" placeholder="按名称或 slug 过滤" />
+        <button type="submit" class="btn-primary btn-sm">过滤</button>
       </form>
     </header>
 
