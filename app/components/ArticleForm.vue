@@ -53,7 +53,8 @@ function payload(): ArticleSavePayload {
   return {
     title: title.value.trim(),
     summary: summary.value.trim() || undefined,
-    coverUrl: coverUrl.value.trim() || undefined,
+    // 未手动选封面时自动取正文首图（A 方案，零后端）；手动选图仍以手动值为准
+    coverUrl: coverUrl.value.trim() || pickFirstImage(content.value) || undefined,
     content: content.value,
     tagNames: tagNames.value
   };
