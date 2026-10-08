@@ -137,6 +137,22 @@
 - 表单控件 shortcut 化（2026-10-07，S12 前置）：源 `design/app.css` 的 `.input/.textarea/.field/.hint` 落为 uno shortcut `sd-input`/`sd-textarea`/`sd-field`/`sd-label`/`sd-hint`，`LoginModal`/`CommentForm`/`search`/`tags` 四处已改为引用（原各写一套 class 已清零）。S12 作者中心的标题框/封面/标签 chips/侧栏面板直接复用，不再新增控件写法分叉。字号取 token 阶梯值（input=`text-base` 兼防 iOS 聚焦缩放，textarea=`text-sm`），未引入魔法值。
 - ~~⚠️ 待人工复核：深色下标签 chip 3.51:1~~ **已结案（非缺陷）**：静态判定 `.sd-chip{color:var(--accent-strong)}`，深色块 `--accent-strong:#67e8f9`、浅色块才是 `#0e7490`；子代理报的 `rgb(14,116,144)` 正是浅色值，且其记录显示当时 `htmlClass=light`（它自己也在任务4 里点了切换），属采样态错配。深色真实对比度为高值，无需改动；用户浏览器目视如仍偏暗再议。
 
+### 2.10 界面与交互迭代（S12-ui，2026-10-08，对照掘金）
+
+用户反馈“基本功能大都在，但样式细节与交互挺糟糕”，四个决策点已拍板（均为用户选定，非默认推断）：
+
+- [x] **列表容器：保持卡片风格仅微调**（不改成掘金式流式行）——`sd-card` 边框/圆角/`card-hover` 全部保留；commit `4aae3e6`：缩略图放大到 `w-40 h-28`（160×112，10:7，仍在左侧、窄屏隐藏、无图不预留空位）、摘要截 1 行、标签不再单独占行而是并入元信息行右端。
+- [x] **自动封面（A 方案，零后端）**：`app/utils/firstImage.ts` 用 `DOMParser` 取正文首个 `<img src>`，仅接受 `/` 与 `http(s)://`（与后端 `validateCoverUrl` 白名单一致，跳过 `data:`/`blob:`/`oss:`）；`coverUrl` 为空时回填，手动选图优先。commit `0b8554c`。已知语义：**存的是快照**，日后删掉正文那张图封面不会自动消失（可手动改）。
+- [x] **发文/编辑页改渐进披露**：commit `ac2f9f1`。主区只留 标题 / 标签 / 正文（单栏 `max-w-4xl`）；摘要、封面（两个可选字段）+ 状态 + 历史版本收进 `PublishDrawer` 右侧抽屉；顶栏改吸顶操作条（`sticky top-16` 贴 AppHeader 下沿，z-20 低于顶栏 z-40）；新增「从正文生成」摘要与自动封面提示；内容快照比对做未保存提醒（**不做自动保存**，避免误写库）。
+  - ❗ **为何标签不能像掘金那样收到发布时再填**：后端 `SdBlogArticleServiceImpl.validateTagCount()`（L572-573）在 `createDraft`(L84) 与 `update`(L124) 都会跑，**草稿也必须 1~6 个标签**，故标签留在写作主区。
+- [x] **复验三修正**：commit `5131fa6`。① 摘要截断由 `line-clamp-1` 改 `truncate`（产物 CSS 正确写了 `display:-webkit-box`，但新版 Chromium 已支持标准 `line-clamp`，`getComputedStyle().display` 报 **flow-root**、省略号是否出现随内核漂移），并补 `min-h-7` 预留行高（空 `<p>` 不生成 line box 高度为 0，导致列表实测 151.9/128.8/105 三种行高）；② `PublishDrawer` 补 ESC 关闭 + 背景滚动锁；③ `LoginModal` 同类缺失一并补齐。
+
+**待办（本小节遗留）**：
+
+- [ ] 抽屉与登录弹层**缺焦点圈定（focus trap）与关闭后焦点归还**，键盘 Tab 可跑到背页；下轮补（可抽 `useModalA11y` 共用）。
+- [ ] 本轮浏览器复验**未拿到截图**（Browser view 被最小化/遮挡，`visibilityState=hidden`，`scrollTo` 失效），结论均出自同源 iframe 量测与 DOM 核对；需人工目视确认列表观感、吸顶条滚动行为、抽屉动画。
+- [ ] 掘金式“自动保存至草稿箱”**未做**（仅未保存提醒），如要真自动保存需先定频控与失败重试策略，避免草稿表版本噪声。
+
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 
 - 三层 API 边界：只调 `/blog/public/**` + `/blog/article|user/**`，**禁 `/blog/admin/**`**；作者自助发文/编辑/隐藏/删除在**作者中心**（D29，走 `/blog/article/**`），平台治理仍仅 plus-ui。
