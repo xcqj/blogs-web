@@ -4,9 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stack Depth · 质感改造对比稿（Before / After）</title>
-<!-- 预览用 CDN 拉字体（只为了在这张对比稿里看效果）；落地时改为自托管拉丁子集 woff2（SIL OFL 开源可商用） -->
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
 /* ============================================================
    质感改造对比稿：机制取自 jason.blog（色阶分层 / 半透明分隔线 /
@@ -55,14 +52,16 @@
   --t-fast:140ms; --t:200ms; --t-slow:280ms;
   --ease-out:cubic-bezier(.22,.61,.36,1); --ease-inout:cubic-bezier(.4,0,.2,1);
   --sans:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  /* 排版三杠杆：标题字体（只影响拉丁）+ 负字距阶梯 + 更大的字号落差。
-     重要：中文方块字负字距上限远低于拉丁——实测 -.045em 会让笔画相接，
-     故这里取 CJK 安全档（拉丁标题可更负，中文标题靠字号与行高拿对比） */
-  --font-display:"Space Grotesk",var(--sans);
+  /* 排版杠杆：负字距阶梯 + 更大的字号落差。
+     重要：中文方块字负字距上限远低于拉丁——实测 -.045em 会让笔画相接，故取 CJK 安全档 */
+  /* 已定：不加载 webfont，标题继续用系统字（OFL 虽免费，但保持零字体依赖与零额外请求）。
+     负字距与字号落差对系统字同样有效，它们才是本次质感提升的主力 */
+  --font-display:var(--sans);
   --ls-display:-.03em; --ls-h1:-.022em; --ls-h2:-.018em; --ls-title:-.008em; --ls-body:0;
   --sec-pad:44px;
   --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
 }
+[hidden]{display:none!important}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
 .wrap{max-width:1280px;margin:0 auto;padding:0 24px}
@@ -164,6 +163,14 @@ a.chip:hover{background:var(--accent);color:var(--accent-ink)}
 .toast b{font-size:13.5px;display:block}
 .toast span{font-size:12.5px;color:var(--ink-3)}
 .toast.out{animation:tout var(--t) var(--ease-inout) forwards}
+.toast .act{margin-left:auto;align-self:center;flex:none;font:600 13px/1 var(--sans);color:var(--accent-fg);background:none;border:0;cursor:pointer;padding:6px 8px;border-radius:var(--r-sm)}
+.toast .act:hover{background:var(--accent-soft)}
+.dlg-mask{position:fixed;inset:0;z-index:60;background:var(--scrim);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px}
+.dlg{width:100%;max-width:420px;background:var(--elevated);border-radius:var(--r-lg);padding:22px;box-shadow:var(--e3),inset 0 0 0 1px var(--rule-2);animation:tin var(--t-slow) var(--ease-out)}
+.dlg h4{margin:0 0 8px;font-size:17px;font-weight:700}
+.dlg p{margin:0 0 10px;color:var(--ink-2);font-size:14.5px;line-height:1.6}
+.dlg .target{background:var(--surface);border-radius:var(--r);padding:10px 12px;font-size:14px;box-shadow:inset 0 0 0 1px var(--rule);margin-bottom:14px}
+.dlg .foot{display:flex;justify-content:flex-end;gap:8px}
 @keyframes tin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes tout{to{opacity:0;transform:translateX(16px)}}
 table{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:12px}
@@ -196,7 +203,6 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-secondary" id="themeBtn" style="height:34px">切换深 / 浅色</button>
       <button class="btn btn-secondary" id="radiusBtn" style="height:34px">圆角：小 2/4（当前）</button>
-      <button class="btn btn-secondary" id="fontBtn" style="height:34px">标题字体：Space Grotesk</button>
     </div>
   </div>
 
@@ -312,12 +318,24 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
     </div></div>
   </div>
 
-  <h2>§7 动效与 Toast 规格（点按钮试）</h2>
+  <h2>§7 反馈体系：按「打断程度」分五层（全部可点）</h2>
+  <p class="note">Toast 只是最轻的一层，<b>不是用来做“确定/取消”的</b>；需要用户决策的得用确认框。下面五个按钮对应四种场景，自己点一遍：</p>
   <div class="demo">
-    <button class="btn btn-primary" onclick="toast('ok','已保存草稿','文章 ID 2107140488228573186')">触发成功 Toast</button>
-    <button class="btn btn-danger" onclick="toast('err','发布失败','仅草稿状态的文章可以发布')">触发错误 Toast</button>
-    <button class="btn btn-secondary" onclick="toast('ok','已隐藏','可点「重新公开」恢复')">再一条（看堆叠）</button>
+    <button class="btn btn-secondary" onclick="toast('ok','已保存草稿','可在「我的文章」继续编辑',{key:'saved',action:'查看',href:'#'})">① 轻告知 + 可带 action（同 key 去重）</button>
+    <button class="btn btn-danger" onclick="askDelete()">② 不可逆操作 → 确认框</button>
+    <button class="btn btn-secondary" onclick="toast('err','发布失败','仅草稿状态的文章可以发布',{key:'err'})">③ 失败告知（不自动消失）</button>
+    <button class="btn btn-ghost" onclick="spam()">④ 连发 5 次 → 看去重与堆叠上限</button>
   </div>
+  <table>
+    <tr><th>层级</th><th>组件</th><th>打断</th><th>用在哪儿（本站实例）</th></tr>
+    <tr><td>1</td><td><b>inline</b> 就地提示</td><td>无</td><td>表单校验：“标签至少 1 个”、“标题不能为空”（就长在字段下面）</td></tr>
+    <tr><td>2</td><td><b>toast</b> 轻告知</td><td>无，自动消失</td><td>已保存草稿 / 已复制 / 已发布；<b>可带一个 action</b>（查看、撤销）</td></tr>
+    <tr><td>3</td><td><b>banner</b> 页面横幅</td><td>弱，常驻</td><td>“该文章已被管理员下线”、“有 3 条评论待回复”（不处理完不消失）</td></tr>
+    <tr><td>4</td><td><b>confirm</b> 确认框</td><td><b>阻断，必须选</b></td><td><b>删除文章</b>、放弃未保存更改 —— 不可逆才用，别滥用</td></tr>
+    <tr><td>5</td><td><b>undo</b> 撤销模式</td><td>无</td><td><b>比“确定要删除吗？”更高级的做法</b>：直接做 + Toast 给「撤销」（Gmail 删邮件）</td></tr>
+  </table>
+  <p class="note"><b>选型口诀</b>：可逆 → 直接做 + toast 带撤销；不可逆 / 破坏性 → confirm 确认框；字段错 → inline；系统状态 → banner。<br>
+  另：我们现在的<b>删除是“行内两步确认”</b>（点一下变“确认删除？”再点执行），属于第 4 层的轻量变体，能用；升级为 confirm 后能同时显示“删哪篇、会发生什么”。</p>
   <table>
     <tr><th>档位</th><th>值</th><th>用途</th></tr>
     <tr><td><code>--t-fast</code></td><td>140ms · ease-out</td><td>颜色/边框/背景变化（hover、active、focus ring）</td></tr>
@@ -358,8 +376,19 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
     <tr><td>4. 逐页替换</td><td>列表卡 / 详情页 / 标签页 / 搜索页 / 作者中心 / 弹层，每页一 commit + 重拍 shots 对比</td><td>契约与接口</td></tr>
     <tr><td>5. 验收</td><td><code>node tooling/shot/shot.mjs</code> 全量 44 张，逐张与本轮基线并排看；退出码必须回 0</td><td>—</td></tr>
   </table>
-  <p class="note" style="margin-bottom:60px"><b>当前待定（2026-10-09）</b>：色板已换 sun-summit 蓝灰 + 黄 CTA；圆角保持 2/2/4，但<b>这套配色的原生气质是大圆角</b>（模板 token 为 <code>8/16/32/48px</code>），请用右上角「圆角：小/大」直接对比后定。<br>另：模板标题用 <b>Space Grotesk</b>、正文 <b>Inter</b>，若要接近那个几何感需加载拉丁子集字体（中文仍走系统字）；这属性能决策，目前不加。<br><b>连带影响</b>：无论最终选哪套色，<code>logo-duotone.svg</code> 的 <code>--logo-back/front</code>、<code>favicon.svg</code>（写死青色）、<code>design/README.md</code> 的“青 + 炭黑”描述、<code>tokens.css</code> 注释全部要同步。</p>
+  <p class="note" style="margin-bottom:60px"><b>当前待定（2026-10-09）</b>：色板已换 sun-summit 蓝灰 + 黄 CTA；圆角保持 2/2/4，但<b>这套配色的原生气质是大圆角</b>（模板 token 为 <code>8/16/32/48px</code>），请用右上角「圆角：小/大」直接对比后定。<br>另：标题字体<b>已定不加载 webfont</b>（Space Grotesk 虽为 OFL 免费商用，但实测字体只影响拉丁部分，不值得多一个依赖）。<br><b>连带影响</b>：无论最终选哪套色，<code>logo-duotone.svg</code> 的 <code>--logo-back/front</code>、<code>favicon.svg</code>（写死青色）、<code>design/README.md</code> 的“青 + 炭黑”描述、<code>tokens.css</code> 注释全部要同步。</p>
 
+</div>
+<div class="dlg-mask" id="dlgMask" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT">
+    <h4 id="dlgT">删除这篇文章？</h4>
+    <p>删除后文章与其<b>全部历史版本</b>将不再展示（逻辑删除，平台管理员可从后台恢复）。</p>
+    <div class="target">《31231》 · 草稿 · 最后保存于 2026-10-05</div>
+    <div class="foot">
+      <button class="btn btn-secondary" id="dlgNo">取消</button>
+      <button class="btn btn-danger" id="dlgOk">确认删除</button>
+    </div>
+  </div>
 </div>
 <div id="toasts"></div>
 <script>
@@ -373,16 +402,58 @@ document.getElementById('radiusBtn').onclick=(e)=>{const r=document.documentElem
   r.style.setProperty('--r-lg',radiusSmall?'4px':'24px');
   r.style.setProperty('--r-sm',radiusSmall?'2px':'8px');
   e.target.textContent=radiusSmall?'圆角：小 2/4（当前）':'圆角：大 12/24（sun-summit 原生）';};
-// 字体开关：单独隔离“字体”这一个变量的贡献（负字距与字号落差保留不变）
-let grotesk=true;
-document.getElementById('fontBtn').onclick=(e)=>{grotesk=!grotesk;
-  document.documentElement.style.setProperty('--font-display',grotesk?'"Space Grotesk",var(--sans)':'var(--sans)');
-  e.target.textContent=grotesk?'标题字体：Space Grotesk':'标题字体：系统字（对比）';};
 // 监听 data-theme 变化重画色板：无论点按钮还是脚本/自动截图改属性，§1 都不会残留旧主题的值
 new MutationObserver(renderSw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-function toast(kind,title,desc){const box=document.getElementById('toasts');const el=document.createElement('div');el.className='toast'+(kind==='err'?' err':'');
-  el.innerHTML='<div style="min-width:0"><b></b><span></span></div>';el.querySelector('b').textContent=title;el.querySelector('span').textContent=desc;
-  box.appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),220)},3200)}
+/* —— 反馈体系：toast 去重 + 堆叠上限 + 可带 action + 失败不自动消失 —— */
+const live = new Map();
+const CAP = 3;
+function toast(kind, title, desc, opt = {}) {
+  const box = document.getElementById('toasts');
+  const key = opt.key || title;
+  // 同 key 不新增，而是把旧的挑到末尾并改文案（避免“已保存草稿”堆 4 条）
+  if (live.has(key)) {
+    const old = live.get(key);
+    old.querySelector('b').textContent = title;
+    old.querySelector('span').textContent = desc;
+    box.appendChild(old);
+    return;
+  }
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind === 'err' ? ' err' : '');
+  el.innerHTML = '<div style="min-width:0"><b></b><span></span></div>';
+  el.querySelector('b').textContent = title;
+  el.querySelector('span').textContent = desc;
+  if (opt.action) {
+    const a = document.createElement('button');
+    a.className = 'act';
+    a.textContent = opt.action;
+    a.onclick = () => { dismiss(); toast('ok', '点了「' + opt.action + '」', '真实场景里这里会跳转或执行撤销'); };
+    el.appendChild(a);
+  }
+  box.appendChild(el);
+  live.set(key, el);
+  while (box.children.length > CAP) {
+    const first = box.firstElementChild;
+    first.remove();
+    for (const [k, v] of live) if (v === first) live.delete(k);
+  }
+  function dismiss() {
+    el.classList.add('out');
+    setTimeout(() => { el.remove(); live.delete(key); }, 220);
+  }
+  if (kind !== 'err') setTimeout(dismiss, 3600); // 失败信息不自动消失，要用户手动处理
+}
+function spam() { for (let i = 1; i <= 5; i++) setTimeout(() => toast('ok', '已保存草稿', '第 ' + i + ' 次保存（同 key 会合并）', { key: 'saved' }), i * 300); }
+
+/* —— 确认框：不可逆操作才用 —— */
+const mask = document.getElementById('dlgMask');
+function askDelete() { mask.hidden = false; document.getElementById('dlgOk').focus(); }
+function closeDelete() { mask.hidden = true; }
+function confirmDelete() { closeDelete(); toast('ok', '已删除《31231》', '草稿与全部历史版本已不再展示', { action: '撤销', key: 'del' }); }
+document.getElementById('dlgOk').onclick = confirmDelete;
+document.getElementById('dlgNo').onclick = closeDelete;
+mask.onclick = (e) => { if (e.target === mask) closeDelete(); };
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !mask.hidden) closeDelete(); });
 function renderSw(){const g=getComputedStyle(document.documentElement);const list=[['bg','页面底'],['surface','卡片面'],['elevated','抬升面 / 输入框'],['raised','hover 面'],['ink','文字 1 档'],['ink-2','文字 2 档'],['ink-3','文字 3 档'],['rule','半透明分隔线'],['accent','主色（按钮底/链接）'],['accent-fg','前景强调（链接/chip）'],['accent-soft','主色浅底'],['accent-line','focus ring'],['cta','CTA 黄（模板签名）'],['danger','危险'],['warn','警告']];
   document.getElementById('sw').innerHTML=list.map(([k,label])=>{const v=g.getPropertyValue('--'+k).trim();return '<div class="chip-sw"><i style="background:'+v+'"></i><b>'+label+'</b><span>'+k+' '+v+'</span></div>'}).join('')}
 renderSw();
