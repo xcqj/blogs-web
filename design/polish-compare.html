@@ -12,35 +12,37 @@
    本文件是设计验证稿，不是落地代码；拍板后按 §9 清单改 tokens.css 与 uno shortcuts。
    ============================================================ */
 :root[data-theme='dark']{
-  /* 色板来源：Realtime Colors 用户选组（紫 primary + 玫瑰棕 secondary/accent）
-     它只给 5 个角色，surface/elevated/ink-2/ink-3/rule/soft/line 均为按机制派生 */
-  --bg:#050406; --surface:#0d0b10; --elevated:#141118; --raised:#1c1822;
-  --ink:#f2eff5; --ink-2:#a9a2b4; --ink-3:#857e94;
-  --rule:rgba(242,239,245,.08); --rule-2:rgba(242,239,245,.16);
-  --accent:#786397; --accent-hi:#8f7ab0; --accent-lo:#5f4d7c;
-  --accent-ink:#ffffff; --accent-fg:#c0abdc; --accent-soft:rgba(120,99,151,.18); --accent-line:rgba(156,132,190,.42);
-  --rose:#6c4f47; --rose-fg:#c9a99f;
-  --ph-1:#41355a; --ph-2:#2a2338;
+  /* 色板来源：sun-summit 模板（preview.yuanpu.cc 实测）——它只给浅色：
+     blue-100 #e9f2f7 / 200 #cfe3ee / 300 #b3d3e6 / 500 #587c92 / 700 #4b6272 + yellow-500 #ffe87d + almost-black #1a1c1c
+     深色版由同一色相（蓝灰）派生，黄作为 CTA 点缀保留 */
+  --bg:#0a1015; --surface:#101a21; --elevated:#16232c; --raised:#1d2e39;
+  --ink:#e9f2f7; --ink-2:#a8c0cf; --ink-3:#7b95a6;
+  --rule:rgba(233,242,247,.09); --rule-2:rgba(233,242,247,.17);
+  --accent:#b3d3e6; --accent-hi:#cbe3f1; --accent-lo:#8fb8cf;
+  --accent-ink:#14232c; --accent-fg:#b3d3e6; --accent-soft:rgba(179,211,230,.15); --accent-line:rgba(179,211,230,.40);
+  --cta:#ffe87d; --cta-ink:#1a1c1c;
+  --ph-1:#2b4251; --ph-2:#1b2c37;
   --danger:#e0685f; --danger-soft:rgba(224,104,95,.14);
-  --warn:#d9a441; --warn-soft:rgba(217,164,65,.14);
+  --warn:#e0955a; --warn-soft:rgba(224,149,90,.14);
   --e1:0 1px 2px rgba(0,0,0,.40); --e2:0 2px 4px rgba(0,0,0,.30),0 8px 20px -6px rgba(0,0,0,.55);
   --e3:0 4px 8px rgba(0,0,0,.35),0 24px 60px -12px rgba(0,0,0,.75);
-  --scrim:rgba(2,1,3,.76);
+  --scrim:rgba(4,8,11,.78);
 }
 :root[data-theme='light']{
-  --bg:#f9f8fa; --surface:#ffffff; --elevated:#ffffff; --raised:#f2eff4;
-  --ink:#0b090e; --ink-2:#565061; --ink-3:#6f6880;
-  --rule:rgba(11,9,14,.10); --rule-2:rgba(11,9,14,.18);
-  --accent:#7d689d; --accent-hi:#6c5889; --accent-lo:#5b4a74;
-  --accent-ink:#ffffff; --accent-fg:#5b4a74; --accent-soft:#f0ebf6; --accent-line:rgba(125,104,157,.32);
-  --rose:#b99b93; --rose-fg:#8a6a62;
-  --ph-1:#ded4ea; --ph-2:#c8b8d8;
+  /* 浅色版直接用模板原色：blue-100 做页面底，白做卡片，blue-700 做主按钮与链接 */
+  --bg:#e9f2f7; --surface:#ffffff; --elevated:#ffffff; --raised:#dfeaf2;
+  --ink:#1a1c1c; --ink-2:#33505f; --ink-3:#527488;
+  --rule:rgba(26,28,28,.10); --rule-2:rgba(26,28,28,.18);
+  --accent:#4b6272; --accent-hi:#3d5261; --accent-lo:#2f4150;
+  --accent-ink:#ffffff; --accent-fg:#4b6272; --accent-soft:#e9f2f7; --accent-line:rgba(88,124,146,.40);
+  --cta:#ffe87d; --cta-ink:#1a1c1c;
+  --ph-1:#cfe3ee; --ph-2:#b3d3e6;
   --danger:#b91c1c; --danger-soft:#fdeaea;
   --warn:#b45309; --warn-soft:#fdf3e2;
   /* 注：浅色下 --accent-hi/lo 是“更暗一档”（与深色方向相反），语义是“hover / active 各变一档”而非“变亮” */
-  --e1:0 1px 2px rgba(11,9,14,.06); --e2:0 2px 4px rgba(11,9,14,.06),0 8px 20px -8px rgba(11,9,14,.14);
-  --e3:0 4px 10px rgba(11,9,14,.08),0 24px 50px -12px rgba(11,9,14,.20);
-  --scrim:rgba(11,9,14,.44);
+  --e1:0 1px 2px rgba(26,28,28,.06); --e2:0 2px 4px rgba(26,28,28,.06),0 8px 20px -8px rgba(26,28,28,.14);
+  --e3:0 4px 10px rgba(26,28,28,.08),0 24px 50px -12px rgba(26,28,28,.20);
+  --scrim:rgba(26,28,28,.44);
 }
 :root{
   /* 圆角族——再小一档（用户反馈）：控件 2px、卡片/弹层 4px，只有 chip 与头像保留胶囊 */
@@ -104,6 +106,10 @@ h3{font-size:14px;margin:0 0 12px;color:var(--ink-2);font-weight:600}
 .btn-ghost:hover{background:var(--accent-soft);color:var(--accent-fg)}
 .btn-danger{background:var(--danger-soft);color:var(--danger);box-shadow:inset 0 0 0 1px rgba(224,104,95,.28)}
 .btn-danger:hover{background:var(--danger);color:#fff}
+/* 模板的签名手法：hero 主 CTA 用黄底黑字，而不是把主色当按钮底 */
+.btn-cta{background:var(--cta);color:var(--cta-ink)}
+.btn-cta:hover{background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--cta)}
+:root[data-theme='dark'] .btn-cta:hover{background:#fff2a8}
 .btn-sm{height:30px;font-size:13px;padding:0 10px;border-radius:var(--r-sm)}
 .btn-lg{height:44px;font-size:15px;padding:0 19px;border-radius:var(--r)}
 .btn-pill{border-radius:var(--r-full)}
@@ -161,8 +167,8 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
 .hero p{color:var(--ink-2);max-width:52ch;position:relative;font-size:var(--fs-body);line-height:var(--lh-body)}
 .stack{position:absolute;right:34px;top:34px;width:150px;height:110px;opacity:.85}
 .stack i{position:absolute;left:0;right:0;height:26px;border:1px solid var(--accent-line);border-radius:var(--r);background:var(--accent-soft)}
-.stack i:nth-child(1){top:0}.stack i:nth-child(2){top:20px;left:14px;right:-14px;border-color:var(--rose);background:transparent}
-.stack i:nth-child(3){top:40px;left:28px;right:-28px}.stack i:nth-child(4){top:60px;left:42px;right:-42px;border-color:var(--rose);background:transparent}
+.stack i:nth-child(1){top:0}.stack i:nth-child(2){top:20px;left:14px;right:-14px;border-color:var(--accent-lo);background:transparent}
+.stack i:nth-child(3){top:40px;left:28px;right:-28px}.stack i:nth-child(4){top:60px;left:42px;right:-42px;border-color:var(--accent-lo);background:transparent}
 .side{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1),inset 0 0 0 1px var(--rule);padding:18px}
 .side h3{margin:0 0 12px;font-size:13px;color:var(--ink-3);font-weight:700;letter-spacing:.02em}
 .grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;margin-top:18px}
@@ -175,14 +181,17 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
   <div class="top">
     <div>
       <h1>Stack Depth · 质感改造对比稿</h1>
-      <p class="sub">色板已换成你在 <b>Realtime Colors</b> 选的紫 + 玫瑰棕（它只给 5 个角色，surface / elevated / ink-2 / ink-3 / rule / soft / line 均按机制派生）；布局与版式不动。左 Before = 现网真实样式（含旧青色），右 After = 建议样式。</p>
+      <p class="sub">色板已换成 <b>sun-summit</b> 模板那组（从 <code>preview.yuanpu.cc</code> 实测取到 <code>blue-100/200/300/500/700 + yellow-500 + almost-black</code>）。它<b>只有浅色</b>，深色版由同一蓝灰色相派生；布局与版式不动。右上角可切主题与<b>圆角大小</b>。</p>
       <p class="note">本文件仅用于设计验证，不是落地代码。拍板后按 §9 清单改 <code>tokens.css</code> + <code>uno.config.ts</code> shortcuts，不动页面结构。</p>
     </div>
-    <button class="btn btn-secondary" id="themeBtn" style="height:34px">切换深 / 浅色</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-secondary" id="themeBtn" style="height:34px">切换深 / 浅色</button>
+      <button class="btn btn-secondary" id="radiusBtn" style="height:34px">圆角：小 2/4（当前）</button>
+    </div>
   </div>
 
   <h2>§1 色板与分层（质感的地基）</h2>
-  <p class="note">jason.blog 的做法：<b>不用阴影</b>，靠 <code>paper → paper-2 → rule</code> 三档色阶分层；文字用 <code>ink / ink-2 / ink-3</code> 三档同色系明度阶梯。我们沿用你选的紫 + 玫瑰棕，把它的<b>机制</b>套上来：从你给的 background/text 派生出 surface / elevated / raised 三层底与 ink-2 / ink-3 两级文字，并保留极弱阴影（纯黑底上光靠色阶会糊成一片）。</p>
+  <p class="note">sun-summit 的手法：<b>完全不用阴影</b>，层次靠 <b>blue-100 → 200 → 300 → 500 → 700 五级蓝色渐进色块</b>（截图里 01/02/03/04 那四块就是它）；文字靠 <code>almost-black → 中蓝灰</code> 分档。我们沿用它的<b>蓝色阶</b>，但保留极弱阴影与半透明边（卡片之间只靠色阶在深色下会糊成一片）。</p>
   <div class="sw" id="sw"></div>
 
   <h2>§2 按钮族：从"四种混排"收敛到"4 变体 × 3 尺寸"</h2>
@@ -316,7 +325,7 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
         <div class="stack"><i></i><i></i><i></i><i></i></div>
         <h2>把技术读到<br>一层层深处</h2>
         <p class="sub">Stack Depth —— 多作者技术博客，往深处读：阅读、搜索与评论。</p>
-        <div class="row"><button class="btn btn-primary btn-lg">开始阅读 →</button><button class="btn btn-secondary btn-lg">看看标签</button></div>
+        <div class="row"><button class="btn btn-cta btn-lg">开始阅读 →</button><button class="btn btn-secondary btn-lg">看看标签</button></div>
       </div>
       <div class="card" style="margin-top:14px"><div class="thumb"></div><div style="min-width:0"><h4>字节二面智力题：100 只老虎和 1 只羊</h4><p>面试考官的，不是看你知不知道这道经典题的答案…</p><div class="meta"><span>Fox爱分享</span><i class="dot"></i><span>2026-10-01</span><i class="dot"></i><span>15k</span><span style="margin-left:auto"><span class="chip">面试</span> <span class="chip">算法</span></span></div></div></div>
       <div class="card" style="margin-top:12px"><div style="min-width:0"><h4>Cursor 转 Codex 大半个月，聊聊真实感受</h4><p>让我第一次强烈感受到 AI 编程的震撼…</p><div class="meta"><span>深小乐</span><i class="dot"></i><span>2026-09-28</span><i class="dot"></i><span>127k</span><span style="margin-left:auto"><span class="chip">人工智能</span></span></div></div></div>
@@ -339,18 +348,27 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
     <tr><td>4. 逐页替换</td><td>列表卡 / 详情页 / 标签页 / 搜索页 / 作者中心 / 弹层，每页一 commit + 重拍 shots 对比</td><td>契约与接口</td></tr>
     <tr><td>5. 验收</td><td><code>node tooling/shot/shot.mjs</code> 全量 44 张，逐张与本轮基线并排看；退出码必须回 0</td><td>—</td></tr>
   </table>
-  <p class="note" style="margin-bottom:60px"><b>已定结论（2026-10-09 更新）</b>：① 圆角再收一档 —— <code>--r-sm 2 / --r 2 / --r-lg 4</code>，控件 2px、卡片与弹层 4px，<b>只有 chip 与头像保留胶囊</b>；② 卡片 hover <b>保留 -2px 轻微上浮</b>；③ 正文 <b>17px / 1.65</b>；④ 色板换成 Realtime Colors 的<b>紫 + 玫瑰棕</b>，并新增 <code>--accent-fg</code>（前景强调）与 <code>--rose</code>（次强调装饰层）两个角色。<br><b>连带影响（落地时必须一起改，否则品牌会互相打架）</b>：现品牌母题是“青 + 炭黑”，换色后 <code>logo-duotone.svg</code> 的 <code>--logo-back/front</code>、<code>favicon.svg</code>（内嵌 prefers-color-scheme 且写死青色）、<code>design/README.md</code> 的“青 + 炭黑”描述、<code>tokens.css</code> 末尾映射注释全部要同步。</p>
+  <p class="note" style="margin-bottom:60px"><b>当前待定（2026-10-09）</b>：色板已换 sun-summit 蓝灰 + 黄 CTA；圆角保持 2/2/4，但<b>这套配色的原生气质是大圆角</b>（模板 token 为 <code>8/16/32/48px</code>），请用右上角「圆角：小/大」直接对比后定。<br>另：模板标题用 <b>Space Grotesk</b>、正文 <b>Inter</b>，若要接近那个几何感需加载拉丁子集字体（中文仍走系统字）；这属性能决策，目前不加。<br><b>连带影响</b>：无论最终选哪套色，<code>logo-duotone.svg</code> 的 <code>--logo-back/front</code>、<code>favicon.svg</code>（写死青色）、<code>design/README.md</code> 的“青 + 炭黑”描述、<code>tokens.css</code> 注释全部要同步。</p>
 
 </div>
 <div id="toasts"></div>
 <script>
 document.getElementById('themeBtn').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'};
+// 圆角开关：sun-summit 这套配色的原生气质是大圆角（模板 token 为 8/16/32/48px），
+// 而上一轮定的是 2/2/4。两者是否要搭配，用这个按钮直接对比，不用猜。
+let radiusSmall=true;
+document.getElementById('radiusBtn').onclick=(e)=>{const r=document.documentElement;
+  radiusSmall=!radiusSmall;
+  r.style.setProperty('--r',radiusSmall?'2px':'12px');
+  r.style.setProperty('--r-lg',radiusSmall?'4px':'24px');
+  r.style.setProperty('--r-sm',radiusSmall?'2px':'8px');
+  e.target.textContent=radiusSmall?'圆角：小 2/4（当前）':'圆角：大 12/24（sun-summit 原生）';};
 // 监听 data-theme 变化重画色板：无论点按钮还是脚本/自动截图改属性，§1 都不会残留旧主题的值
 new MutationObserver(renderSw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 function toast(kind,title,desc){const box=document.getElementById('toasts');const el=document.createElement('div');el.className='toast'+(kind==='err'?' err':'');
   el.innerHTML='<div style="min-width:0"><b></b><span></span></div>';el.querySelector('b').textContent=title;el.querySelector('span').textContent=desc;
   box.appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),220)},3200)}
-function renderSw(){const g=getComputedStyle(document.documentElement);const list=[['bg','页面底'],['surface','卡片面'],['elevated','抬升面 / 输入框'],['raised','hover 面'],['ink','文字 1 档'],['ink-2','文字 2 档'],['ink-3','文字 3 档'],['rule','半透明分隔线'],['accent','主色（按钮底）'],['accent-fg','前景强调（链接/chip）'],['accent-soft','主色浅底'],['accent-line','focus ring'],['rose','次强调（装饰层）'],['danger','危险'],['warn','警告']];
+function renderSw(){const g=getComputedStyle(document.documentElement);const list=[['bg','页面底'],['surface','卡片面'],['elevated','抬升面 / 输入框'],['raised','hover 面'],['ink','文字 1 档'],['ink-2','文字 2 档'],['ink-3','文字 3 档'],['rule','半透明分隔线'],['accent','主色（按钮底/链接）'],['accent-fg','前景强调（链接/chip）'],['accent-soft','主色浅底'],['accent-line','focus ring'],['cta','CTA 黄（模板签名）'],['danger','危险'],['warn','警告']];
   document.getElementById('sw').innerHTML=list.map(([k,label])=>{const v=g.getPropertyValue('--'+k).trim();return '<div class="chip-sw"><i style="background:'+v+'"></i><b>'+label+'</b><span>'+k+' '+v+'</span></div>'}).join('')}
 renderSw();
 </script>

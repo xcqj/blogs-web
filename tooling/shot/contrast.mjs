@@ -31,17 +31,18 @@ const ratio = (fg, bg, base) => {
 };
 
 const THEMES = {
+  // sun-summit 蓝灰阶：深色版由同一色相派生（模板本身只给浅色）
   dark: {
-    bg: '#050406', surface: '#0d0b10', elevated: '#141118',
-    ink: '#f2eff5', ink2: '#a9a2b4', ink3: '#857e94',
-    accent: '#786397', accentInk: '#ffffff', accentSoft: 'rgba(120,99,151,.18)',
-    accentFg: '#c0abdc'
+    bg: '#0a1015', surface: '#101a21', elevated: '#16232c',
+    ink: '#e9f2f7', ink2: '#a8c0cf', ink3: '#7b95a6',
+    accent: '#b3d3e6', accentInk: '#14232c', accentSoft: 'rgba(179,211,230,.15)',
+    accentFg: '#b3d3e6', cta: '#ffe87d', ctaInk: '#1a1c1c'
   },
   light: {
-    bg: '#f9f8fa', surface: '#ffffff', elevated: '#ffffff',
-    ink: '#0b090e', ink2: '#565061', ink3: '#6f6880',
-    accent: '#7d689d', accentInk: '#ffffff', accentSoft: '#f0ebf6',
-    accentFg: '#5b4a74'
+    bg: '#e9f2f7', surface: '#ffffff', elevated: '#ffffff',
+    ink: '#1a1c1c', ink2: '#33505f', ink3: '#527488',
+    accent: '#4b6272', accentInk: '#ffffff', accentSoft: '#e9f2f7',
+    accentFg: '#4b6272', cta: '#ffe87d', ctaInk: '#1a1c1c'
   }
 };
 // [前景, 背景, 场景, 门槛, 背景所落的 base（默认 surface）]
@@ -53,6 +54,7 @@ const CASES = [
   ['accentInk', 'accent', '主按钮文字', 4.5],
   ['accentFg', 'surface', '链接 / 标题 hover', 4.5],
   ['accentFg', 'accentSoft', 'chip 文字', 4.5, 'surface'],
+  ['ctaInk', 'cta', 'CTA 黄按钮文字', 4.5],
   ['ink', 'bg', '正文 / 页面底', 4.5]
 ];
 
