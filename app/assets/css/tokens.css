@@ -178,6 +178,38 @@
   display: none !important;
 }
 
+/* 同样因缺 preflight（第三个后果，也是“按钮像 20 年前”的真凶）：
+   UA 默认给 <button> 的 border-style 是 outset、给 <input>/<textarea> 的是 inset，
+   而我们的 shortcut 只设 background 或只设 border 宽度与颜色（不设 style），
+   结果就是左上亮、右下暗的 3D 浮雕按钮。这里把 style 统一成 solid、宽度归零，
+   工具类 border / border-* 仍能正常覆盖（特异性高于元素选择器） */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+  border-style: solid;
+  border-width: 0;
+}
+
+button {
+  appearance: none;
+  background-color: transparent;
+  background-image: none;
+  cursor: pointer;
+}
+
+/* Chrome 自动填充会把输入底刷成淡蓝，与主题色板打架：用 inset 阴影盖回 surface 色 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  box-shadow: 0 0 0 1000px var(--surface) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 img,
 svg,
 video {
