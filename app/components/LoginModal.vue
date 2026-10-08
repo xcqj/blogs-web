@@ -45,7 +45,7 @@ async function submit() {
     form.password = ''
     form.code = ''
   } catch (e: any) {
-    error.value = e?.statusMessage || e?.data?.message || '登录失败'
+    error.value = apiErrorText(e, '登录失败')
     refreshCaptcha() // 验证码一次性，失败后刷新重试
   } finally {
     loading.value = false

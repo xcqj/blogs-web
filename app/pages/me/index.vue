@@ -77,7 +77,7 @@ async function action(kind: 'publish' | 'hide' | 'show' | 'delete', a: AuthorArt
     await Promise.all([refreshList(), refreshCounts()])
   } catch (e: any) {
     // 越权/状态不允许由后端判定，前端只如实转达
-    notice.value = e?.statusMessage || e?.data?.msg || '操作失败，请稍后重试'
+    notice.value = apiErrorText(e, '操作失败，请稍后重试')
   } finally {
     busy.value = false
   }

@@ -71,7 +71,7 @@ const editorConfig = computed<Partial<IEditorConfig>>(() => ({
           const res = await uploadToOss(file);
           insertFn(res.url, file.name, res.url);
         } catch (e: any) {
-          uploadError.value = e?.statusMessage || '图片上传失败';
+          uploadError.value = apiErrorText(e, '图片上传失败');
         }
       }
     }

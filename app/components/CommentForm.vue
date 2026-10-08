@@ -18,7 +18,7 @@ async function submit() {
     content.value = ''
     emit('posted') // 通知父级刷新评论列表
   } catch (e: any) {
-    err.value = e?.statusMessage || '发表失败，请重试'
+    err.value = apiErrorText(e, '发表失败，请重试')
   } finally {
     submitting.value = false
   }

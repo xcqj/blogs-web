@@ -21,7 +21,7 @@ async function load() {
   try {
     list.value = await $fetch<ArticleVersionMeta[]>(`/api/blog/article/${props.articleId}/versions`);
   } catch (e: any) {
-    error.value = e?.statusMessage || '版本列表加载失败';
+    error.value = apiErrorText(e, '版本列表加载失败');
   } finally {
     loading.value = false;
   }
@@ -37,7 +37,7 @@ async function view(v: ArticleVersionMeta) {
   try {
     snapshot.value = await $fetch<VersionSnapshot>(`/api/blog/article/${props.articleId}/versions/${v.versionId}`);
   } catch (e: any) {
-    error.value = e?.statusMessage || '版本快照加载失败';
+    error.value = apiErrorText(e, '版本快照加载失败');
   } finally {
     snapLoading.value = false;
   }

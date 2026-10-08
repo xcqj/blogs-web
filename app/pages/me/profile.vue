@@ -35,7 +35,7 @@ async function save() {
     if (prof.value) prof.value.bio = bio.value.trim() || null;
     notice.value = '已保存';
   } catch (e: any) {
-    error.value = e?.statusMessage || e?.data?.msg || '保存失败';
+    error.value = apiErrorText(e, '保存失败');
   } finally {
     saving.value = false;
   }

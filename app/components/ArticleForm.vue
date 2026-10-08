@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 作者中心·发文/编辑表单（S12；2026-10-08 起改为「渐进披露」形态，对照掘金写作页）。
-// 主区只有 标题 / 标签 / 正文；摘要与封面（可选字段）+ 状态 + 历史版本收进「发布设置」抽屉。
+// 主区只有 标题 / 标签 / 正文；摘要与封面（可选字段）+ 首次发布时间 + 历史版本收进「更多」抽屉。
 // 保存 = §3.1 创建（草稿）或 §3.4 保存（内容变化才建新版本，由后端判定）；发布 = §3.5 独立动作。
 // ADMIN_HIDDEN 只读（作者不可编辑/自恢复，红线由后端强制，这里只做体验）。
 import type { AuthorArticleDetail, ArticleSavePayload } from '~/types/author';
@@ -71,7 +71,7 @@ async function load() {
     tagNames.value = (d.tags ?? []).map((t) => t.name);
     baseline.value = snapshot();
   } catch (e: any) {
-    error.value = e?.statusMessage || '文章加载失败（可能不是你的文章）';
+    error.value = apiErrorText(e, '文章加载失败（可能不是你的文章）');
   } finally {
     loading.value = false;
   }
@@ -120,7 +120,7 @@ async function submit(publish: boolean) {
       await load();
     }
   } catch (e: any) {
-    error.value = e?.statusMessage || e?.data?.msg || '保存失败，请检查标题/正文/标签（1~6 个）';
+    error.value = apiErrorText(e, '保存失败，请检查标题/正文/标签（1~6 个）');
   } finally {
     saving.value = false;
   }
@@ -143,13 +143,20 @@ async function submit(publish: boolean) {
       </NuxtLink>
 
       <span class="ml-auto text-xs text-muted">{{ saveStateText }}</span>
-      <button class="sd-act" @click="drawerOpen = true">发布设置</button>
-      <button class="btn-ghost" :disabled="!canSave" @click="submit(false)">
-        {{ saving ? '保存中…' : isEdit ? '保存修改' : '存为草稿' }}
+      <button class="sd-act" @click="drawerOpen = true">更多</button>
+      <!-- 已发布文章不再提供「发布」：后端 ArticleGuards.requirePublishable 只允许草稿发布，
+           重复调用会抛「仅草稿状态的文章可以发布」；隐藏/下线文章的重新公开仍在 /me 列表行做 -->
+      <button v-if="isPublished" class="btn-primary" :disabled="!canSave" @click="submit(false)">
+        {{ saving ? '保存中…' : '保存修改' }}
       </button>
-      <button class="btn-primary" :disabled="!canSave" @click="submit(true)">
-        {{ saving ? '提交中…' : '发布' }}
-      </button>
+      <template v-else>
+        <button class="btn-ghost" :disabled="!canSave" @click="submit(false)">
+          {{ saving ? '保存中…' : '存为草稿' }}
+        </button>
+        <button class="btn-primary" :disabled="!canSave" @click="submit(true)">
+          {{ saving ? '提交中…' : '发布' }}
+        </button>
+      </template>
     </div>
 
     <p v-if="readOnly" class="mb-3 rounded-md bg-danger-bg px-3 py-2 text-sm text-danger">
@@ -178,7 +185,7 @@ async function submit(publish: boolean) {
       </ClientOnly>
     </div>
 
-    <!-- 发布设置抽屉：摘要 / 封面 / 状态 / 历史版本 -->
+    <!-- 更多设置抽屉：摘要 / 封面 / 首次发布时间 / 历史版本（状态不在此重复，操作条已有） -->
     <PublishDrawer
       v-model:summary="summary"
       v-model:cover-url="coverUrl"
@@ -187,12 +194,8 @@ async function submit(publish: boolean) {
       :read-only="readOnly"
       @close="drawerOpen = false"
     >
-      <div v-if="detail" class="border-t border-border pt-4">
-        <p class="mb-2 text-sm text-muted">
-          状态：<StatusBadge :status="detail.status" :visibility="detail.visibility" />
-        </p>
-        <p v-if="detail.publishedAt" class="sd-hint">首次发布于 {{ detail.publishedAt }}</p>
-      </div>
+      <!-- 状态不在此重复（操作条已带徽标）；只保留抽屉里独有的首次发布时间 -->
+      <p v-if="detail?.publishedAt" class="sd-hint">首次发布于 {{ detail.publishedAt }}</p>
 
       <!-- 历史版本只读（§4.1/§4.2；append-only，不提供恢复） -->
       <VersionHistory

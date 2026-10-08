@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// 发布设置抽屉（S12-ui 渐进披露）：写作主区只留「标题 / 标签 / 正文」，
-// 摘要与封面（两个可选字段）连同状态、历史版本收进这里，需要时再滑出，减少一次性摊开的信息量。
+// 更多设置抽屉（S12-ui 渐进披露）：写作主区只留「标题 / 标签 / 正文」，
+// 摘要与封面（两个可选字段）连同历史版本收进这里，需要时再滑出，减少一次性摊开的信息量。
 // 注：标签不收进抽屉——后端 createDraft/update 都会跑 validateTagCount（1~6），草稿也必须带标签。
 import { pickFirstImage } from '~/utils/firstImage';
 
@@ -51,7 +51,7 @@ onUnmounted(() => {
       <div class="absolute inset-0 bg-black/45" @click="emit('close')" />
       <aside class="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-border bg-elevated shadow-md">
         <header class="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
-          <h2 class="text-base font-semibold">发布设置</h2>
+          <h2 class="text-base font-semibold">更多设置</h2>
           <button class="sd-act" @click="emit('close')">关闭 ✕</button>
         </header>
 

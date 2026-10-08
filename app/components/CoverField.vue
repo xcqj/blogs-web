@@ -39,7 +39,7 @@ async function onChange(e: Event) {
     const res = await $fetch<OssUploadResult>('/api/resource/oss/upload', { method: 'POST', body: fd });
     emit('update:modelValue', res.url);
   } catch (err: any) {
-    error.value = err?.statusMessage || '封面上传失败';
+    error.value = apiErrorText(err, '封面上传失败');
   } finally {
     uploading.value = false;
   }
