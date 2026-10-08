@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stack Depth · 质感改造对比稿（Before / After）</title>
+<!-- 预览用 CDN 拉字体（只为了在这张对比稿里看效果）；落地时改为自托管拉丁子集 woff2（SIL OFL 开源可商用） -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
 /* ============================================================
    质感改造对比稿：机制取自 jason.blog（色阶分层 / 半透明分隔线 /
@@ -52,13 +55,19 @@
   --t-fast:140ms; --t:200ms; --t-slow:280ms;
   --ease-out:cubic-bezier(.22,.61,.36,1); --ease-inout:cubic-bezier(.4,0,.2,1);
   --sans:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  /* 排版三杠杆：标题字体（只影响拉丁）+ 负字距阶梯 + 更大的字号落差。
+     重要：中文方块字负字距上限远低于拉丁——实测 -.045em 会让笔画相接，
+     故这里取 CJK 安全档（拉丁标题可更负，中文标题靠字号与行高拿对比） */
+  --font-display:"Space Grotesk",var(--sans);
+  --ls-display:-.03em; --ls-h1:-.022em; --ls-h2:-.018em; --ls-title:-.008em; --ls-body:0;
+  --sec-pad:44px;
   --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
 .wrap{max-width:1280px;margin:0 auto;padding:0 24px}
-h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
-h2{font-size:19px;margin:56px 0 4px;letter-spacing:-.005em}
+h1{font-size:clamp(30px,4vw,42px);line-height:1.12;margin:0 0 6px;font-family:var(--font-display);font-weight:700;letter-spacing:var(--ls-h1)}
+h2{font-size:21px;margin:56px 0 4px;font-family:var(--font-display);font-weight:600;letter-spacing:var(--ls-title)}
 h3{font-size:14px;margin:0 0 12px;color:var(--ink-2);font-weight:600}
 .sub{color:var(--ink-2);margin:0 0 8px;font-size:15px}
 .note{color:var(--ink-3);font-size:13.5px;line-height:1.65;margin:10px 0 0}
@@ -128,12 +137,12 @@ h3{font-size:14px;margin:0 0 12px;color:var(--ink-2);font-weight:600}
   transition:box-shadow var(--t) var(--ease-out),background var(--t) var(--ease-out),transform var(--t) var(--ease-out)}
 /* 已定 ②B：保留轻微上浮（-2px），但不再靠 glow 撑场 */
 .card:hover{background:var(--elevated);box-shadow:var(--e2),inset 0 0 0 1px var(--rule-2);transform:translateY(-2px)}
-.card h4{margin:0;font-size:var(--fs-body);font-weight:700;line-height:1.35;letter-spacing:-.005em;transition:color var(--t-fast) var(--ease-out)}
+.card h4{margin:0;font-size:var(--fs-body);font-weight:700;line-height:1.3;letter-spacing:var(--ls-title);transition:color var(--t-fast) var(--ease-out)}
 .card:hover h4{color:var(--accent-fg)}
 .card p{margin:5px 0 0;color:var(--ink-2);font-size:14.5px;line-height:1.6}
 .meta{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12.5px;color:var(--ink-3)}
 .meta .dot{width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.6}
-.thumb{width:132px;height:92px;border-radius:var(--r);flex:none;background:linear-gradient(135deg,var(--ph-1),var(--ph-2));box-shadow:inset 0 0 0 1px var(--rule)}
+.thumb{width:132px;height:92px;border-radius:var(--r);flex:none;background:linear-gradient(135deg,var(--ph-1),var(--ph-2));box-shadow:inset 0 0 0 1px var(--rule);filter:saturate(.92)}
 .chip{border:0;background:var(--accent-soft);color:var(--accent-fg);border-radius:var(--r-full);padding:4px 10px;font:600 12.5px/1.5 var(--sans);transition:background var(--t-fast) var(--ease-out)}
 a.chip:hover{background:var(--accent);color:var(--accent-ink)}
 .badge{border-radius:var(--r-sm);padding:3px 8px;font:600 12px/1.5 var(--sans)}
@@ -161,17 +170,17 @@ table{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:12px}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
 th{color:var(--ink-3);font-weight:600;font-size:12px;letter-spacing:.02em}
 td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent-soft);padding:1px 5px;border-radius:var(--r-sm)}
-.hero{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1),inset 0 0 0 1px var(--rule);padding:34px 30px;margin-top:18px;position:relative;overflow:hidden}
+.hero{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1),inset 0 0 0 1px var(--rule);padding:var(--sec-pad) calc(var(--sec-pad) - 6px);margin-top:18px;position:relative;overflow:hidden}
 .hero:after{content:"";position:absolute;right:-40px;top:-30px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,var(--accent-soft),transparent 68%)}
-.hero h2{margin:0;font-size:32px;line-height:1.18;letter-spacing:-.02em;position:relative}
+.hero h2{margin:0;font-family:var(--font-display);font-size:clamp(38px,5.4vw,68px);line-height:1.04;font-weight:700;letter-spacing:var(--ls-display);position:relative}
 .hero p{color:var(--ink-2);max-width:52ch;position:relative;font-size:var(--fs-body);line-height:var(--lh-body)}
 .stack{position:absolute;right:34px;top:34px;width:150px;height:110px;opacity:.85}
 .stack i{position:absolute;left:0;right:0;height:26px;border:1px solid var(--accent-line);border-radius:var(--r);background:var(--accent-soft)}
 .stack i:nth-child(1){top:0}.stack i:nth-child(2){top:20px;left:14px;right:-14px;border-color:var(--accent-lo);background:transparent}
 .stack i:nth-child(3){top:40px;left:28px;right:-28px}.stack i:nth-child(4){top:60px;left:42px;right:-42px;border-color:var(--accent-lo);background:transparent}
-.side{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1),inset 0 0 0 1px var(--rule);padding:18px}
-.side h3{margin:0 0 12px;font-size:13px;color:var(--ink-3);font-weight:700;letter-spacing:.02em}
-.grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;margin-top:18px}
+.side{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1),inset 0 0 0 1px var(--rule);padding:22px}
+.side h3{margin:0 0 14px;font-size:12.5px;color:var(--ink-3);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:22px;margin-top:22px}
 @media(max-width:900px){.grid2{grid-template-columns:1fr}.stack{display:none}}
 </style>
 </head>
@@ -187,6 +196,7 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-secondary" id="themeBtn" style="height:34px">切换深 / 浅色</button>
       <button class="btn btn-secondary" id="radiusBtn" style="height:34px">圆角：小 2/4（当前）</button>
+      <button class="btn btn-secondary" id="fontBtn" style="height:34px">标题字体：Space Grotesk</button>
     </div>
   </div>
 
@@ -318,7 +328,7 @@ td code{font:12px/1.5 var(--mono);color:var(--accent-fg);background:var(--accent
   </table>
 
   <h2>§8 合成预览：统一后的首页片段</h2>
-  <p class="note">把上面所有配方放在同一屏，检查"色调是否统一"：同一族圆角、同一族半透明边、三档文字色、一个主色 + 它的 soft/ink。</p>
+  <p class="note">本轮在此叠加了<b>排版三杠杆</b>（右上角可单独关掉字体看差异）：① 标题字体 Space Grotesk；② 负字距阶梯 <code>--ls-display -.03em / --ls-h1 -.022em / --ls-title -.008em</code>（我们原 tokens.css 里 letter-spacing 出现 0 次）；③ 字号落差从 3.25× 拉到 <b>4.25×</b>（hero 最大 68px）；另加缩略图 <code>saturate(.92)</code> 去素材感。<br><b>实测结论（开关字体对比过）</b>：字体只影响拉丁部分，<b>中文标题仍走系统黑体</b>（中文 webfont 2~8MB 不可接受），所以字体不是主因；真正的主因是<b>字号落差、负字距、留白节奏、饱和度</b>（最后一条已随换色解决）。现 tokens.css 实测阶梯 12/14/16/18/20/24/30/38/52 相邻比仅 1.125~1.27，是“层级平”的根因。</p>
   <div class="grid2">
     <div>
       <div class="hero">
@@ -363,6 +373,11 @@ document.getElementById('radiusBtn').onclick=(e)=>{const r=document.documentElem
   r.style.setProperty('--r-lg',radiusSmall?'4px':'24px');
   r.style.setProperty('--r-sm',radiusSmall?'2px':'8px');
   e.target.textContent=radiusSmall?'圆角：小 2/4（当前）':'圆角：大 12/24（sun-summit 原生）';};
+// 字体开关：单独隔离“字体”这一个变量的贡献（负字距与字号落差保留不变）
+let grotesk=true;
+document.getElementById('fontBtn').onclick=(e)=>{grotesk=!grotesk;
+  document.documentElement.style.setProperty('--font-display',grotesk?'"Space Grotesk",var(--sans)':'var(--sans)');
+  e.target.textContent=grotesk?'标题字体：Space Grotesk':'标题字体：系统字（对比）';};
 // 监听 data-theme 变化重画色板：无论点按钮还是脚本/自动截图改属性，§1 都不会残留旧主题的值
 new MutationObserver(renderSw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 function toast(kind,title,desc){const box=document.getElementById('toasts');const el=document.createElement('div');el.className='toast'+(kind==='err'?' err':'');
