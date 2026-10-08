@@ -1,105 +1,165 @@
 /* =====================================================================
-   Stack Depth · 设计 Token 单一来源（落地版，源 design/tokens.css，桶A）
+   Stack Depth · 设计 Token 单一来源（质感打磨轮 · 2026-10-09 重排）
    - 深色为默认（:root 直接给值），浅色由 @nuxtjs/color-mode 在 <html> 打
      class="light" 覆盖；同时保留 [data-theme] 选择器以兼容 design/ mockup。
    - 页面/组件一律通过 uno.config.ts 的语义类消费这些变量，不写魔法数字。
+   - 色板来源：sun-summit 模板（实测 blue-100/200/300/500/700 + yellow-500 +
+     almost-black）；该模板只提供浅色，深色由同一蓝灰色相派生。
+   - 分层机制来源：jason.blog（色阶分层 + 半透明分隔线 + 三档文字 + 克制圆角）。
+   - 全部前景/底色对已实测通过 WCAG AA（见 tooling/shot/contrast.mjs，16 项全过）。
    ===================================================================== */
 
 :root {
-  /* 字体：中文走系统栈，不加载中文 webfont（保 SSR 首屏） */
+  /* 字体：已定不加载任何 webfont（含拉丁），中文与拉丁均走系统栈。
+     实测字体只影响拉丁部分，不值得多一个外部依赖；质感靠字号落差 + 字距 + 留白 */
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
     'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Code', Menlo, Consolas, monospace;
 
-  /* 字号阶梯（基准 16，正文行高 1.7 利于长文阅读） */
+  /* 字号阶梯：正文 17px（原 16），body→display 落差由 3.25× 提到 4.24×。
+     原阶梯相邻比仅 1.125~1.27，层级过平是"廉价感"的主因之一 */
   --text-xs: 12px;      --lh-xs: 1.5;
-  --text-sm: 14px;      --lh-sm: 1.6;
-  --text-base: 16px;    --lh-base: 1.7;
-  --text-lg: 18px;      --lh-lg: 1.6;
-  --text-xl: 20px;      --lh-xl: 1.5;
-  --text-2xl: 24px;     --lh-2xl: 1.35;
-  --text-3xl: 30px;     --lh-3xl: 1.25;
-  --text-4xl: 38px;     --lh-4xl: 1.15;
-  /* Hero 展示字号（源 design/home.html 的 clamp，收进 token 避免页面魔法值） */
-  --text-display: clamp(30px, 5vw, 52px); --lh-display: 1.08;
+  --text-sm: 14px;      --lh-sm: 1.55;
+  --text-base: 17px;    --lh-base: 1.65;
+  --text-lg: 19px;      --lh-lg: 1.5;
+  --text-xl: 24px;      --lh-xl: 1.35;
+  --text-2xl: 32px;     --lh-2xl: 1.25;
+  --text-3xl: 44px;     --lh-3xl: 1.15;
+  --text-4xl: 56px;     --lh-4xl: 1.1;
+  --text-display: clamp(40px, 6vw, 72px); --lh-display: 1.04;
+
+  /* 负字距阶梯：只在 ≥24px 的标题上用。
+     ⚠️ 中文方块字上限远低于拉丁——实测 -.045em 会让笔画相接，故取 CJK 安全档 */
+  --ls-display: -0.03em;
+  --ls-h1: -0.022em;
+  --ls-h2: -0.018em;
+  --ls-title: -0.008em;
+  --ls-body: 0;
 
   /* 正文测量行宽 / 列表容器宽 */
   --measure: 68ch;
   --container: 1080px;
 
-  /* Hero 背景：青辉径向 + 面板底色（引用主题变量，随深浅自动切换） */
-  --hero-bg: radial-gradient(120% 120% at 85% 20%, var(--glow-soft), transparent 55%), var(--surface);
+  /* 圆角族：已定小圆角 —— 控件 2px、卡片与弹层 4px，只有 chip 与头像用胶囊 */
+  --radius-sm: 2px; --radius-md: 2px; --radius-lg: 4px; --radius-xl: 4px; --radius-full: 999px;
 
-  /* 圆角 */
-  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 20px; --radius-full: 999px;
-
-  /* 间距阶梯（4px 基准，源 design/tokens.css；正文排版 prose.css 消费） */
+  /* 间距阶梯（4px 基准）；--section-pad 用于区块内边距，留白节奏是质感主力 */
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
   --space-5: 24px; --space-6: 32px; --space-8: 48px; --space-10: 64px; --space-12: 96px;
+  --section-pad: 44px;
 
-  /* 阴影 */
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 10px 30px rgb(0 0 0 / 0.1);
+  /* 三级文字：原只有 text/muted 两档，层级靠字号硬撑；补第三档给 meta/计数 */
+  /* elevation 三级：阴影只表达"浮起高度"，不承担装饰；深色下比浅色更重 */
+  --e1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --e2: 0 2px 4px rgb(0 0 0 / 0.3), 0 8px 20px -6px rgb(0 0 0 / 0.55);
+  --e3: 0 4px 8px rgb(0 0 0 / 0.35), 0 24px 60px -12px rgb(0 0 0 / 0.75);
+
+  /* 动效：全站只有三档时长 + 两条曲线；离场用 --t 配 ease-inout，比进场更快 */
+  --t-fast: 140ms; --t: 200ms; --t-slow: 280ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 列表缩略图统一轻微去饱和，避免真实照片与扁平 UI 的"素材感" */
+  --thumb-filter: saturate(0.92);
 }
 
-/* ---------- 深色（默认） ---------- */
+/* ---------- 深色（默认）：蓝灰阶派生，黄作 CTA 点缀 ---------- */
 :root {
   color-scheme: dark;
-  --bg: #0b1120;
-  --surface: #0f1626;
-  --elevated: #131a2a;
-  --text: #edeff2;
-  --text-muted: #8b94a7;
-  --border: #223049;
-  --accent: #22d3ee;
-  --accent-strong: #67e8f9;
-  --accent-ink: #04222b;
-  --chip-bg: rgb(34 211 238 / 0.1);
-  --chip-border: rgb(34 211 238 / 0.3);
-  --glow: rgb(34 211 238 / 0.55);
-  --glow-soft: rgb(34 211 238 / 0.18);
-  --shadow-glow: 0 8px 30px var(--glow);
-  --layer-fill: linear-gradient(135deg, rgb(34 211 238 / 0.1), rgb(15 22 38 / 0.35));
-  --code-bg: #0d1526;
-  --code-text: #e2e8f0;
-  --logo-back: #edeff2;
-  --logo-front: #22d3ee;
+  --bg: #0a1015;
+  --surface: #101a21;
+  --elevated: #16232c;
+  --raised: #1d2e39;
+  --text: #e9f2f7;
+  --text-muted: #a8c0cf;
+  --text-dim: #7b95a6;
+  /* 分隔线用半透明而非实色灰：自动适配任何底色，不会在深色上显生硬 */
+  --border: rgb(233 242 247 / 0.09);
+  --border-strong: rgb(233 242 247 / 0.17);
+  /* --accent 作按钮底/边框；--accent-fg 作前景强调（链接、chip 文字、hover 标题）。
+     必须拆开：蓝灰主色做底够，做小字对比度不足 */
+  --accent: #b3d3e6;
+  --accent-strong: #cbe3f1;
+  --accent-press: #8fb8cf;
+  --accent-ink: #14232c;
+  --accent-fg: #b3d3e6;
+  --accent-soft: rgb(179 211 230 / 0.15);
+  --accent-line: rgb(179 211 230 / 0.4);
+  /* CTA 黄：模板的签名用法——主行动按钮用黄底黑字，而非把主色当按钮底 */
+  --cta: #ffe87d;
+  --cta-strong: #fff2a8;
+  --cta-ink: #1a1c1c;
+  --chip-bg: rgb(179 211 230 / 0.15);
+  --chip-border: rgb(179 211 230 / 0.3);
+  /* 旧 glow 机制保留变量名（6 处在用）但强度大幅调低：主按钮不再发光 */
+  --glow: rgb(179 211 230 / 0.28);
+  --glow-soft: rgb(179 211 230 / 0.1);
+  --shadow-glow: var(--e2);
+  --layer-fill: linear-gradient(135deg, #2b4251, #1b2c37);
+  --ph-1: #2b4251;
+  --ph-2: #1b2c37;
+  --code-bg: #0d151c;
+  --code-text: #e9f2f7;
+  --logo-back: #e9f2f7;
+  --logo-front: #b3d3e6;
   --danger: #e0685f;
-  --danger-bg: rgb(224 104 95 / 0.12);
-  /* 状态徽标（作者中心 S12）：草稿=中性、用户隐藏=琥珀、管理员下线=红 */
-  --warn: #d9a441;
-  --warn-bg: rgb(217 164 65 / 0.12);
-  --muted-bg: rgb(139 148 167 / 0.14);
+  /* danger 实心按钮上的文字色：深色下 #e0685f 配白字只 3.32:1，必须用深字 */
+  --danger-ink: #1a1c1c;
+  --danger-bg: rgb(224 104 95 / 0.14);
+  /* 状态徽标：草稿=中性、用户隐藏=橙、管理员下线=红；warn 由琥珀改橙以避开黄 CTA */
+  --warn: #e0955a;
+  --warn-bg: rgb(224 149 90 / 0.14);
+  --muted-bg: rgb(168 192 207 / 0.14);
+  --hero-bg: radial-gradient(120% 120% at 85% 20%, var(--accent-soft), transparent 60%), var(--surface);
 }
 
 /* ---------- 浅色（color-mode 打 class，或 mockup 用 data-theme） ---------- */
 :root.light,
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #f6f7fb;
+  --bg: #e9f2f7;
   --surface: #ffffff;
   --elevated: #ffffff;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --accent: #0891b2;
-  --accent-strong: #0e7490;
+  --raised: #dfeaf2;
+  --text: #1a1c1c;
+  --text-muted: #33505f;
+  --text-dim: #527488;
+  --border: rgb(26 28 28 / 0.1);
+  --border-strong: rgb(26 28 28 / 0.18);
+  /* 模板原色 blue-500 #587c92 配白字只有 4.45:1 不达 AA，故主按钮底用 blue-700 */
+  --accent: #4b6272;
+  --accent-strong: #3d5261;
+  --accent-press: #2f4150;
   --accent-ink: #ffffff;
-  --chip-bg: rgb(8 145 178 / 0.1);
-  --chip-border: rgb(8 145 178 / 0.3);
-  --glow: rgb(8 145 178 / 0.28);
-  --glow-soft: rgb(8 145 178 / 0.12);
-  --shadow-glow: 0 8px 24px var(--glow);
-  --layer-fill: linear-gradient(135deg, rgb(8 145 178 / 0.1), rgb(255 255 255 / 0.65));
-  --code-bg: #0f172a;
-  --code-text: #e2e8f0;
-  --logo-back: #0f172a;
-  --logo-front: #0891b2;
+  --accent-fg: #4b6272;
+  --accent-soft: #e9f2f7;
+  --accent-line: rgb(88 124 146 / 0.4);
+  --cta: #ffe87d;
+  --cta-strong: #fbd75a;
+  --cta-ink: #1a1c1c;
+  --chip-bg: #e9f2f7;
+  --chip-border: rgb(75 98 114 / 0.24);
+  --glow: rgb(75 98 114 / 0.2);
+  --glow-soft: rgb(75 98 114 / 0.08);
+  --shadow-glow: var(--e1);
+  --layer-fill: linear-gradient(135deg, #cfe3ee, #b3d3e6);
+  --ph-1: #cfe3ee;
+  --ph-2: #b3d3e6;
+  --code-bg: #101a21;
+  --code-text: #e9f2f7;
+  --logo-back: #1a1c1c;
+  --logo-front: #4b6272;
   --danger: #b91c1c;
+  --danger-ink: #ffffff;
   --danger-bg: rgb(185 28 28 / 0.08);
   --warn: #b45309;
   --warn-bg: rgb(180 83 9 / 0.1);
-  --muted-bg: rgb(100 116 139 / 0.12);
+  --muted-bg: rgb(82 116 136 / 0.12);
+  --hero-bg: radial-gradient(120% 120% at 85% 20%, rgb(179 211 230 / 0.55), transparent 60%), var(--surface);
+  /* 浅色下阴影要更轻，否则白卡发脏 */
+  --e1: 0 1px 2px rgb(26 28 28 / 0.06);
+  --e2: 0 2px 4px rgb(26 28 28 / 0.06), 0 8px 20px -8px rgb(26 28 28 / 0.14);
+  --e3: 0 4px 10px rgb(26 28 28 / 0.08), 0 24px 50px -12px rgb(26 28 28 / 0.2);
 }
 
 /* ---------- 基础层：底色/正文/链接跟随 token ---------- */
@@ -109,6 +169,11 @@
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+/* 同样因缺 preflight：hidden 属性会被 display 工具类覆盖，弹层/确认框依赖它 */
+[hidden] {
+  display: none !important;
 }
 
 img,
@@ -141,11 +206,31 @@ body {
   transition: background 0.35s ease, color 0.35s ease;
 }
 
-::selection {
-  background: var(--glow-soft);
+/* 标题层级：字号与行高走 token，字距按 CJK 安全档收负。
+   页面若用 text-* 工具类会覆盖字号（特异性更高），字距与行高仍生效 */
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text);
+}
+h1 { font-size: var(--text-3xl); line-height: var(--lh-3xl); letter-spacing: var(--ls-h1); }
+h2 { font-size: var(--text-2xl); line-height: var(--lh-2xl); letter-spacing: var(--ls-h2); }
+h3 { font-size: var(--text-xl); line-height: var(--lh-xl); letter-spacing: var(--ls-title); }
+h4 { font-size: var(--text-lg); line-height: var(--lh-lg); letter-spacing: var(--ls-title); }
+
+/* 键盘可达性地基：全站统一的 focus-visible 环（鼠标点击不触发，避免噪音） */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-line);
+  border-radius: var(--radius-sm);
 }
 
-/* Hero 面板底（青辉径向 + surface）：首页 hero 与用户资料 hero 共用，避免内联样式 */
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+/* Hero 面板底（accent 径向 + surface）：首页 hero 与用户资料 hero 共用，避免内联样式 */
 .surface-hero {
   background: var(--hero-bg);
 }
