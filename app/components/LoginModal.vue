@@ -24,6 +24,17 @@ async function refreshCaptcha() {
 // 打开弹层时拉取验证码（仅客户端，LoginModal 由 <ClientOnly> 包裹，SSR-safe）
 watch(open, (v) => { if (v) refreshCaptcha() }, { immediate: true })
 
+// 交互补强（2026-10-08）：ESC 关闭 + 打开时锁背景滚动，避免背后页面跟着滚
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && open.value) hide()
+}
+watch(open, (v) => { document.body.style.overflow = v ? 'hidden' : '' })
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown)
+  if (open.value) document.body.style.overflow = ''
+})
+
 async function submit() {
   if (loading.value) return
   loading.value = true

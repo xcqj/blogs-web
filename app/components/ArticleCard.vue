@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // 文章行式卡片（design/home.html .card 基线）：全站列表/搜索/标签/用户页复用。
 // 布局规则（2026-10-08 对照掘金列表微调）：保留卡片边框/圆角/hover，但
-// ① 缩略图在左侧并放大到 10:7；② 摘要只截 1 行；③ 标签并入元信息行右端，不再单独占行。
+// ① 缩略图在左侧并放大到 10:7；② 摘要只截 1 行（truncate + 预留行高）；③ 标签并入元信息行右端。
 // 尺寸与状态全部走 token shortcut（sd-card / card-hover / sd-chip / sd-muted），不写魔法值。
 import type { ArticleSummary } from '~/types/blog'
 
@@ -25,8 +25,10 @@ const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10
       >
         {{ article.title }}
       </NuxtLink>
-      <!-- 摘要截 1 行：列表行高保持统一，不靠多行摘要拉高 -->
-      <p class="mt-1 line-clamp-1 text-sm text-muted">
+      <!-- 摘要截 1 行：用 truncate（nowrap+ellipsis）而非 line-clamp-1——后者依赖 -webkit-box，
+           新版 Chromium 已改由标准 line-clamp 接管并可能不出省略号；min-h-7 保留行高，
+           避免无摘要的条目塔成矮行导致列表行高不齐 -->
+      <p class="mt-1 min-h-7 truncate text-sm text-muted">
         {{ article.summary }}
       </p>
       <!-- 标签与元信息同行（右端），不再单独占一行 -->

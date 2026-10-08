@@ -25,6 +25,24 @@ function fillSummaryFromContent() {
     .trim() ?? '';
   summary.value = text.slice(0, 80);
 }
+
+// 交互补强（2026-10-08 复验发现缺失）：ESC 关闭 + 开启时锁背景滚动。
+// 监听只在 onMounted/onUnmounted 注册，不在服务端路径触 DOM。
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') emit('close');
+}
+function lockBodyScroll(open: boolean) {
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+watch(() => props.open, lockBodyScroll);
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown);
+  if (props.open) lockBodyScroll(true);
+});
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown);
+  if (props.open) lockBodyScroll(false);
+});
 </script>
 
 <template>
