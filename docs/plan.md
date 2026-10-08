@@ -143,9 +143,11 @@
 
 - [x] **列表容器：保持卡片风格仅微调**（不改成掘金式流式行）——`sd-card` 边框/圆角/`card-hover` 全部保留；commit `4aae3e6`：缩略图放大到 `w-40 h-28`（160×112，10:7，仍在左侧、窄屏隐藏、无图不预留空位）、摘要截 1 行、标签不再单独占行而是并入元信息行右端。
 - [x] **自动封面（A 方案，零后端）**：`app/utils/firstImage.ts` 用 `DOMParser` 取正文首个 `<img src>`，仅接受 `/` 与 `http(s)://`（与后端 `validateCoverUrl` 白名单一致，跳过 `data:`/`blob:`/`oss:`）；`coverUrl` 为空时回填，手动选图优先。commit `0b8554c`。已知语义：**存的是快照**，日后删掉正文那张图封面不会自动消失（可手动改）。
-- [x] **发文/编辑页改渐进披露**：commit `ac2f9f1`。主区只留 标题 / 标签 / 正文（单栏 `max-w-4xl`）；摘要、封面（两个可选字段）+ 状态 + 历史版本收进 `PublishDrawer` 右侧抽屉；顶栏改吸顶操作条（`sticky top-16` 贴 AppHeader 下沿，z-20 低于顶栏 z-40）；新增「从正文生成」摘要与自动封面提示；内容快照比对做未保存提醒（**不做自动保存**，避免误写库）。
+- [x] **发文/编辑页改渐进披露**：commit `ac2f9f1`。主区只留 标题 / 标签 / 正文（单栏 `max-w-4xl`）；摘要、封面（两个可选字段）+ 历史版本收进 `PublishDrawer` 右侧抽屉；顶栏改吸顶操作条（`sticky top-16` 贴 AppHeader 下沿，z-20 低于顶栏 z-40）；新增「从正文生成」摘要与自动封面提示；内容快照比对做未保存提醒（**不做自动保存**，避免误写库）。
   - ❗ **为何标签不能像掘金那样收到发布时再填**：后端 `SdBlogArticleServiceImpl.validateTagCount()`（L572-573）在 `createDraft`(L84) 与 `update`(L124) 都会跑，**草稿也必须 1~6 个标签**，故标签留在写作主区。
 - [x] **复验三修正**：commit `5131fa6`。① 摘要截断由 `line-clamp-1` 改 `truncate`（产物 CSS 正确写了 `display:-webkit-box`，但新版 Chromium 已支持标准 `line-clamp`，`getComputedStyle().display` 报 **flow-root**、省略号是否出现随内核漂移），并补 `min-h-7` 预留行高（空 `<p>` 不生成 line box 高度为 0，导致列表实测 151.9/128.8/105 三种行高）；② `PublishDrawer` 补 ESC 关闭 + 背景滚动锁；③ `LoginModal` 同类缺失一并补齐。
+- [x] **人工验收反馈三条修正**：commit `61c8eb9`（2026-10-08）。① 抽屉里的「状态：已发布」删除（操作条已有徽标，不重复），只保留抽屉独有的首次发布时间；② **已发布文章不再渲染「发布」按钮**——后端 `ArticleGuards.requirePublishable()`（L78-80）只允许草稿发布，重复调用报「仅草稿状态的文章可以发布」；现在 `isPublished` 只剩主按钮「保存修改」，草稿态才是「存为草稿 + 发布」（隐藏/下线的重新公开仍归 `/me` 列表行）；③ 「发布设置」→「更多」，抽屉标题→「更多设置」。
+- [x] **错误文案收口（Bad Gateway 真因）**：新增 `app/utils/apiError.ts`，10 处调用点统一。根因：代理 `createError` 把后端 envelope 放在 `data` 里，而浏览器 fetch 的 `Response.statusText` 规范上恒为空串，只读 `e.statusMessage` 的部分链路会退化成 Node 默认短语（实测 GET 路径能正常带出中文 msg，所以是取值字段选错而非代理写错）。取值顺序：`data.data.msg` → `data.msg` → `statusMessage` → `data.message` → 兜底；**不用 `e.message`**（ofetch 会拼成 `502 Bad Gateway` 这种无信息量前缀）。`app/error.vue` 继续读 `error.statusMessage` 是对的（那里是 Nuxt 错误对象，不是 ofetch 错误）。
 
 **待办（本小节遗留）**：
 
