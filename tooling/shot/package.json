@@ -1,0 +1,13 @@
+{
+  "name": "blog-web-visual-baseline",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "blog-web 视觉基线截图工具（本地验证用，不参与构建、不进镜像）；用法见 ../../README.md",
+  "scripts": {
+    "shot": "node shot.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.0"
+  }
+}

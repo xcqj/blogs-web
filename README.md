@@ -84,3 +84,42 @@ npm run preview
 > `script/docker/docker-compose.dev.yml` 的 `web` 服务）。
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+## 视觉基线截图（本地验证工具，不参与构建）
+
+`tooling/shot/` 是一个**独立小包**：不写进主 `package.json`、不进 `dependencies`、不进 Docker 镜像。
+它用 Playwright 无头 Chromium 拍全站基线图到 `design/shots/`（已 gitignore），
+并在任一页出现 console error / page error / 5xx 时以**退出码 1** 结束，可直接当回归门禁。
+
+```bash
+cd tooling/shot
+npm i                              # 装 playwright（一次）
+npx playwright install chromium    # 下浏览器到 ~/.cache/ms-playwright（一次，约 120MB）
+
+node shot.mjs                                  # 全量：页面 × 3 视口(1440/768/390) × 2 主题
+node shot.mjs --only=home,post                 # 只拍指定页
+node shot.mjs --views=mobile --themes=dark     # 只拍窄屏深色
+SHOT_TOKEN=<blog-web-token 值> node shot.mjs --only=editor   # 作者中心页需登录态时传 cookie
+```
+
+每次运行会**先清空** `design/shots/`，避免旧命名与新版截图混在一起。
+
+### WSL 免 root 环境准备（本机已配好；重装后照此恢复）
+
+精简 WSL Ubuntu 上的无头 Chromium 会缺两类东西，**都不需要 sudo**，解包到本目录即可（`.libs/`、`.fonts/` 已 gitignore）：
+
+```bash
+cd tooling/shot && mkdir -p .libs .fonts
+mkdir -p /tmp/dl && cd /tmp/dl
+apt-get download libnss3 libnspr4 libasound2t64 fonts-wqy-microhei   # 免 root 下载
+for f in *.deb; do dpkg -x "$f" /tmp/px; done
+cd -
+cp /tmp/px/usr/lib/x86_64-linux-gnu/*.so* .libs/
+cp -r /tmp/px/usr/share .fonts/          # 保持 .fonts/usr/share/fonts 层级，脚本按此路径生成 fontconfig
+```
+
+- 缺 `libnss3/libnspr4/libasound2` → 浏览器启动即退出（报 `Target page, context or browser has been closed`）；脚本会把 `.libs` 注入 `LD_LIBRARY_PATH`。
+- 缺中文字体 → 中文全渲染成豆腐块 `□□□`，截图失去判断价值；脚本检测到 `.fonts/usr/share/fonts` 就自动生成 fontconfig（绝对路径运行时拼，不写进仓库）。
+- 若有 root，`sudo npx playwright install-deps chromium` 可替代上面的 `.libs` 方案（中文字体仍需自装）。
+
+> 注意：容器内中文字体是 **WQY 微米黑**，与你本机系统字体字形不同。截图用于判断**布局、层次、配色、间距、状态反馈**，不用于判断字体观感。

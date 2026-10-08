@@ -23,6 +23,12 @@ logs
 /*.jpg
 /*.jpeg
 
+# 视觉基线截图与本地兜底库/字体：tooling/shot 的运行产物（勿提交）
+design/shots/
+tooling/shot/.libs/
+tooling/shot/.fonts/
+tooling/shot/.fontconfig/
+
 # Local env files
 .env
 .env.*
