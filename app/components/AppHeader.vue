@@ -86,6 +86,9 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
           <NuxtLink to="/me" class="flex items-center gap-1.5 py-2.5 text-sm text-muted transition hover:text-text">
             <span class="i-mdi:pencil-box-outline" aria-hidden="true" />作者中心
           </NuxtLink>
+          <NuxtLink to="/me/profile" class="flex items-center gap-1.5 py-2.5 text-sm text-muted transition hover:text-text">
+            <span class="i-mdi:account-circle-outline" aria-hidden="true" />个人资料
+          </NuxtLink>
           <button class="py-2.5 text-left text-sm text-muted transition hover:text-text" @click="logout">
             退出登录
           </button>

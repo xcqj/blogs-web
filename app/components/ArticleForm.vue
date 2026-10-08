@@ -126,6 +126,13 @@ async function submit(publish: boolean) {
             <div class="sd-card text-sm text-muted">编辑器加载中…（富文本仅在客户端渲染，不参与 SSR）</div>
           </template>
         </ClientOnly>
+
+        <!-- 历史版本只读（§4.1/§4.2；append-only，不提供恢复） -->
+        <VersionHistory
+          v-if="articleId && detail"
+          :article-id="detail.articleId"
+          :current-version-no="detail.currentVersion?.versionNo"
+        />
       </div>
 
       <!-- 右：发布选项面板 -->

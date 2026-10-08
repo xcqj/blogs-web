@@ -65,6 +65,16 @@ export interface ArticleSavePayload {
   tagNames: string[];
 }
 
+/** §8.1 我的博客资料（BlogUserProfileVo；头像昵称实时取自 sys_user，不复制） */
+export interface BlogUserProfile {
+  userId: string;
+  nickName: string;
+  /** sys_user 头像的 ossId */
+  avatar: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+}
+
 /** OSS 上传返回（/resource/oss/upload） */
 export interface OssUploadResult {
   ossId: string;

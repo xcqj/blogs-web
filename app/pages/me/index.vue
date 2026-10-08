@@ -95,7 +95,10 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
         <h1 class="text-2xl font-semibold">我的文章</h1>
         <p class="mt-1 text-sm text-muted">作者中心 · 服务端按 author_id 隔离，仅显示你自己的文章</p>
       </div>
-      <NuxtLink :to="editTarget()" class="btn-primary">＋ 新建文章</NuxtLink>
+      <div class="flex flex-wrap items-center gap-2">
+        <NuxtLink to="/me/profile" class="btn-ghost">个人资料</NuxtLink>
+        <NuxtLink :to="editTarget()" class="btn-primary">＋ 新建文章</NuxtLink>
+      </div>
     </header>
 
     <!-- 未登录：守卫已唤起登录弹层，这里给占位说明，不发无谓请求 -->

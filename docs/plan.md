@@ -97,7 +97,9 @@
   **生产约定制**：桶策略用 **公有读(2) + CDN 域名**（博客图片本就公开），并把当前的 `1 公有读写` 收紧为 `2 公有读`（写入仍走后端 SDK 凭据）。
   **私有桶预案（仅当真要私有存储时启用）**：后端加 `OssContentResolver`（正则 `oss://(\d+)` → `OssService.selectByIds` 回填，约 60~80 行、无表结构/契约变更，基建已就绪：`sd-blog` 已依赖 `ruoyi-api`、`SysOssServiceImpl implements OssService`）**且同时把 120s 有效期配置化调长或改走图片代理**，否则仅把破图率从 100% 降到一两成；需另开后端切片（突破零后端改动边界）。
 - [x] 发布 / 隐藏 / 重新公开 / 删除：`POST /blog/article/{id}/publish|hide|show`、`DELETE /{id}`（服务端按 author_id 校验；代理层已实测无 cookie → 401）
-- [ ] 版本只读（可选）：`GET /blog/article/{id}/versions[/vId]` 嵌详情子视图（代理已包在 `[...path].ts` 白名单内，缺 UI）
+- [x] 版本只读：`GET /blog/article/{id}/versions[/vId]` 嵌编辑页子视图（2026-10-08 S12-3：`VersionHistory.vue` 折叠面板 + 快照弹层，标记“当前”版、prose 渲染快照正文；**append-only 红线：不提供恢复入口**；代理走 `[...path].ts` 白名单，无 cookie 实测 401）
+- [x] 个人资料：`/me/profile` 走 §8.1/§8.2 `GET/PUT /blog/user/profile`（2026-10-08 S12-3：`server/api/blog/user/profile.{get,put}.ts` + 页面；**仅 bio 可改（≤500）**，头像/昵称只读展示（§9.1 不复制）。
+  ⚠️ **与 design/profile.html 的有意偏差**：mockup 里的「更换头像」按钮**未实现**——改头像属 RuoYi 用户中心 `/system/user/**`，超出 blog-web 允许的 API 层（红线：只允 `/blog/public/**` 与 `/blog/article|user/**`），改为文案提示“在用户中心修改”。入口已接进 `/me` 页头与移动抽屉）
 - [x] 边界：禁 `/blog/admin/**`（平台治理仍 plus-ui）；作者中心页 CSR 为主、不进读者首屏/SEO（`/me/**` 均 `robots=noindex`）；不信任前端 authorId（代理层只透传，归属后端定）
 
 **S12 代理层两个坑（已修，备案）**：① Nitro 的 `[...path]` catch-all **不匹配零段路径**，`POST /api/blog/article`（创建）会 404，需单独 `index.post.ts`；② 作者侧 10 个端点若逐个建文件会重复同一段 authed 转发，改用 `[...path].ts` + **方法/路径白名单**，既 DRY 又锁死可调用面。
