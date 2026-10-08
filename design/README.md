@@ -15,7 +15,10 @@ cd design && python3 -m http.server 4599 --bind 127.0.0.1
 每页右上角可切换 **深色 / 浅色** 主题；拖动窗口宽度可看响应式。
 
 ## 设计体系
-- **配色**：青 + 炭黑母题，深浅两套同源于 `tokens.css` 的 `:root[data-theme]`。落地映射见 `tokens.css` 末尾注释（写进 `uno.config.ts` 的 `theme.colors`）。
+- **配色**（2026-10-09 质感打磨轮换色）：**蓝灰阶 + 黄 CTA**，深两套同源于 `app/assets/css/tokens.css`。
+  色板来源 sun-summit 模板（`blue-100/200/300/500/700` + `yellow-500` + `almost-black`，模板只给浅色，
+  深色由同一色相派生）；分层机制来源 jason.blog（色阶分层 + 半透明分隔线 + 三档文字）。**旧的“青 + 炭黑”已作废**。
+  权威 token 以 `app/assets/css/tokens.css` 为准；本目录 `tokens.css` 是桶A 历史稿，仅供对照，不再同步。
 - **Logo**：几何"错位叠框"母题，三件套 —— `logo-mono.svg`（currentColor 单色）、`logo-duotone.svg`（双色随主题）、`favicon.svg`（内嵌 prefers-color-scheme）。
 - **排版**：Tailwind/UnoCSS 字号阶梯 + 正文 68ch 行宽 + 系统字体栈（不加载中文 webfont）。
 - 决策依据：品牌视觉 / Logo / 首页 Hero / 作者中心边界见后端仓库 `docs/ROADMAP.md` §6（D28/D29）与本仓库 `AGENTS.md`、`docs/plan.md`。

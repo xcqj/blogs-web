@@ -47,12 +47,15 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'zh-CN' },
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'alternate icon', type: 'image/x-icon', href: '/favicon.ico' }
+        // 只用 SVG favicon：目标浏览器（桌面各浏览器与 iOS Safari 15+）已全部支持；
+        // 旧的 /favicon.ico 是上一代青色位图且本机无光栅化工具可重做，
+        // 留着只会让老浏览器显示旧品牌色，故连文件一并移除
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }
       ],
       meta: [
-        { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0b1120' },
-        { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#f6f7fb' }
+        // 浏览器界面色跟随新色板（与 tokens.css 的 --bg 一致，不可写旧值）
+        { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0a1015' },
+        { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#e9f2f7' }
       ]
     }
   },

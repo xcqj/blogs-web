@@ -155,6 +155,45 @@
 - [ ] 本轮浏览器复验**未拿到截图**（Browser view 被最小化/遮挡，`visibilityState=hidden`，`scrollTo` 失效），结论均出自同源 iframe 量测与 DOM 核对；需人工目视确认列表观感、吸顶条滚动行为、抽屉动画。
 - [ ] 掘金式“自动保存至草稿箱”**未做**（仅未保存提醒），如要真自动保存需先定频控与失败重试策略，避免草稿表版本噪声。
 
+### 2.11 质感打磨轮落地（2026-10-09，L1→L5）
+
+用户三项决策：**圆角 2/4**、**色板 sun-summit 蓝灰黄**、**logo + favicon 同步换色**；另定**不加载 webfont**。
+对比稿与基线：`design/polish-compare.html`（Before/After + 三个开关）；现状基线 `design/shots/`（可重生、不入库）。
+
+- [x] **L1 token 层** `a4fa043`：色板换 sun-summit（深色由同色相派生）；分隔线改半透明；圆角 8/12/16/20 → 2/2/4/4；
+  字号阶梯重排（base 16→17、display 52→72，body→display 落差 3.25×→4.24×）；新增负字距阶梯
+  （原 tokens.css 里 `letter-spacing` 出现 0 次）与 `--e1/e2/e3`、三档时长两条曲线；
+  新增角色 `--text-dim`/`--accent-fg`/`--accent-soft`/`--accent-line`/`--cta*`/`--danger-ink`/`--raised`；
+  根层补 `[hidden]` 重置（缺 preflight 的第二个后果）、h1~h4 默认字号行高字距、全站 `:focus-visible` 环
+- [x] **L2 shortcut 层** `a4fa043`：按钮改「基类 btn + 4 变体 + 3 尺寸」五态齐备（去 glow 与胶囊）；
+  `sd-card` 半透边 + `shadow-e1`；`card-hover` 升色阶不依赖 glow；输入框与按钮同族同高 38px；
+  新增 `sd-search`/`sd-chip-link`/`sd-thumb`/`sd-elev-1~3`/`sd-scrim`/`sd-h1`/`sd-h2`
+- [x] **L3 反馈体系** `83acb6a`：`useToast()`（同 key 去重、上限 3、err 不自动消失、可带 action）
+  + `useConfirm()`（Promise 风格阻断确认）+ `useModalA11y()`（ESC/滚动锁/**焦点圈定与归还**）；
+  `<AppToaster/>` `<AppConfirmDialog/>` 挂 `app.vue`；收编 LoginModal / PublishDrawer / AuthorArticleRow
+  三处各写一套的旧实现；ArticleForm 与 `/me`、`/me/profile` 的页内 notice 全部改 toast。
+  实测：同 key 去重后 1 条、连发 6 条上限 3、4.2s 后 ok 全消而 err 仍在
+- [x] **L4 逐页** `8bc9552` `3dfc734` `3846857`：侧栏与首张卡片对齐（boundingBox 实测差值 0）；
+  无摘要卡片不再预留行高（原 `min-h-7` 造成死白）；hero 主 CTA 改黄；prose 关中文假斜体与自动引号、
+  strong 提 700、链接改 `--accent-fg`；标签/搜索页改一体化 `sd-search`；全站 6 页 h1 接入字距 token；
+  修一个**只有实拍才能发现的 bug**：浅色下 `--accent-soft` 与 `--bg` 同为 `#e9f2f7`，
+  使直接放在页面底上的 chip 背景隐形 → 改 `#dbe8f2`
+- [x] **L5 品牌同步**：`public/favicon.svg`、`design/favicon.svg`、`design/logo-duotone.svg` 换色
+  （`AppBrand.vue` 本来就走 `--logo-back/front`，随 token 自动跟上）；`theme-color` 由旧底色改为新 `--bg`；
+  `design/README.md` 的“青 + 炭黑”改为蓝灰阶 + 黄 CTA 并注明旧值作废；
+  `nuxt.config.ts` 取消 `alternate icon` 引用（旧 .ico 是上一代青色位图且本机无光栅化工具）
+
+**遗留与待决**：
+
+- [ ] ⚠️ **`public/favicon.ico` 需手动删除**：`DeleteFile` 对非主工作区根静默失败（已知工具限制），
+  文件仍在仓中但已不被引用。若需保留位图兼容，应用图像工具从 `favicon.svg` 重生成后再恢复引用。
+- [ ] 作者中心页面（`/me`、`/me/new`、`/me/{id}/edit`、`/me/profile`）需登录后目视：它们靠 shortcut 继承新样式，
+  但 Playwright 无登录态拍不到（可用 `SHOT_TOKEN=<blog-web-token>` 拍）
+- [ ] 已知数据缺陷（非本轮引入）：旧文章正文含 `oss://` 标记与 `src=""` 空值，详情页报 `ERR_UNKNOWN_URL_SCHEME`，
+  使 `shot.mjs` 退出码长期为 1（D31 已定不改后端；可清理测试数据或给检查器加白名单）
+- [ ] 掘金的另外两条机制未吸收：大标题 `line-height 1.04` 已做，但**负字距对中文仍保守**（CJK 安全档）；
+  若想要更“编辑部”的风，下一档是全站直角（jason.blog 语言）
+
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 
 - 三层 API 边界：只调 `/blog/public/**` + `/blog/article|user/**`，**禁 `/blog/admin/**`**；作者自助发文/编辑/隐藏/删除在**作者中心**（D29，走 `/blog/article/**`），平台治理仍仅 plus-ui。
