@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light" data-opt="b">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stack Depth · 首页方案对比（薄条 hero / 编辑式分组 / 现状大 hero）</title>
+<style>
+/* =====================================================================
+   首页方案对比稿（2026-10-10）。三个方案可切换，背景光斑随滚动联动，
+   可单独关掉联动以隔离"滚动动画"这一个变量的贡献。
+   规格沿用已锁定项：sun-summit 蓝灰 + 黄 CTA、圆角 2/2/4、不加载 webfont。
+   本文件是设计验证稿，不是落地代码。
+   ===================================================================== */
+:root{
+  --sans:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --r-sm:2px; --r:2px; --r-lg:4px; --r-full:999px;
+  --t-fast:140ms; --t:200ms; --t-slow:280ms;
+  --ease-out:cubic-bezier(.22,.61,.36,1);
+  --ls-display:-.03em; --ls-h1:-.022em; --ls-title:-.008em;
+  --measure:68ch; --container:1120px;
+}
+:root[data-theme='light']{
+  --bg:#e9f2f7; --surface:#fff; --elevated:#fff; --raised:#dfeaf2;
+  --ink:#1a1c1c; --ink-2:#33505f; --ink-3:#527488;
+  --rule:rgba(26,28,28,.1); --rule-2:rgba(26,28,28,.18);
+  --accent:#4b6272; --accent-ink:#fff; --accent-fg:#4b6272;
+  --soft:#dbe8f2; --cta:#ffe87d; --cta-ink:#1a1c1c;
+  --e1:0 1px 2px rgba(26,28,28,.06); --e2:0 2px 4px rgba(26,28,28,.06),0 8px 20px -8px rgba(26,28,28,.14);
+  /* 光斑：蓝灰 + 暖黄，低透明度，靠 radial-gradient 自带柔边（不用 filter:blur） */
+  --blob-a:rgba(75,98,114,.13); --blob-b:rgba(255,232,125,.5); --blob-c:rgba(179,211,230,.55);
+}
+:root[data-theme='dark']{
+  --bg:#0a1015; --surface:#101a21; --elevated:#16232c; --raised:#1d2e39;
+  --ink:#e9f2f7; --ink-2:#a8c0cf; --ink-3:#857e94;
+  --rule:rgba(233,242,247,.09); --rule-2:rgba(233,242,247,.17);
+  --accent:#b3d3e6; --accent-ink:#14232c; --accent-fg:#b3d3e6;
+  --soft:rgba(179,211,230,.15); --cta:#ffe87d; --cta-ink:#1a1c1c;
+  --e1:0 1px 2px rgba(0,0,0,.4); --e2:0 2px 4px rgba(0,0,0,.3),0 8px 20px -6px rgba(0,0,0,.55);
+  --blob-a:rgba(179,211,230,.1); --blob-b:rgba(255,232,125,.09); --blob-c:rgba(88,124,146,.22);
+}
+*{box-sizing:border-box}
+html{background:var(--bg);color:var(--ink);font:17px/1.65 var(--sans);-webkit-text-size-adjust:100%}
+body{margin:0;transition:background var(--t) var(--ease-out),color var(--t) var(--ease-out)}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+
+/* ---------- 背景光斑层：固定全屏、不吃鼠标事件、在内容之下 ---------- */
+.blobs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
+.blobs i{position:absolute;display:block;border-radius:50%;will-change:transform;
+  transform:translate3d(0,calc(var(--sy,0) * var(--k,0) * -1px),0)}
+.b1{width:52vw;height:52vw;right:-10vw;top:4vh;--k:.10;
+  background:radial-gradient(circle at 50% 50%,var(--blob-a),transparent 66%);
+  animation:drift1 38s ease-in-out infinite alternate}
+.b2{width:34vw;height:34vw;left:-6vw;top:52vh;--k:.18;
+  background:radial-gradient(circle at 50% 50%,var(--blob-b),transparent 64%);
+  animation:drift2 26s ease-in-out infinite alternate}
+.b3{width:26vw;height:26vw;right:14vw;top:120vh;--k:.26;
+  background:radial-gradient(circle at 50% 50%,var(--blob-c),transparent 62%);
+  animation:drift1 32s ease-in-out infinite alternate-reverse}
+@keyframes drift1{from{transform:translate3d(0,calc(var(--sy,0)*var(--k)*-1px),0) scale(1)}
+  to{transform:translate3d(calc(var(--sy,0)*var(--k)*-1px),calc(var(--sy,0)*var(--k)*-1.6px),0) scale(1.12)}}
+@keyframes drift2{from{transform:translate3d(0,calc(var(--sy,0)*var(--k)*-1px),0) scale(1.06)}
+  to{transform:translate3d(60px,calc(var(--sy,0)*var(--k)*-2px),0) scale(.94)}}
+/* 关掉联动：只留常驻漂浮，滚动位移归零 */
+:root[data-link="off"] .blobs i{--k:0}
+@media (max-width:767px){.b3{display:none}}
+@media (prefers-reduced-motion:reduce){
+  .blobs i{animation:none}
+  *{transition-duration:.01ms !important}
+}
+
+/* ---------- 顶栏 ---------- */
+.hd{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--rule)}
+.hd .in{max-width:var(--container);margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;gap:24px}
+.brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;letter-spacing:var(--ls-title)}
+.brand svg{width:26px;height:26px}
+.nav{margin-left:auto;display:flex;gap:22px;font-size:15px;color:var(--ink-2)}
+.nav a.on{color:var(--ink);font-weight:700}
+.btn{border:0;cursor:pointer;font:600 14px/1 var(--sans);border-radius:var(--r);height:38px;
+  padding:0 15px;display:inline-flex;align-items:center;gap:7px;
+  transition:background var(--t-fast) var(--ease-out),color var(--t-fast) var(--ease-out),box-shadow var(--t-fast) var(--ease-out)}
+.btn:active{transform:translateY(1px)}
+.btn-p{background:var(--accent);color:var(--accent-ink)}
+.btn-c{background:var(--cta);color:var(--cta-ink)}
+.btn-s{background:var(--elevated);color:var(--ink);border:1px solid var(--rule-2)}
+.btn-g{background:transparent;color:var(--ink-2)}
+.btn-g:hover{background:var(--soft);color:var(--accent-fg)}
+.btn-sm{height:30px;font-size:13px;padding:0 11px}
+
+/* ---------- 内容层（在光斑之上） ---------- */
+main{position:relative;z-index:1;max-width:var(--container);margin:0 auto;padding:0 24px 96px}
+.opt{display:none}
+.opt.on{display:block}
+
+/* A/B 用的薄条 hero */
+.sliver{margin:28px 0 8px;padding:26px 28px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg);box-shadow:var(--e1)}
+.sliver h1{margin:0;font-size:clamp(24px,3vw,30px);font-weight:800;letter-spacing:var(--ls-h1);line-height:1.2}
+.sliver h1 em{font-style:normal;color:var(--accent-fg)}
+.sliver p{margin:8px 0 0;color:var(--ink-2);font-size:15px;max-width:60ch}
+.sliver .row{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search{display:flex;align-items:center;gap:8px;height:38px;flex:1;min-width:220px;max-width:420px;
+  padding:0 4px 0 12px;border-radius:var(--r);background:var(--elevated);border:1px solid var(--rule-2)}
+.search input{flex:1;min-width:0;border:0;background:transparent;outline:0;font:15px var(--sans);color:var(--ink)}
+.search input::placeholder{color:var(--ink-3)}
+.search svg{width:16px;height:16px;color:var(--ink-3);flex:none}
+
+/* C 用的现状大 hero */
+.big{position:relative;overflow:hidden;margin:28px 0 8px;padding:56px 40px;background:var(--surface);
+  border:1px solid var(--rule);border-radius:var(--r-lg);box-shadow:var(--e1);min-height:420px;display:grid;
+  grid-template-columns:1.15fr .85fr;align-items:center;gap:24px}
+.big h1{margin:0;font-size:clamp(40px,6vw,72px);font-weight:800;line-height:1.04;letter-spacing:var(--ls-display)}
+.big h1 em{font-style:normal;color:var(--accent)}
+.big p{margin:18px 0 0;color:var(--ink-2);font-size:17px;max-width:46ch}
+.big .row{margin-top:28px}
+.stack{position:relative;height:220px}
+.stack i{position:absolute;left:0;right:0;height:34px;border:1px solid var(--rule-2);border-radius:var(--r);
+  background:linear-gradient(135deg,var(--soft),transparent)}
+.stack i:nth-child(1){top:0}.stack i:nth-child(2){top:26px;left:22px;right:-22px}
+.stack i:nth-child(3){top:52px;left:44px;right:-44px}.stack i:nth-child(4){top:78px;left:66px;right:-66px}
+@media(max-width:900px){.big{grid-template-columns:1fr;min-height:0;padding:36px 24px}.stack{display:none}}
+
+/* 列表通用 */
+.sec-h{display:flex;align-items:center;gap:12px;margin:36px 0 14px;font:700 12.5px/1 var(--sans);
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.sec-h::after{content:"";flex:1;height:1px;background:var(--rule)}
+.sec-h b{color:var(--accent-fg)}
+.cards{display:flex;flex-direction:column;gap:14px}
+.card{display:flex;gap:16px;padding:16px;background:var(--surface);border:1px solid var(--rule);
+  border-radius:var(--r-lg);box-shadow:var(--e1);
+  transition:background var(--t) var(--ease-out),box-shadow var(--t) var(--ease-out),border-color var(--t) var(--ease-out),transform var(--t) var(--ease-out)}
+.card:hover{background:var(--elevated);border-color:var(--rule-2);box-shadow:var(--e2);transform:translateY(-2px)}
+.thumb{width:132px;height:92px;flex:none;border-radius:var(--r);filter:saturate(.92);
+  background:linear-gradient(135deg,var(--blob-c),var(--soft))}
+.body{min-width:0;flex:1}
+.body h3{margin:0;font-size:19px;font-weight:700;letter-spacing:var(--ls-title);line-height:1.3}
+.card:hover .body h3{color:var(--accent-fg)}
+.body p{margin:6px 0 0;color:var(--ink-2);font-size:15px;line-height:1.6}
+.meta{margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-3)}
+.meta .dot{width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.6}
+.chip{border-radius:var(--r-full);padding:3px 10px;font-size:12px;font-weight:600;background:var(--soft);color:var(--accent-fg)}
+.more{margin-left:auto;color:var(--accent-fg);font-weight:600;font-size:13px}
+
+/* B 方案特有：大号日期左栏（jason.blog 编辑式排版） */
+.card.ed{align-items:flex-start;padding:20px 16px}
+.date{flex:none;width:64px;text-align:left;line-height:1}
+.date b{display:block;font-size:30px;font-weight:300;letter-spacing:var(--ls-title)}
+.date span{display:block;margin-top:4px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.card.ed .body{border-left:1px solid var(--rule);padding-left:20px}
+@media(max-width:640px){.card.ed{padding:16px}.date{width:auto}.card.ed .body{border-left:0;padding-left:0}.thumb{display:none}}
+
+/* B2 变体：去掉卡片壳，只用发丝线分隔（jason.blog 本尊的做法）
+   —— 行与行之间更连续、阅读节奏更快，但“可点块面”的暗示变弱 */
+.cards.bare .card{background:transparent;border:0;border-radius:0;box-shadow:none;
+  padding:22px 0;border-top:1px solid var(--rule);transform:none}
+.cards.bare .card:first-child{border-top:0;padding-top:6px}
+.cards.bare .card:hover{background:transparent;border-color:var(--rule-2);box-shadow:none;transform:none}
+.cards.bare .card:hover .body h3{transform:translateX(2px)}
+.cards.bare .body h3{transition:color var(--t-fast) var(--ease-out),transform var(--t-fast) var(--ease-out)}
+
+/* ---------- 底部切换台 ---------- */
+.dock{position:fixed;left:50%;bottom:20px;z-index:50;transform:translateX(-50%);
+  display:flex;align-items:center;gap:6px;padding:7px;border-radius:var(--r-full);
+  background:var(--surface);border:1px solid var(--rule-2);box-shadow:var(--e2)}
+.dock .lab{padding:0 8px 0 6px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.seg{display:flex;gap:4px}
+.seg button{border:0;background:transparent;cursor:pointer;border-radius:var(--r-full);
+  padding:7px 13px;font:600 13px var(--sans);color:var(--ink-2);
+  transition:background var(--t-fast) var(--ease-out),color var(--t-fast) var(--ease-out)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.dock .sep{width:1px;height:22px;background:var(--rule)}
+.hint{max-width:var(--container);margin:18px auto 0;padding:0 24px;font-size:13px;color:var(--ink-3);position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<!-- 背景光斑：三层，滚动位移由 --sy 驱动，常驻漂浮由 CSS 动画驱动 -->
+<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+
+<header class="hd"><div class="in">
+  <a class="brand" href="#">
+    <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <rect x="6" y="10" width="22" height="22" rx="2" stroke="var(--ink)" stroke-width="2.6"/>
+      <rect x="12" y="6" width="22" height="22" rx="2" stroke="var(--accent)" stroke-width="2.6"/>
+    </svg>
+    Stack Depth
+  </a>
+  <nav class="nav"><a class="on" href="#">首页</a><a href="#">标签</a><a href="#">搜索</a></nav>
+  <button class="btn btn-s btn-sm" id="themeBtn">浅色</button>
+  <button class="btn btn-p btn-sm">登录</button>
+</div></header>
+
+<main>
+  <!-- ============ 方案 A：薄条 hero + 现有卡片列表 ============ -->
+  <section class="opt" data-opt="a">
+    <div class="sliver">
+      <h1>把技术<em>一层层</em>读到深处</h1>
+      <p>多作者技术博客 · 阅读、搜索与评论</p>
+      <div class="row">
+        <label class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="搜索标题、摘要或正文…">
+          <button class="btn btn-p btn-sm">搜索</button>
+        </label>
+        <a class="btn btn-g btn-sm" href="#">浏览标签</a>
+      </div>
+    </div>
+    <div class="sec-h">最新文章</div>
+    <div class="cards" id="listA"></div>
+  </section>
+
+  <!-- ============ 方案 B（推荐）：薄条 hero + 编辑式分组列表 ============ -->
+  <section class="opt" data-opt="b">
+    <div class="sliver">
+      <h1>把技术<em>一层层</em>读到深处</h1>
+      <p>多作者技术博客 · 阅读、搜索与评论</p>
+      <div class="row">
+        <label class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="搜索标题、摘要或正文…">
+          <button class="btn btn-p btn-sm">搜索</button>
+        </label>
+        <a class="btn btn-g btn-sm" href="#">浏览标签</a>
+      </div>
+    </div>
+    <div id="listB"></div>
+  </section>
+
+  <!-- ============ 方案 B2：同 B，但去掉卡片壳只留发丝线 ============ -->
+  <section class="opt" data-opt="b2">
+    <div class="sliver">
+      <h1>把技术<em>一层层</em>读到深处</h1>
+      <p>多作者技术博客 · 阅读、搜索与评论</p>
+      <div class="row">
+        <label class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="搜索标题、摘要或正文…">
+          <button class="btn btn-p btn-sm">搜索</button>
+        </label>
+        <a class="btn btn-g btn-sm" href="#">浏览标签</a>
+      </div>
+    </div>
+    <div class="sec-h"><b>2026 · 秋</b></div>
+    <div class="cards bare ed-list" id="listB2"></div>
+    <div class="sec-h"><b>2026 · 夏</b></div>
+    <div class="cards bare" id="listB3"></div>
+  </section>
+
+  <!-- ============ 方案 C：保持现状大 hero，仅加背景联动 ============ -->
+  <section class="opt" data-opt="c">
+    <div class="big">
+      <div>
+        <h1>把技术读到<br><em>深处</em></h1>
+        <p>Stack Depth —— 一个多作者技术博客。从源码到系统，一层层往深处读：阅读、搜索与评论。</p>
+        <div class="row"><a class="btn btn-c" href="#" style="height:44px;padding:0 19px;font-size:15px">开始阅读 →</a></div>
+      </div>
+      <div class="stack"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="sec-h">最新文章</div>
+    <div class="cards" id="listC"></div>
+  </section>
+</main>
+
+<p class="hint" id="hint"></p>
+
+<div class="dock">
+  <span class="lab">方案</span>
+  <div class="seg" id="segOpt">
+    <button data-opt="a">A 薄条+卡片</button>
+    <button data-opt="b">B 薄条+编辑式</button>
+    <button data-opt="b2">B2 无卡片壳</button>
+    <button data-opt="c">C 现状大 hero</button>
+  </div>
+  <span class="sep"></span>
+  <div class="seg" id="segLink"><button data-v="on">滚动联动 开</button></div>
+</div>
+
+<script>
+/* 假数据：够长才能感受滚动 */
+const POSTS = [
+  {d:'10',m:'Oct',t:'把 append-only 版本表讲清楚：为什么编辑一次文章要插一行',x:'草稿、发布、隐藏三个状态如何与版本表协作，以及为什么 MVP 不做"恢复到历史版本"。',tags:['架构','后端'],min:9,grp:'2026 · 秋',cover:1},
+  {d:'06',m:'Oct',t:'Nuxt 4 SSR 下的 cookie 认证与 Nitro 代理边界',x:'token 放 httpOnly cookie、clientid 头由服务端注入，浏览器永远拿不到后端基址与密钥。',tags:['Nuxt','安全'],min:12,grp:'2026 · 秋',cover:1},
+  {d:'02',m:'Oct',t:'设计 Token 是唯一能防止界面腐化的东西',x:'当同一行里出现四种按钮语言，问题不在某个按钮丑，而在没有规矩。',tags:['设计','前端'],min:7,grp:'2026 · 秋'},
+  {d:'27',m:'Sep',t:'MySQL 8.4 上不建外键：我们如何靠 Service 与事务守住一致性',x:'文章—版本—标签三张表的写入顺序、幂等与回滚边界。',tags:['数据库'],min:11,grp:'2026 · 秋',cover:1},
+  {d:'19',m:'Sep',t:'UnoCSS v66 的 presetIcons 为什么静默不生成图标',x:'默认入口换成了 universal 版，不再自动扫 node_modules，必须显式注册 collections。',tags:['UnoCSS','踩坑'],min:5,grp:'2026 · 秋'},
+  {d:'08',m:'Sep',t:'多作者博客的权限模型：author_id 与 create_by 不是一回事',x:'归属判断与操作权限必须由后端强制校验，前端隐藏按钮只是体验。',tags:['架构','安全'],min:8,grp:'2026 · 夏'},
+  {d:'30',m:'Aug',t:'阅读量与搜索：先不做 ES，用一张计数表能撑多久',x:'MVP 阶段的取舍：不为"面试亮点"提前写死非必需技术。',tags:['性能'],min:6,grp:'2026 · 夏',cover:1},
+  {d:'21',m:'Aug',t:'富文本净化：jsoup 白名单与危险协议清单怎么列',x:'内容安全与业务权限是两条独立链路，都要守。',tags:['安全','后端'],min:10,grp:'2026 · 夏'}
+];
+
+function card(p, editorial){
+  const thumb = editorial || p.cover ? `<div class="thumb"></div>` : '';
+  const date = editorial ? `<div class="date"><b>${p.d}</b><span>${p.m}</span></div>` : '';
+  return `<article class="card${editorial ? ' ed' : ''}">${date}${editorial ? '' : thumb}
+    <div class="body"><h3>${p.t}</h3><p>${p.x}</p>
+      <div class="meta"><span>admin</span><i class="dot"></i><span>${p.min} min 阅读</span>
+        ${p.tags.map(t=>`<span class="chip">${t}</span>`).join('')}
+        <span class="more">继续阅读 →</span>
+      </div></div></article>`;
+}
+
+document.getElementById('listA').innerHTML = POSTS.map(p=>card(p,false)).join('');
+document.getElementById('listC').innerHTML = POSTS.map(p=>card(p,false)).join('');
+/* B：按分组渲染（jason.blog 的 2026 · SPRING 手法） */
+document.getElementById('listB').innerHTML = ['2026 · 秋','2026 · 夏'].map(g =>
+  `<div class="sec-h"><b>${g}</b></div><div class="cards">${POSTS.filter(p=>p.grp===g).map(p=>card(p,true)).join('')}</div>`
+).join('');
+/* B2：同样的编辑式行，但去掉卡片壳 */
+document.getElementById('listB2').innerHTML = POSTS.filter(p=>p.grp==='2026 · 秋').map(p=>card(p,true)).join('');
+document.getElementById('listB3').innerHTML = POSTS.filter(p=>p.grp==='2026 · 夏').map(p=>card(p,true)).join('');
+
+/* ---------- 滚动联动：rAF 节流，只写一个 CSS 变量 ---------- */
+let ticking = false;
+function onScroll(){
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    document.documentElement.style.setProperty('--sy', window.scrollY.toFixed(1));
+    ticking = false;
+  });
+}
+addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+/* ---------- 方案切换 ---------- */
+const HINTS = {
+  a:'A｜薄条 hero（约 150px）+ 现有卡片列表：首屏立刻露出 2 篇文章，品牌主张压成一行标题 + 搜索入口。改动最小。',
+  b:'B（推荐）｜薄条 hero + 编辑式分组列表：大号日期左栏 + 年份/季节分组 + 继续阅读，品牌感来自排版而不是标语块。滚动时光斑跟随最明显。',
+  b2:'B2｜与 B 同构，但去掉卡片壳、只用发丝线分隔（jason.blog 本尊的做法）：行与行更连续、阅读节奏更快，但“这是一块可点区域”的暗示变弱，且与你之前定的“保留卡片”相反 —— 选它等于改那条决定。',
+  c:'C｜保持现状大 hero，只加背景光斑联动：首屏仍然看不到文章，等于给现状加装饰。'
+};
+function setOpt(k){
+  document.documentElement.dataset.opt = k;
+  document.querySelectorAll('.opt').forEach(s=>s.classList.toggle('on', s.dataset.opt===k));
+  document.querySelectorAll('#segOpt button').forEach(b=>b.classList.toggle('on', b.dataset.opt===k));
+  document.getElementById('hint').textContent = HINTS[k];
+  window.scrollTo(0,0); onScroll();
+}
+document.getElementById('segOpt').onclick = e => { if(e.target.dataset.opt) setOpt(e.target.dataset.opt); };
+
+/* ---------- 联动开关：隔离"滚动动画"这一个变量 ---------- */
+let link = true;
+document.getElementById('segLink').onclick = () => {
+  link = !link;
+  document.documentElement.dataset.link = link ? 'on' : 'off';
+  document.querySelector('#segLink button').textContent = link ? '滚动联动 开' : '滚动联动 关';
+  document.querySelector('#segLink button').classList.toggle('on', link);
+};
+
+/* ---------- 深浅主题 ---------- */
+document.getElementById('themeBtn').onclick = e => {
+  const r = document.documentElement;
+  r.dataset.theme = r.dataset.theme === 'light' ? 'dark' : 'light';
+  e.target.textContent = r.dataset.theme === 'light' ? '浅色' : '深色';
+};
+
+setOpt('b');
+document.querySelector('#segLink button').classList.add('on');
+</script>
+</body>
+</html>

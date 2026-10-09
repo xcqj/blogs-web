@@ -42,6 +42,7 @@ cd design && python3 -m http.server 4599 --bind 127.0.0.1
 | `responsive.html` | 响应式规则表 | 桶A |
 | `polish-compare.html` | **质感改造对比稿**（Before/After 并排，含按钮/输入/卡片/弹层/动效规格） | 打磨轮 |
 | `mechanisms.md` | **质感机制对照表**（6 个参照站实测数据 + M1~M17 机制清单 + 已锁规格） | 打磨轮 |
+| `home-options.html` | **首页方案对比稿**（A 薄条+卡片 / B 薄条+编辑式 / B2 无卡片壳 / C 现状大 hero，背景光斑真联动、可开关隔离变量） | 打磨轮 |
 
 > `shots/` 不是设计稿，是 `tooling/shot/shot.mjs` 拍出的**现状基线截图**（已 gitignore、可重生、每次跑先清空）；
 > 本目录其余文件是“应该长什么样”的目标基线，`shots/` 是“现在长什么样”的证据。
