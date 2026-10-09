@@ -40,34 +40,38 @@
 }
 *{box-sizing:border-box}
 html{background:var(--bg);color:var(--ink);font:17px/1.65 var(--sans);-webkit-text-size-adjust:100%}
-body{margin:0;transition:background var(--t) var(--ease-out),color var(--t) var(--ease-out)}
+body{margin:0;position:relative;min-height:100%;transition:background var(--t) var(--ease-out),color var(--t) var(--ease-out)}
 a{color:inherit;text-decoration:none}
 img{max-width:100%}
 
-/* ---------- 背景光斑层：固定全屏、不吃鼠标事件、在内容之下 ---------- */
-.blobs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
+/* ---------- 背景光斑层 ----------
+   ⚠️ 上一版用 position:fixed，导致光斑根本不随页面滚动，只补 78px 微位移——肉眼看不出来。
+   改为 absolute 放在文档流里：光斑会“出现→经过→离开”，再叠加不同系数的 transform 做视差。 */
+.blobs{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:clip;contain:paint}
 .blobs i{position:absolute;display:block;border-radius:50%;will-change:transform;
-  transform:translate3d(0,calc(var(--sy,0) * var(--k,0) * -1px),0)}
-.b1{width:52vw;height:52vw;right:-10vw;top:4vh;--k:.10;
-  background:radial-gradient(circle at 50% 50%,var(--blob-a),transparent 66%);
-  animation:drift1 38s ease-in-out infinite alternate}
-.b2{width:34vw;height:34vw;left:-6vw;top:52vh;--k:.18;
-  background:radial-gradient(circle at 50% 50%,var(--blob-b),transparent 64%);
-  animation:drift2 26s ease-in-out infinite alternate}
-.b3{width:26vw;height:26vw;right:14vw;top:120vh;--k:.26;
-  background:radial-gradient(circle at 50% 50%,var(--blob-c),transparent 62%);
-  animation:drift1 32s ease-in-out infinite alternate-reverse}
-@keyframes drift1{from{transform:translate3d(0,calc(var(--sy,0)*var(--k)*-1px),0) scale(1)}
-  to{transform:translate3d(calc(var(--sy,0)*var(--k)*-1px),calc(var(--sy,0)*var(--k)*-1.6px),0) scale(1.12)}}
-@keyframes drift2{from{transform:translate3d(0,calc(var(--sy,0)*var(--k)*-1px),0) scale(1.06)}
-  to{transform:translate3d(60px,calc(var(--sy,0)*var(--k)*-2px),0) scale(.94)}}
-/* 关掉联动：只留常驻漂浮，滚动位移归零 */
-:root[data-link="off"] .blobs i{--k:0}
-@media (max-width:767px){.b3{display:none}}
-@media (prefers-reduced-motion:reduce){
-  .blobs i{animation:none}
-  *{transition-duration:.01ms !important}
-}
+  transform:translate3d(calc(var(--sy,0)*var(--kx,0)*1px),calc(var(--sy,0)*var(--ky,0)*1px),0)
+            rotate(calc(var(--sy,0)*var(--rot,0)*1deg)) scale(calc(1 + var(--sy,0)*var(--grow,0)/1000))}
+.b1{width:46vw;height:46vw;right:-8vw;top:8vh;--ky:-.14;--kx:.05;--rot:.012;--grow:.18;
+  background:radial-gradient(circle at 50% 50%,var(--blob-a),transparent 64%)}
+.b2{width:30vw;height:30vw;left:-7vw;top:46vh;--ky:.20;--kx:-.06;--rot:-.02;--grow:.30;
+  background:radial-gradient(circle at 50% 50%,var(--blob-b),transparent 62%)}
+.b3{width:24vw;height:24vw;right:16vw;top:105vh;--ky:-.26;--kx:.10;--rot:.025;--grow:.22;
+  background:radial-gradient(circle at 50% 50%,var(--blob-c),transparent 60%)}
+.b4{width:38vw;height:38vw;left:6vw;top:168vh;--ky:.16;--kx:.05;--rot:-.014;--grow:.26;
+  background:radial-gradient(circle at 50% 50%,var(--blob-a),transparent 65%)}
+.b5{width:26vw;height:26vw;right:-4vw;top:228vh;--ky:-.22;--kx:-.08;--rot:.02;--grow:.34;
+  background:radial-gradient(circle at 50% 50%,var(--blob-b),transparent 62%)}
+/* 常驻漂浮：纯 CSS，不占滚动帧，与视差位移叠加 */
+@keyframes bob{from{translate:0 0}to{translate:0 -34px}}
+.blobs i{animation:bob 17s ease-in-out infinite alternate}
+.blobs i:nth-child(2){animation-duration:23s;animation-delay:-6s}
+.blobs i:nth-child(3){animation-duration:14s;animation-delay:-3s}
+.blobs i:nth-child(4){animation-duration:26s;animation-delay:-11s}
+.blobs i:nth-child(5){animation-duration:19s;animation-delay:-8s}
+/* 关掉联动：所有视差系数归零，光斑只随内容普通滚动 */
+:root[data-link="off"] .blobs i{--ky:0;--kx:0;--rot:0;--grow:0;animation:none}
+@media (max-width:767px){.b3,.b5{display:none}}
+@media (prefers-reduced-motion:reduce){.blobs i{animation:none}}
 
 /* ---------- 顶栏 ---------- */
 .hd{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--rule)}
@@ -125,6 +129,10 @@ main{position:relative;z-index:1;max-width:var(--container);margin:0 auto;paddin
 .sec-h::after{content:"";flex:1;height:1px;background:var(--rule)}
 .sec-h b{color:var(--accent-fg)}
 .cards{display:flex;flex-direction:column;gap:14px}
+/* 整卡可点（掘金式）：用“拉伸链接”——标题 a 的 ::after 铺满整张卡做点击区，
+   而标签、阅读入口自己抬到 z-index:2 浮在覆盖层之上。
+   不用 <a> 套 <a>（非法 HTML，且键盘 Tab 会嵌套错乱） */
+.card{position:relative}
 .card{display:flex;gap:16px;padding:16px;background:var(--surface);border:1px solid var(--rule);
   border-radius:var(--r-lg);box-shadow:var(--e1);
   transition:background var(--t) var(--ease-out),box-shadow var(--t) var(--ease-out),border-color var(--t) var(--ease-out),transform var(--t) var(--ease-out)}
@@ -135,9 +143,13 @@ main{position:relative;z-index:1;max-width:var(--container);margin:0 auto;paddin
 .body h3{margin:0;font-size:19px;font-weight:700;letter-spacing:var(--ls-title);line-height:1.3}
 .card:hover .body h3{color:var(--accent-fg)}
 .body p{margin:6px 0 0;color:var(--ink-2);font-size:15px;line-height:1.6}
+.body h3 a{color:inherit}
+.body h3 a::after{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit}
 .meta{margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-3)}
 .meta .dot{width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.6}
-.chip{border-radius:var(--r-full);padding:3px 10px;font-size:12px;font-weight:600;background:var(--soft);color:var(--accent-fg)}
+.chip{position:relative;z-index:2;border-radius:var(--r-full);padding:3px 10px;font-size:12px;font-weight:600;
+  background:var(--soft);color:var(--accent-fg);transition:background var(--t-fast) var(--ease-out),color var(--t-fast) var(--ease-out)}
+.chip:hover{background:var(--accent);color:var(--accent-ink)}
 .more{margin-left:auto;color:var(--accent-fg);font-weight:600;font-size:13px}
 
 /* B 方案特有：大号日期左栏（jason.blog 编辑式排版） */
@@ -174,7 +186,7 @@ main{position:relative;z-index:1;max-width:var(--container);margin:0 auto;paddin
 <body>
 
 <!-- 背景光斑：三层，滚动位移由 --sy 驱动，常驻漂浮由 CSS 动画驱动 -->
-<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
 
 <header class="hd"><div class="in">
   <a class="brand" href="#">
@@ -290,11 +302,11 @@ const POSTS = [
 function card(p, editorial){
   const thumb = editorial || p.cover ? `<div class="thumb"></div>` : '';
   const date = editorial ? `<div class="date"><b>${p.d}</b><span>${p.m}</span></div>` : '';
+  /* 标题不再单独变色：整卡 hover 已经变色；“继续阅读”按用户要求去掉 */
   return `<article class="card${editorial ? ' ed' : ''}">${date}${editorial ? '' : thumb}
-    <div class="body"><h3>${p.t}</h3><p>${p.x}</p>
+    <div class="body"><h3><a href="#">${p.t}</a></h3><p>${p.x}</p>
       <div class="meta"><span>admin</span><i class="dot"></i><span>${p.min} min 阅读</span>
-        ${p.tags.map(t=>`<span class="chip">${t}</span>`).join('')}
-        <span class="more">继续阅读 →</span>
+        ${p.tags.map(t=>`<a class="chip" href="#">${t}</a>`).join('')}
       </div></div></article>`;
 }
 
@@ -323,8 +335,8 @@ onScroll();
 
 /* ---------- 方案切换 ---------- */
 const HINTS = {
-  a:'A｜薄条 hero（约 150px）+ 现有卡片列表：首屏立刻露出 2 篇文章，品牌主张压成一行标题 + 搜索入口。改动最小。',
-  b:'B（推荐）｜薄条 hero + 编辑式分组列表：大号日期左栏 + 年份/季节分组 + 继续阅读，品牌感来自排版而不是标语块。滚动时光斑跟随最明显。',
+  a:'A（已选定）｜薄条 hero（约150px）+ 卡片列表：整卡可点（标题拉伸链接），标签独立可点且 hover 变色，“继续阅读”已去掉。',
+  b:'B｜薄条 hero + 编辑式分组列表：大号细字日期左栏 + 年份/季节分组，品牌感来自排版而不是标语块。',
   b2:'B2｜与 B 同构，但去掉卡片壳、只用发丝线分隔（jason.blog 本尊的做法）：行与行更连续、阅读节奏更快，但“这是一块可点区域”的暗示变弱，且与你之前定的“保留卡片”相反 —— 选它等于改那条决定。',
   c:'C｜保持现状大 hero，只加背景光斑联动：首屏仍然看不到文章，等于给现状加装饰。'
 };
