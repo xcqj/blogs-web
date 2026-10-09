@@ -26,9 +26,10 @@
   --accent:#4b6272; --accent-ink:#fff; --accent-fg:#4b6272;
   --soft:#dbe8f2; --cta:#ffe87d; --cta-ink:#1a1c1c;
   --e1:0 1px 2px rgba(26,28,28,.06); --e2:0 2px 4px rgba(26,28,28,.06),0 8px 20px -8px rgba(26,28,28,.14);
-  /* 光斑：蓝灰 + 暖黄。调成“水印级”淡度（用户对照 jason.blog 反馈：上一版太明显）。
-     保留偏心渐变与不规则轮廓，否则淡到无特征又看不出联动。 */
-  --blob-a:rgba(75,98,114,.13); --blob-b:rgba(255,214,80,.26); --blob-c:rgba(143,184,207,.30);
+  /* 光斑：只用黄色一种（用户要求）。中团很淡做氛围，小点稍深做“运动指针”。
+     jason.blog 能看出联动的真正原因：小点只约 20px，相对位移 60px 就能明显穿过它；
+     全是淡大团时，一屏差 180px 根本看不出来。 */
+  --blob-a:rgba(255,214,80,.24); --blob-b:rgba(226,176,62,.42);
 }
 :root[data-theme='dark']{
   --bg:#0a1015; --surface:#101a21; --elevated:#16232c; --raised:#1d2e39;
@@ -37,7 +38,7 @@
   --accent:#b3d3e6; --accent-ink:#14232c; --accent-fg:#b3d3e6;
   --soft:rgba(179,211,230,.15); --cta:#ffe87d; --cta-ink:#1a1c1c;
   --e1:0 1px 2px rgba(0,0,0,.4); --e2:0 2px 4px rgba(0,0,0,.3),0 8px 20px -6px rgba(0,0,0,.55);
-  --blob-a:rgba(179,211,230,.07); --blob-b:rgba(255,232,125,.05); --blob-c:rgba(88,124,146,.13);
+  --blob-a:rgba(255,232,125,.07); --blob-b:rgba(255,232,125,.16);
 }
 *{box-sizing:border-box}
 html{background:var(--bg);color:var(--ink);font:17px/1.65 var(--sans);-webkit-text-size-adjust:100%}
@@ -56,32 +57,39 @@ img{max-width:100%}
   border-radius:46% 54% 52% 48% / 52% 46% 54% 48%;
   transform:translate3d(calc(var(--sy,0)*var(--kx,0)*1px),calc(var(--sy,0)*var(--ky,0)*1px),0)
             rotate(calc(var(--sy,0)*var(--rot,0)*1deg)) scale(calc(1 + var(--sy,0)*var(--grow,0)/1000))}
-/* 速度：ky<0 比内容快，ky>0 比内容慢。幅度收到±0.12~0.22 —— 一屏相对位移约 150~300px。
-   ⚠️ 定位要点：A 方案的不透明白卡片会遮住视口约 67%，光斑放在内容列下根本看不见；
-   所以把它们推到页边距（左右留白）里，靠负 right/left 让主体落在栏外。 */
-.b1{width:34vw;height:34vw;right:-13vw;top:6vh;--ky:-.16;--kx:.05;--rot:.006;--grow:.20;
+/* 两类光斑：
+   ① 中团（22~34vw，很淡，ky ±0.12）—— 氛围，不需要看出它在动
+   ② 小点（1.6~2.4vw，稍深，ky ±0.30~0.42）—— 运动指针，一屏相对位移 270~380px，
+      远大于自身直径，所以“联动”全靠它们被看见 */
+.b1{width:34vw;height:34vw;right:-13vw;top:4vh;--ky:-.12;--kx:.04;--rot:.004;--grow:.14;
   background:radial-gradient(circle at 36% 40%,var(--blob-a),transparent 62%)}
-.b2{width:8vw;height:8vw;right:1vw;top:52vh;--ky:.22;--kx:-.04;--rot:-.010;--grow:.10;
-  background:radial-gradient(circle at 60% 40%,var(--blob-c),transparent 58%)}
-.b3{width:13vw;height:13vw;left:-4vw;top:104vh;--ky:-.13;--kx:.06;--rot:.008;--grow:.14;
-  background:radial-gradient(circle at 42% 58%,var(--blob-b),transparent 60%)}
-.b4{width:22vw;height:22vw;right:-8vw;top:168vh;--ky:.18;--kx:.04;--rot:-.005;--grow:.12;
+.b2{width:22vw;height:22vw;right:-7vw;top:150vh;--ky:.14;--kx:.03;--rot:-.004;--grow:.10;
   background:radial-gradient(circle at 56% 44%,var(--blob-a),transparent 63%)}
-.b5{width:7vw;height:7vw;left:1vw;top:232vh;--ky:-.20;--kx:.03;--rot:.012;--grow:.08;
-  background:radial-gradient(circle at 50% 46%,var(--blob-c),transparent 58%)}
-/* 轮廓缓慢呼吸：给光斑一个会变的边缘，让运动可被察觉 */
+.b3{width:2.4vw;height:2.4vw;right:3vw;top:38vh;--ky:-.38;
+  background:radial-gradient(circle at 50% 50%,var(--blob-b) 0 34%,transparent 72%)}
+.b4{width:1.8vw;height:1.8vw;right:8vw;top:96vh;--ky:.34;
+  background:radial-gradient(circle at 50% 50%,var(--blob-b) 0 34%,transparent 72%)}
+.b5{width:2.2vw;height:2.2vw;left:4vw;top:128vh;--ky:-.42;
+  background:radial-gradient(circle at 50% 50%,var(--blob-b) 0 34%,transparent 72%)}
+.b6{width:1.6vw;height:1.6vw;right:5vw;top:196vh;--ky:.30;
+  background:radial-gradient(circle at 50% 50%,var(--blob-b) 0 34%,transparent 72%)}
+.b7{width:2vw;height:2vw;left:6vw;top:250vh;--ky:-.34;
+  background:radial-gradient(circle at 50% 50%,var(--blob-b) 0 34%,transparent 72%)}
+/* 轮廓缓慢呼吸：只给中团，小点不需要 */
 @keyframes morph{from{border-radius:46% 54% 52% 48% / 52% 46% 54% 48%}
   to{border-radius:54% 46% 44% 58% / 46% 54% 50% 52%}}
-@keyframes bob{from{translate:0 0}to{translate:0 -22px}}
-.blobs i{animation:bob 22s ease-in-out infinite alternate,morph 30s ease-in-out infinite alternate}
-.blobs i:nth-child(2){animation-duration:27s,36s;animation-delay:-7s,-13s}
-.blobs i:nth-child(3){animation-duration:18s,25s;animation-delay:-4s,-9s}
-.blobs i:nth-child(4){animation-duration:31s,40s;animation-delay:-14s,-6s}
-.blobs i:nth-child(5){animation-duration:20s,28s;animation-delay:-9s,-3s}
+@keyframes bob{from{translate:0 0}to{translate:0 -18px}}
+.blobs i{animation:bob 20s ease-in-out infinite alternate}
+.blobs i:nth-child(1),.blobs i:nth-child(2){animation-duration:26s,34s}
+.blobs i:nth-child(1),.blobs i:nth-child(2){animation-name:bob,morph}
+.blobs i:nth-child(3){animation-duration:24s}
+.blobs i:nth-child(4){animation-duration:17s;animation-delay:-6s}
+.blobs i:nth-child(5){animation-duration:29s;animation-delay:-11s}
+.blobs i:nth-child(6){animation-duration:21s;animation-delay:-4s}
+.blobs i:nth-child(7){animation-duration:31s;animation-delay:-14s}
 /* 关掉联动：所有视差系数归零且停掉漂浮/呼吸 → 光斑变成完全静止的背景 */
 :root[data-link="off"] .blobs i{--ky:0;--kx:0;--rot:0;--grow:0;animation:none}
-@media (max-width:1200px){.b2,.b5{display:none}}
-@media (max-width:767px){.b3,.b4{display:none}}
+@media (max-width:767px){.b2,.b5,.b7{display:none}}
 @media (prefers-reduced-motion:reduce){.blobs i{animation:none}}
 
 /* ---------- 顶栏 ---------- */
@@ -197,7 +205,7 @@ main{position:relative;z-index:1;max-width:var(--container);margin:0 auto;paddin
 <body>
 
 <!-- 背景光斑：三层，滚动位移由 --sy 驱动，常驻漂浮由 CSS 动画驱动 -->
-<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
+<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i><i class="b6"></i><i class="b7"></i></div>
 
 <header class="hd"><div class="in">
   <a class="brand" href="#">
