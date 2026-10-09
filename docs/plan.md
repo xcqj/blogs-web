@@ -205,8 +205,15 @@ M1~M17 机制对照表（每条带证据/我们现状/判定/成本）、授权�
 ——**质感不在 CSS 曲线，而在进场与滚动联动由 JS 驱动**。
 反面教材：inflouno 有 **28 个不同 `border-radius` 值**（正是我们已消灭的“没规矩”）；三站大量 `transition: all`（会动到 layout 属性）。
 
-- [ ] **批 1（零依赖、高感知）**：M1 弹层进出场动画（登录弹层现在是无动画硬出现）、M7 路由页面过渡、
-  M8 骨架→内容交叉淡入、M15 `prefers-reduced-motion` 全站化、M9 图片懒加载与宽高占位防 CLS
+- [x] **批 1（零依赖、高感知）已完成**：M1 弹层进出场（遮罩 `sd-fade` 淡入 + 面板 `sd-pop-in` 缩放弹出，
+  登录弹层与确认框都已接）、M7 路由页面过渡（`<NuxtPage :transition="{ name:'page', mode:'out-in' }">`）、
+  M8 骨架→内容交叉淡入（首页与 `/me` 列表，Transition 要单一子节点故包一层 div + `key`）、
+  M15 `prefers-reduced-motion` 全站兜底（新增 `app/assets/css/transitions.css` 并注册进 nuxt.config）、
+  M9 图片懒加载与宽高占位防 CLS（`ArticleCard` 缩略图加 `width/height/loading=lazy/decoding=async`）。
+  实测：弹层 `animationName=sd-pop-in`、路由切换出现 `page-enter-from`、首页 5 张缩略图全带 lazy、
+  产物 CSS 含 `prefers-reduced-motion`×4；ESC 关闭与跳转均无控制台报错。
+  ⚠️ 过程中两个自犯错误已修：① `app.vue` 注释误写成 `*/` 结尾导致模板未闭合、build 失败；
+  ② 首版用嵌套 `<Transition>` 使缩进混乱，改用 CSS 动画更简单（且不对全屏遮罩做缩放，否则露边）。
 - [ ] **批 2（零依赖、中感知）**：M4 滚动进场 reveal（IntersectionObserver）、M10 详情页阅读进度条、
   M11 header 滚动方向感知（下滑隐藏/上滑出现）
 - [ ] **批 3（需拍板）**：M3 Lenis 平滑惯性滚动、M5 hero 轻视差、M6 拉丁/数字逐字进场

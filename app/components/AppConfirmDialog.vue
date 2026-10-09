@@ -17,10 +17,12 @@ useModalA11y({
 </script>
 
 <template>
-  <div v-if="pending" class="sd-scrim z-60 grid place-items-center p-5" @click.self="settleConfirm(false)">
+  <!-- 遮罩淡入（Transition）+ 面板弹出（CSS 动画），不对全屏遮罩做缩放 -->
+  <Transition name="sd-fade">
+    <div v-if="pending" class="sd-scrim z-60 grid place-items-center p-5" @click.self="settleConfirm(false)">
     <div
       ref="rootEl"
-      class="w-full max-w-[420px] rounded-lg bg-elevated p-5 shadow-e3"
+      class="sd-pop-in w-full max-w-[420px] rounded-lg bg-elevated p-5 shadow-e3"
       role="dialog"
       aria-modal="true"
       :aria-labelledby="`confirm-${pending.options.title}`"
@@ -48,5 +50,6 @@ useModalA11y({
         </button>
       </div>
     </div>
-  </div>
+    </div>
+  </Transition>
 </template>

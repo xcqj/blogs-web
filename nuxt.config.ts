@@ -25,7 +25,7 @@ export default defineNuxtConfig({
   },
 
   // 全局样式：设计 token 单一来源（变量 + 基础层），UnoCSS 语义类消费之
-  css: ['~/assets/css/tokens.css', '~/assets/css/prose.css'],
+  css: ['~/assets/css/tokens.css', '~/assets/css/prose.css', '~/assets/css/transitions.css'],
 
   // runtimeConfig：服务端专用（不暴露给浏览器）
   // 环境变量映射：NUXT_API_BASE → apiBase，NUXT_APP_CLIENT_ID → appClientId

@@ -15,7 +15,17 @@ const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10
   <article class="sd-card card-hover flex gap-4 p-4">
     <!-- 缩略图固定不拉伸：w-40 h-28 = 160×112（10:7，对齐掘金）；窄屏隐藏，无图不预留空位 -->
     <NuxtLink v-if="article.coverUrl" :to="`/post/${article.articleId}`" class="hidden shrink-0 sm:block">
-      <img :src="article.coverUrl" :alt="article.title" class="sd-thumb h-28 w-40" />
+      <!-- 显式 width/height 让浏览器在图片下载前就算出比例，防 CLS（加载完布局跳动）；
+           列表图在首屏之下，用 lazy + async 解码 -->
+      <img
+        :src="article.coverUrl"
+        :alt="article.title"
+        width="160"
+        height="112"
+        loading="lazy"
+        decoding="async"
+        class="sd-thumb h-28 w-40"
+      />
     </NuxtLink>
 
     <div class="min-w-0 flex-1">

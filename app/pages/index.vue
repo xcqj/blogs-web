@@ -44,26 +44,29 @@ useSeoMeta({
     <div id="latest" class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <section>
         <h2 class="sd-eyebrow mb-4">最新文章</h2>
-        <ArticleListSkeleton v-if="pageStatus === 'pending'" :count="3" />
-        <ErrorState
-          v-else-if="pageStatus === 'error'"
-          title="文章加载失败"
-          description="网络异常或服务暂不可用，请稍后重试。"
-        >
-          <button class="btn-primary" @click="refreshPage">重试</button>
-        </ErrorState>
-        <template v-else>
-          <div class="space-y-3.5">
-            <ArticleCard v-for="a in page?.rows" :key="a.articleId" :article="a" />
-          </div>
-          <EmptyState
-            v-if="!page?.rows?.length"
-            title="还没有文章"
-            description="这个列表暂时是空的，去别处看看或稍后再来。"
+        <!-- 骨架 / 错误 / 列表三态交叉淡入（M8）：直接替换会“硬跳”，Transition 需单一子节点，
+             故末尾统一包一层 div 并用 key 区分状态 -->
+        <Transition name="sd-fade" mode="out-in">
+          <ArticleListSkeleton v-if="pageStatus === 'pending'" key="skeleton" :count="3" />
+          <ErrorState
+            v-else-if="pageStatus === 'error'"
+            key="error"
+            title="文章加载失败"
+            description="网络异常或服务暂不可用，请稍后重试。"
           >
-            <NuxtLink to="/tags" class="btn-ghost mt-1">逛标签</NuxtLink>
-          </EmptyState>
-        </template>
+            <button class="btn-primary" @click="refreshPage">重试</button>
+          </ErrorState>
+          <div v-else key="list" class="space-y-3.5">
+            <ArticleCard v-for="a in page?.rows" :key="a.articleId" :article="a" />
+            <EmptyState
+              v-if="!page?.rows?.length"
+              title="还没有文章"
+              description="这个列表暂时是空的，去别处看看或稍后再来。"
+            >
+              <NuxtLink to="/tags" class="btn-ghost mt-1">逛标签</NuxtLink>
+            </EmptyState>
+          </div>
+        </Transition>
         <div v-if="page?.total" class="mt-4 flex items-center justify-between text-sm text-muted">
           <span>共 {{ page.total }} 篇</span>
           <NuxtLink v-if="page.total > 10" to="/page/2" class="transition hover:text-primary">更早文章 →</NuxtLink>

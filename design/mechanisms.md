@@ -76,4 +76,7 @@
 - **批 3（需你拍板）**：M3 Lenis 平滑滚动、M5 hero 视差、M6 拉丁/数字逐字进场
 - **桶 B（MVP 后）**：M17 three.js 漂浮层（槽位已留）
 
-每批一个 commit + 重拍 `design/shots/` 基线对比；`tooling/shot/shot.mjs` 的退出码须回 0（先处理已知 `oss://` 脏数据）。
+每批一个 commit + 重拍 `design/shots/` 基线对比；`tooling/shot/shot.mjs` 的退出码须回 0。
+
+> **进度的唯一事实源是 `docs/plan.md` §2.12**（本表不重复维护勾选状态）。截至 2026-10-10：
+> 批 1（M1/M7/M8/M9/M15）已落地，`shot.mjs` 退出码已回 0（44 张、控制台与网络无报错）。

@@ -48,8 +48,11 @@ async function submit() {
 </script>
 
 <template>
-  <div v-if="open" class="sd-scrim z-50 flex items-center justify-center px-4" @click.self="hide">
-    <div ref="modalEl" class="w-full max-w-sm rounded-lg border border-border bg-elevated p-5 shadow-e3">
+  <!-- 遮罩用 Transition 淡入（v-if 进出），面板用 CSS 动画弹出；
+       不对全屏遮罩做缩放，否则边缘会露出背景 -->
+  <Transition name="sd-fade">
+    <div v-if="open" class="sd-scrim z-50 flex items-center justify-center px-4" @click.self="hide">
+    <div ref="modalEl" class="sd-pop-in w-full max-w-sm rounded-lg border border-border bg-elevated p-5 shadow-e3">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-base font-semibold">登录</h2>
         <button class="rounded-sm p-1.5 text-dim transition hover:bg-raised hover:text-text" aria-label="关闭登录框" @click="hide">✕</button>
@@ -98,5 +101,6 @@ async function submit() {
         </button>
       </form>
     </div>
-  </div>
+    </div>
+  </Transition>
 </template>

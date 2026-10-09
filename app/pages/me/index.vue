@@ -135,8 +135,11 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
       </nav>
 
 
-      <ArticleListSkeleton v-if="listStatus === 'pending'" :count="4" />
-      <template v-else>
+      <!-- 骨架→内容交叉淡入（M8）：与首页同一套过渡；Transition 要求单一子节点，
+           故行、空态、分页三块包一层 div，并用 key 区分两种状态 -->
+      <Transition name="sd-fade" mode="out-in">
+        <ArticleListSkeleton v-if="listStatus === 'pending'" key="skeleton" :count="4" />
+        <div v-else key="list">
         <div class="space-y-3">
           <AuthorArticleRow
             v-for="a in list?.rows"
@@ -163,7 +166,8 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
           :page-size="pageSize"
           :link-for="(n) => ({ path: '/me', query: { ...(tab === 'all' ? {} : { tab }), ...(n > 1 ? { page: n } : {}) } })"
         />
-      </template>
+        </div>
+      </Transition>
     </template>
   </section>
 </template>
