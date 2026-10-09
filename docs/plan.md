@@ -194,6 +194,26 @@
 - [ ] 掘金的另外两条机制未吸收：大标题 `line-height 1.04` 已做，但**负字距对中文仍保守**（CJK 安全档）；
   若想要更“编辑部”的风，下一档是全站直角（jason.blog 语言）
 
+### 2.12 质感机制吸收（2026-10-10，只吸收机制不改已锁规格）
+
+用户明确规则：**“只允许吸收‘机制’，不允许改‘已锁的规格’”**，并追加 3 个参照模板（deploy / arthur-jones / inflouno）。
+产出已落文件：**`design/mechanisms.md`** —— 含 6 个参照站的实测数据（curl 取到的 CSS/JS 统计）、
+M1~M17 机制对照表（每条带证据/我们现状/判定/成本）、授权核实结论、分批落地计划。
+
+关键实测结论：三个模板 CSS 里 **`cubic-bezier` 出现 0 次**，但全部加载 `gsap.min.js`
+（arthur-jones/inflouno 额外带 `ScrollTrigger` + `SplitText`，inflouno 还带 `lenis` + `three`）
+——**质感不在 CSS 曲线，而在进场与滚动联动由 JS 驱动**。
+反面教材：inflouno 有 **28 个不同 `border-radius` 值**（正是我们已消灭的“没规矩”）；三站大量 `transition: all`（会动到 layout 属性）。
+
+- [ ] **批 1（零依赖、高感知）**：M1 弹层进出场动画（登录弹层现在是无动画硬出现）、M7 路由页面过渡、
+  M8 骨架→内容交叉淡入、M15 `prefers-reduced-motion` 全站化、M9 图片懒加载与宽高占位防 CLS
+- [ ] **批 2（零依赖、中感知）**：M4 滚动进场 reveal（IntersectionObserver）、M10 详情页阅读进度条、
+  M11 header 滚动方向感知（下滑隐藏/上滑出现）
+- [ ] **批 3（需拍板）**：M3 Lenis 平滑惯性滚动、M5 hero 轻视差、M6 拉丁/数字逐字进场
+- [x] 授权已核：**GSAP 3.13 起 core 与全部插件（含 SplitText/ScrollTrigger）MIT 免费可商用**（Webflow 赞助），
+  Lenis 亦 MIT——所以障碍不在授权，而在“要不要为 80% 效果多引 30KB 依赖”；建议先零依赖实现，GSAP 留给桶 B
+- ❌ **不吸收**：M16 响应式圆角变量（revoul）——与已锁的 2/2/4 单族圆角直接冲突
+
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 
 - 三层 API 边界：只调 `/blog/public/**` + `/blog/article|user/**`，**禁 `/blog/admin/**`**；作者自助发文/编辑/隐藏/删除在**作者中心**（D29，走 `/blog/article/**`），平台治理仍仅 plus-ui。
