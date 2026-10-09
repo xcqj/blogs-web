@@ -214,8 +214,17 @@ M1~M17 机制对照表（每条带证据/我们现状/判定/成本）、授权�
   产物 CSS 含 `prefers-reduced-motion`×4；ESC 关闭与跳转均无控制台报错。
   ⚠️ 过程中两个自犯错误已修：① `app.vue` 注释误写成 `*/` 结尾导致模板未闭合、build 失败；
   ② 首版用嵌套 `<Transition>` 使缩进混乱，改用 CSS 动画更简单（且不对全屏遮罩做缩放，否则露边）。
-- [ ] **批 2（零依赖、中感知）**：M4 滚动进场 reveal（IntersectionObserver）、M10 详情页阅读进度条、
-  M11 header 滚动方向感知（下滑隐藏/上滑出现）
+- [x] **批 2（零依赖、中感知）已完成**：M4 滚动进场 reveal（`v-reveal` + IntersectionObserver，支持
+  `v-reveal="90"` 错峰延迟；**隐藏态由 JS 在 mounted 加 class**，禁用 JS 时内容照常可见，不会白屏；
+  一次性触发不回退）、M10 详情页阅读进度条（`useReadingProgress()`，`transform: scaleX()` 不靠 width
+  避免每帧重排）、M11 顶栏滚动方向感知（`useScrollDirection()`，**CSS 限制为仅 <768 生效**，
+  因为作者中心吸顶操作条靠 `top-16` 定位，桌面收起顶栏会在其上方留一条空隙；触底不隐藏）。
+  两者均用 rAF 节流 + `passive: true`。
+  实测：reveal 3 个元素加类、首屏 1 个已进场；进度条 `scaleX(0)→scaleX(1)`；
+  窄屏下滑 `translateY(-68px)` 不透明、上滑恢复 `none`；无控制台报错。
+  ⚠️ **踩到一个框架行为**：本项目 Nuxt 4.6 **不会自动注册 `app/directives/` 下的指令**
+  （产物 JS 里根本没有 `is-revealed`，说明实现文件未进 bundle），必须写 `app/plugins/reveal-directive.ts`
+  显式 `nuxtApp.vueApp.directive('reveal', …)`。已记进记忆，避免下次再撞。
 - [ ] **批 3（需拍板）**：M3 Lenis 平滑惯性滚动、M5 hero 轻视差、M6 拉丁/数字逐字进场
 - [x] 授权已核：**GSAP 3.13 起 core 与全部插件（含 SplitText/ScrollTrigger）MIT 免费可商用**（Webflow 赞助），
   Lenis 亦 MIT——所以障碍不在授权，而在“要不要为 80% 效果多引 30KB 依赖”；建议先零依赖实现，GSAP 留给桶 B

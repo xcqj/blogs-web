@@ -76,7 +76,9 @@ useSeoMeta({
       <!-- 侧栏标题与左列「最新文章」同规格并提到面板外：
            两列顶部结构一致，标题对标题、卡片对第一张卡片自然对齐（不靠魔法值 margin） -->
       <aside class="space-y-4">
-        <div>
+        <!-- v-reveal：侧栏面板错峰进场（M4）。隐藏态由 JS 在 mounted 加 class，
+             禁用 JS 或脚本加载失败时内容照常可见，不会白屏 -->
+        <div v-reveal>
           <h2 class="sd-eyebrow mb-4">热门标签</h2>
           <div class="sd-card p-5">
             <div class="flex flex-wrap gap-2">
@@ -85,7 +87,7 @@ useSeoMeta({
             </div>
           </div>
         </div>
-        <div>
+        <div v-reveal="90">
           <h2 class="sd-eyebrow mb-4">精选标签</h2>
           <div class="sd-card p-5">
             <div class="flex flex-wrap gap-2">
@@ -94,7 +96,7 @@ useSeoMeta({
             </div>
           </div>
         </div>
-        <div>
+        <div v-reveal="180">
           <h2 class="sd-eyebrow mb-4">关于</h2>
           <div class="sd-card p-5">
             <p class="text-sm text-muted">{{ siteName }} · 多作者技术博客前台，基于 Nuxt 4 SSR。</p>

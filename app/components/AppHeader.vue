@@ -3,6 +3,8 @@
 // md+ 文字导航；<768 收进汉堡（xs/sm 行）。右侧操作区随登录态变化——登录才显示「作者中心」(D29)。
 const { logged, profile, logout } = useAuth()
 const { show: showLogin } = useLoginModal()
+// 下滑隐藏顶栏、上滑立即出现（M11）；CSS 已限制为仅 <768 生效
+const { hideHeader } = useScrollDirection()
 
 const route = useRoute()
 const nav = [
@@ -17,7 +19,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 border-b border-border bg-surface">
+  <header class="site-header sticky top-0 z-50 border-b border-border bg-surface" :class="{ 'is-hidden': hideHeader }">
     <div class="sd-wrap flex h-16 items-center justify-between gap-3">
       <AppBrand />
 

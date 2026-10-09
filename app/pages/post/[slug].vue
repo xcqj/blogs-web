@@ -26,6 +26,8 @@ if (error.value || !article.value) {
 
 const version = computed(() => article.value!.currentVersion)
 const displayDate = computed(() => (article.value?.publishedAt || '').slice(0, 10))
+// 阅读进度条（M10）：长文刚需，给读者“还剩多少”的位置感
+const { progress } = useReadingProgress()
 
 // head getter 在 setup 上下文之外执行，composable 必须先在 setup 顶层取好再引用
 const siteName = useRuntimeConfig().public.siteName
@@ -41,10 +43,15 @@ useSeoMeta({
 
 <template>
   <article v-if="article" class="sd-measure mx-auto">
+    <!-- 阅读进度：固定在顶栏下沿，用 scaleX 不动 width，避免每帧重排 -->
+    <div
+      class="read-progress fixed top-16 left-0 z-40 h-0.5 w-full bg-primary"
+      :style="{ transform: `scaleX(${progress})` }"
+      aria-hidden="true"
+    />
     <NuxtLink to="/" class="mb-6 inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-primary">
       <span class="i-mdi:arrow-left" aria-hidden="true" />返回文章列表
     </NuxtLink>
-
     <header>
       <h1 class="max-w-[24ch] text-3xl font-extrabold leading-[var(--lh-3xl)] tracking-[var(--ls-h1)]">{{ version?.title }}</h1>
 

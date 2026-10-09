@@ -51,6 +51,35 @@
   opacity: 0;
 }
 
+/* ---------- 滚动进场 reveal（M4）：隐藏态由 JS 加 class，无 JS 时内容默认可见 ---------- */
+.sd-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity var(--t-slow) var(--ease-out), transform var(--t-slow) var(--ease-out);
+}
+.sd-reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- 顶栏滚动方向感知（M11）：仅窄屏生效 ----------
+   桌面不隐藏：作者中心吸顶操作条靠 top-16 定位，顶栏收起会在其上方留一条空隙 */
+.site-header {
+  transition: transform var(--t) var(--ease-out), opacity var(--t) var(--ease-out);
+}
+@media (max-width: 767px) {
+  .site-header.is-hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* ---------- 阅读进度条（M10）：用 scaleX 而不是 width，避免每帧触发重排 ---------- */
+.read-progress {
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
 /* ---------- 减少动态效果：全局兜底（M15） ----------
    注意用 0.01ms 而非 0，以保证 transitionend/animationend 仍会触发，
    依赖事件做清理的逻辑（如 Toast 移除）不会被卡住 */
