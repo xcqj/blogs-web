@@ -26,8 +26,9 @@
   --accent:#4b6272; --accent-ink:#fff; --accent-fg:#4b6272;
   --soft:#dbe8f2; --cta:#ffe87d; --cta-ink:#1a1c1c;
   --e1:0 1px 2px rgba(26,28,28,.06); --e2:0 2px 4px rgba(26,28,28,.06),0 8px 20px -8px rgba(26,28,28,.14);
-  /* 光斑：蓝灰 + 暖黄，低透明度，靠 radial-gradient 自带柔边（不用 filter:blur） */
-  --blob-a:rgba(75,98,114,.13); --blob-b:rgba(255,232,125,.5); --blob-c:rgba(179,211,230,.55);
+  /* 光斑：蓝灰 + 暖黄。上一版 alpha 太低（.13）在浅底上几乎看不见，
+     看不见就谈不上“联动”——适当提高不透明度与对比 */
+  --blob-a:rgba(75,98,114,.22); --blob-b:rgba(255,214,80,.55); --blob-c:rgba(143,184,207,.55);
 }
 :root[data-theme='dark']{
   --bg:#0a1015; --surface:#101a21; --elevated:#16232c; --raised:#1d2e39;
@@ -45,32 +46,42 @@ a{color:inherit;text-decoration:none}
 img{max-width:100%}
 
 /* ---------- 背景光斑层 ----------
-   ⚠️ 上一版用 position:fixed，导致光斑根本不随页面滚动，只补 78px 微位移——肉眼看不出来。
-   改为 absolute 放在文档流里：光斑会“出现→经过→离开”，再叠加不同系数的 transform 做视差。 */
-.blobs{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:clip;contain:paint}
-.blobs i{position:absolute;display:block;border-radius:50%;will-change:transform;
+   上一版“看不出联动”的两个真原因：
+   ① radial-gradient(circle,...) 是中心对称的，没有内部特征 → 平移多少都看着一样；
+   ② 系数太小（±0.14），一屏滚动下来相对位移不到直径 1/4。
+   修：系数拉开到±0.5（光斑速度变 0.5×~1.5×，两层明显拉开）+ 偏心渐变 + 不规则轮廓，
+   这样平移与旋转都变成可被看见的运动。 */
+.blobs{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:clip}
+.blobs i{position:absolute;display:block;will-change:transform;
+  border-radius:46% 54% 52% 48% / 52% 46% 54% 48%;
   transform:translate3d(calc(var(--sy,0)*var(--kx,0)*1px),calc(var(--sy,0)*var(--ky,0)*1px),0)
             rotate(calc(var(--sy,0)*var(--rot,0)*1deg)) scale(calc(1 + var(--sy,0)*var(--grow,0)/1000))}
-.b1{width:46vw;height:46vw;right:-8vw;top:8vh;--ky:-.14;--kx:.05;--rot:.012;--grow:.18;
-  background:radial-gradient(circle at 50% 50%,var(--blob-a),transparent 64%)}
-.b2{width:30vw;height:30vw;left:-7vw;top:46vh;--ky:.20;--kx:-.06;--rot:-.02;--grow:.30;
-  background:radial-gradient(circle at 50% 50%,var(--blob-b),transparent 62%)}
-.b3{width:24vw;height:24vw;right:16vw;top:105vh;--ky:-.26;--kx:.10;--rot:.025;--grow:.22;
-  background:radial-gradient(circle at 50% 50%,var(--blob-c),transparent 60%)}
-.b4{width:38vw;height:38vw;left:6vw;top:168vh;--ky:.16;--kx:.05;--rot:-.014;--grow:.26;
-  background:radial-gradient(circle at 50% 50%,var(--blob-a),transparent 65%)}
-.b5{width:26vw;height:26vw;right:-4vw;top:228vh;--ky:-.22;--kx:-.08;--rot:.02;--grow:.34;
-  background:radial-gradient(circle at 50% 50%,var(--blob-b),transparent 62%)}
-/* 常驻漂浮：纯 CSS，不占滚动帧，与视差位移叠加 */
-@keyframes bob{from{translate:0 0}to{translate:0 -34px}}
-.blobs i{animation:bob 17s ease-in-out infinite alternate}
-.blobs i:nth-child(2){animation-duration:23s;animation-delay:-6s}
-.blobs i:nth-child(3){animation-duration:14s;animation-delay:-3s}
-.blobs i:nth-child(4){animation-duration:26s;animation-delay:-11s}
-.blobs i:nth-child(5){animation-duration:19s;animation-delay:-8s}
-/* 关掉联动：所有视差系数归零，光斑只随内容普通滚动 */
+/* 速度：ky<0 比内容快（向上采），ky>0 比内容慢（被追过） */
+.b1{width:42vw;height:42vw;right:-6vw;top:6vh;--ky:-.55;--kx:.16;--rot:.05;--grow:.9;
+  background:radial-gradient(circle at 34% 38%,var(--blob-a),transparent 62%)}
+.b2{width:26vw;height:26vw;left:-5vw;top:34vh;--ky:.52;--kx:-.20;--rot:-.07;--grow:.5;
+  background:radial-gradient(circle at 66% 30%,var(--blob-b),transparent 60%)}
+.b3{width:15vw;height:15vw;right:22vw;top:88vh;--ky:-.85;--kx:.30;--rot:.11;--grow:1.4;
+  background:radial-gradient(circle at 40% 62%,var(--blob-c),transparent 58%)}
+.b4{width:34vw;height:34vw;left:8vw;top:150vh;--ky:.44;--kx:.12;--rot:-.05;--grow:.7;
+  background:radial-gradient(circle at 58% 44%,var(--blob-a),transparent 63%)}
+.b5{width:12vw;height:12vw;right:6vw;top:210vh;--ky:-.95;--kx:-.26;--rot:.14;--grow:1.8;
+  background:radial-gradient(circle at 46% 54%,var(--blob-b),transparent 56%)}
+.b6{width:22vw;height:22vw;left:24vw;top:268vh;--ky:.60;--kx:-.16;--rot:-.09;--grow:1.1;
+  background:radial-gradient(circle at 62% 60%,var(--blob-c),transparent 61%)}
+/* 轮廓缓慢呼吸：给光斑一个会变的边缘，让运动可被察觉 */
+@keyframes morph{from{border-radius:46% 54% 52% 48% / 52% 46% 54% 48%}
+  to{border-radius:56% 44% 42% 58% / 44% 56% 48% 52%}}
+@keyframes bob{from{translate:0 0}to{translate:0 -40px}}
+.blobs i{animation:bob 15s ease-in-out infinite alternate,morph 21s ease-in-out infinite alternate}
+.blobs i:nth-child(2){animation-duration:21s,27s;animation-delay:-5s,-9s}
+.blobs i:nth-child(3){animation-duration:11s,17s;animation-delay:-3s,-6s}
+.blobs i:nth-child(4){animation-duration:24s,31s;animation-delay:-11s,-4s}
+.blobs i:nth-child(5){animation-duration:9s,15s;animation-delay:-7s,-12s}
+.blobs i:nth-child(6){animation-duration:19s,25s;animation-delay:-2s,-14s}
+/* 关掉联动：所有视差系数归零且停掉漂浮/呼吸 → 光斑变成完全静止的背景 */
 :root[data-link="off"] .blobs i{--ky:0;--kx:0;--rot:0;--grow:0;animation:none}
-@media (max-width:767px){.b3,.b5{display:none}}
+@media (max-width:767px){.b3,.b5,.b6{display:none}}
 @media (prefers-reduced-motion:reduce){.blobs i{animation:none}}
 
 /* ---------- 顶栏 ---------- */
@@ -186,7 +197,7 @@ main{position:relative;z-index:1;max-width:var(--container);margin:0 auto;paddin
 <body>
 
 <!-- 背景光斑：三层，滚动位移由 --sy 驱动，常驻漂浮由 CSS 动画驱动 -->
-<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
+<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i><i class="b6"></i></div>
 
 <header class="hd"><div class="in">
   <a class="brand" href="#">
@@ -296,7 +307,13 @@ const POSTS = [
   {d:'19',m:'Sep',t:'UnoCSS v66 的 presetIcons 为什么静默不生成图标',x:'默认入口换成了 universal 版，不再自动扫 node_modules，必须显式注册 collections。',tags:['UnoCSS','踩坑'],min:5,grp:'2026 · 秋'},
   {d:'08',m:'Sep',t:'多作者博客的权限模型：author_id 与 create_by 不是一回事',x:'归属判断与操作权限必须由后端强制校验，前端隐藏按钮只是体验。',tags:['架构','安全'],min:8,grp:'2026 · 夏'},
   {d:'30',m:'Aug',t:'阅读量与搜索：先不做 ES，用一张计数表能撑多久',x:'MVP 阶段的取舍：不为"面试亮点"提前写死非必需技术。',tags:['性能'],min:6,grp:'2026 · 夏',cover:1},
-  {d:'21',m:'Aug',t:'富文本净化：jsoup 白名单与危险协议清单怎么列',x:'内容安全与业务权限是两条独立链路，都要守。',tags:['安全','后端'],min:10,grp:'2026 · 夏'}
+  {d:'21',m:'Aug',t:'富文本净化：jsoup 白名单与危险协议清单怎么列',x:'内容安全与业务权限是两条独立链路，都要守。',tags:['安全','后端'],min:10,grp:'2026 · 夏'},
+  {d:'14',m:'Aug',t:'为什么我们把评论提到前台之前做',x:'后端 API 闭环先行，否则前端只能对着 mock 数据空转。',tags:['流程'],min:6,grp:'2026 · 夏',cover:1},
+  {d:'05',m:'Aug',t:'SSR 首屏不能闪烁：color-mode 的 cookie 与 emitOnAllHTTPRequests',x:'服务端直接产出正确主题 class，而不是客户端再改导致白屏一闪。',tags:['Nuxt','性能'],min:8,grp:'2026 · 夏'},
+  {d:'28',m:'Jul',t:'标签合并：一个全局标签体系如何避免重复与歧义',x:'alias 表 + 关系迁移 + 去重，事务边界画在哪里。',tags:['架构','数据库'],min:13,grp:'2026 · 夏',cover:1},
+  {d:'19',m:'Jul',t:'把长列表分页做成可预测的三态：骨架 / 空 / 错误',x:'状态切换要有交叉淡入，直接替换会“硬跳”。',tags:['前端','UX'],min:5,grp:'2026 · 夏'},
+  {d:'02',m:'Jul',t:'一个图标为什么从建仓起就没渲染',x:'unocss v66 的 presetIcons 默认入口不再自动扫 node_modules，必须显式注册集合。',tags:['UnoCSS','踩坑'],min:7,grp:'2026 · 夏'},
+  {d:'24',m:'Jun',t:'不信任前端传的 authorId：文章归属与操作权限分开',x:'归属判断必须由后端按登录上下文强制校验，前端隐藏按钮只是体验。',tags:['安全'],min:9,grp:'2026 · 夏',cover:1}
 ];
 
 function card(p, editorial){
