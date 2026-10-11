@@ -36,7 +36,16 @@ export function useAuth() {
     await refresh()
   }
 
-  return { session, status, ready, logged, profile, login, logout, refresh }
+  /**
+   * 注册（PRD §5.1 AUTH-01）。注意：**注册不产生登录态**——后端 `/auth/register` 返回 `R<Void>`
+   * 且会消费掉本次验证码，同一组 code+uuid 无法复用于登录，故这里不像 login 那样 refresh()，
+   * 调用方应在成功后引导用户回到登录再认证一次。
+   */
+  async function register(payload: { username: string; password: string; code?: string; uuid?: string }) {
+    await $fetch('/api/auth/register', { method: 'POST', body: payload })
+  }
+
+  return { session, status, ready, logged, profile, login, logout, register, refresh }
 }
 
 /**
