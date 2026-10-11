@@ -67,6 +67,7 @@
 :root {
   color-scheme: dark;
   --bg: #14120f;
+  --bg-fade: #100e0b; /* 页面底→底的极淡竖向渐变（纵深，非空） */
   --surface: #1c1916;
   --elevated: #232019;
   --raised: #2b2721;
@@ -118,6 +119,7 @@
 :root[data-theme='light'] {
   color-scheme: light;
   --bg: #f4f1ea;
+  --bg-fade: #eee8dc; /* 页面底→底的极淡竖向渐变（纵深，非空） */
   --surface: #ffffff;
   --elevated: #f8f5ee;
   --raised: #efebe2;
@@ -235,7 +237,9 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  /* 竖向渐变给页面纵深（attachment:fixed 让长文页也保持视口高度的渐变，不被拉平） */
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-fade) 100%);
+  background-attachment: fixed;
   color: var(--text);
   transition: background 0.35s ease, color 0.35s ease;
 }
@@ -276,5 +280,54 @@ h4 { font-size: var(--text-lg); line-height: var(--lh-lg); letter-spacing: var(-
   .sd-act,
   button[type='submit'] {
     min-height: 44px;
+  }
+}
+
+/* ---------- 滚轴按钮（借鉴 neura-nova 的 .primary-button） ----------
+   文字与箭头各两份，纵向堆叠在遮罩内；整枚按钮 hover / 键盘 focus 时同时上滚一行，
+   第二份补位。第二份内容由使用方标 aria-hidden，读屏只念一次。 */
+.sd-roll,
+.sd-roll-icon {
+  display: inline-flex;
+  flex-direction: column;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.sd-roll {
+  height: 1.15em;
+}
+.sd-roll-icon {
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid currentColor;
+  border-radius: var(--radius-full);
+}
+.sd-roll > span,
+.sd-roll-icon > span {
+  flex: 0 0 auto;
+  transition: transform var(--t) var(--ease-out);
+}
+/* 单行高度必须等于遮罩高度，否则上移后文字/图标会被裁掉一截（实测：文字行高 19.8 vs 遮罩 13.8） */
+.sd-roll > span {
+  line-height: 1.15em;
+}
+.sd-roll-icon > span {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.group:hover .sd-roll > span,
+.group:hover .sd-roll-icon > span,
+.group:focus-visible .sd-roll > span,
+.group:focus-visible .sd-roll-icon > span {
+  transform: translateY(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sd-roll > span,
+  .sd-roll-icon > span {
+    transition: none;
   }
 }

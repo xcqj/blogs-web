@@ -30,8 +30,8 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
             v-for="item in nav"
             :key="item.to"
             :to="item.to"
-            class="text-muted transition hover:text-text"
-            active-class="!text-text font-semibold"
+            class="relative text-muted transition hover:text-text after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-text after:transition-[width] after:duration-200 hover:after:w-full"
+            active-class="!text-text !font-semibold after:!w-full"
           >
             {{ item.label }}
           </NuxtLink>
@@ -58,7 +58,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
           </NuxtLink>
           <button class="hidden text-xs text-muted transition hover:text-text md:inline" @click="logout">退出</button>
         </template>
-        <SdButton v-else size="sm" @click="showLogin">登录</SdButton>
+        <SdRollButton v-else size="sm" label="登录" @click="showLogin" />
 
         <!-- 移动汉堡按钮（<768） -->
         <button

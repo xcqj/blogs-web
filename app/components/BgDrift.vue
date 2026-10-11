@@ -91,6 +91,8 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="layerEl" class="bg-drift" aria-hidden="true">
+    <!-- 纸纹：极淡噪点，让「暖纸」有颗粒而不是一块平色（灰噪点 + 3.5% 透明度，深浅通用） -->
+    <div class="bg-grain" />
     <div
       v-for="(s, i) in SEEDS"
       :key="i"
@@ -115,6 +117,13 @@ onBeforeUnmount(() => {
     display: none;
   }
 }
+.bg-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27160%27 height=%27160%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.85%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27160%27 height=%27160%27 filter=%27url(%23n)%27/%3E%3C/svg%3E");
+}
+
 .seed {
   position: absolute;
   opacity: 0; /* 初始不可见，透明度全由 JS 按滚动窗口驱动（SSR 首屏干净） */
