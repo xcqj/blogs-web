@@ -37,7 +37,7 @@ useSeoMeta({
 
     <ArticleListSkeleton v-if="status === 'pending'" :count="4" />
     <ErrorState v-else-if="status === 'error'" description="文章加载失败，请稍后重试。">
-      <button class="btn-primary" @click="refresh">重试</button>
+      <SdButton @click="refresh">重试</SdButton>
     </ErrorState>
     <template v-else>
       <div class="space-y-3.5">
@@ -48,7 +48,7 @@ useSeoMeta({
         title="该标签下暂无公开文章"
         description="换个标签看看，或回到全部文章。"
       >
-        <NuxtLink to="/tags" class="btn-ghost mt-1">全部标签</NuxtLink>
+        <SdButton to="/tags" variant="ghost" class="mt-1">全部标签</SdButton>
       </EmptyState>
       <AppPagination
         :page="page"

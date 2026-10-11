@@ -59,31 +59,11 @@ async function submit() {
       </div>
 
       <form class="space-y-3" @submit.prevent="submit">
-        <input
-          v-model="form.username"
-          type="text"
-          placeholder="用户名"
-          aria-label="用户名"
-          autocomplete="username"
-          class="sd-input"
-        />
-        <input
-          v-model="form.password"
-          type="password"
-          placeholder="密码"
-          aria-label="密码"
-          autocomplete="current-password"
-          class="sd-input"
-        />
+        <SdInput v-model="form.username" placeholder="用户名" aria-label="用户名" autocomplete="username" />
+        <SdInput v-model="form.password" type="password" placeholder="密码" aria-label="密码" autocomplete="current-password" />
 
         <div v-if="captchaEnabled" class="flex items-center gap-2">
-          <input
-            v-model="form.code"
-            type="text"
-            placeholder="验证码"
-            autocomplete="off"
-            class="sd-input min-w-0 flex-1"
-          />
+          <SdInput v-model="form.code" placeholder="验证码" autocomplete="off" class="min-w-0 flex-1" />
           <!-- base64 验证码图，点击刷新；不缓存 -->
           <img
             v-if="captchaImg"
@@ -96,9 +76,9 @@ async function submit() {
         </div>
 
         <p v-if="error" class="text-xs text-danger">{{ error }}</p>
-        <button type="submit" :disabled="loading" class="btn-primary w-full">
+        <SdButton type="submit" :disabled="loading" block>
           {{ loading ? '登录中…' : '登录' }}
-        </button>
+        </SdButton>
       </form>
     </div>
     </div>

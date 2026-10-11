@@ -14,6 +14,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), { modelValue: '', rows: 4 })
+
+// attrs（class/aria-label 等）透传到 textarea 本体而非包裹 div；显式绑定写在其后，优先级更高
+defineOptions({ inheritAttrs: false })
 const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>()
 
 const uid = useId()
@@ -25,6 +28,7 @@ const descId = `sd-desc-${uid}`
   <div :class="label || hint || error ? 'sd-field' : ''">
     <label v-if="label" :for="inputId" class="sd-label">{{ label }}</label>
     <textarea
+      v-bind="$attrs"
       :id="inputId"
       :rows="rows"
       :value="modelValue"

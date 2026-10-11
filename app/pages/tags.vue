@@ -36,7 +36,7 @@ useSeoMeta({ title: () => (keyword.value ? `标签 · ${keyword.value}` : '全�
       <form class="sd-search w-72" @submit.prevent="submit">
         <span class="i-mdi:magnify shrink-0 text-dim" aria-hidden="true" />
         <input v-model="input" type="search" placeholder="按名称或 slug 过滤" />
-        <button type="submit" class="btn-primary btn-sm">过滤</button>
+        <SdButton type="submit" size="sm">过滤</SdButton>
       </form>
     </header>
 

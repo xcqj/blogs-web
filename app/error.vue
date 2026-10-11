@@ -30,9 +30,9 @@ function retry() {
       </template>
 
       <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-        <NuxtLink to="/" class="btn-primary">回首页</NuxtLink>
-        <NuxtLink to="/search" class="btn-ghost">去搜索</NuxtLink>
-        <button v-if="!is404" class="btn-ghost" @click="retry">重试</button>
+        <SdButton to="/">回首页</SdButton>
+        <SdButton to="/search" variant="ghost">去搜索</SdButton>
+        <SdButton v-if="!is404" variant="ghost" @click="retry">重试</SdButton>
       </div>
 
       <div class="mt-10">

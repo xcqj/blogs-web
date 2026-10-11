@@ -151,16 +151,16 @@ async function submit(publish: boolean) {
       <button class="sd-act" @click="drawerOpen = true">更多</button>
       <!-- 已发布文章不再提供「发布」：后端 ArticleGuards.requirePublishable 只允许草稿发布，
            重复调用会抛「仅草稿状态的文章可以发布」；隐藏/下线文章的重新公开仍在 /me 列表行做 -->
-      <button v-if="isPublished" class="btn-primary" :disabled="!canSave" @click="submit(false)">
+      <SdButton v-if="isPublished" :disabled="!canSave" @click="submit(false)">
         {{ saving ? '保存中…' : '保存修改' }}
-      </button>
+      </SdButton>
       <template v-else>
-        <button class="btn-ghost" :disabled="!canSave" @click="submit(false)">
+        <SdButton variant="ghost" :disabled="!canSave" @click="submit(false)">
           {{ saving ? '保存中…' : '存为草稿' }}
-        </button>
-        <button class="btn-primary" :disabled="!canSave" @click="submit(true)">
+        </SdButton>
+        <SdButton :disabled="!canSave" @click="submit(true)">
           {{ saving ? '提交中…' : '发布' }}
-        </button>
+        </SdButton>
       </template>
     </div>
 

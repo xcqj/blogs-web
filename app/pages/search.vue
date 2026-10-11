@@ -42,7 +42,7 @@ useSeoMeta({
     <form class="sd-search mx-auto mt-2 max-w-xl" @submit.prevent="submit">
       <span class="i-mdi:magnify shrink-0 text-dim" aria-hidden="true" />
       <input v-model="input" type="search" placeholder="搜索文章标题 / 摘要 / 正文…" />
-      <button type="submit" class="btn-primary btn-sm">搜索</button>
+      <SdButton type="submit" size="sm">搜索</SdButton>
     </form>
 
     <div class="mt-8">
@@ -51,7 +51,7 @@ useSeoMeta({
 
         <ArticleListSkeleton v-if="status === 'pending'" :count="3" />
         <ErrorState v-else-if="status === 'error'" description="搜索失败，请稍后重试。">
-          <button class="btn-primary" @click="refresh">重试</button>
+          <SdButton @click="refresh">重试</SdButton>
         </ErrorState>
         <template v-else>
           <div class="space-y-3.5">
@@ -62,7 +62,7 @@ useSeoMeta({
             title="没有找到相关文章"
             description="换个关键词试试，或去标签页逛逛。"
           >
-            <NuxtLink to="/tags" class="btn-ghost mt-1">逛标签</NuxtLink>
+            <SdButton to="/tags" variant="ghost" class="mt-1">逛标签</SdButton>
           </EmptyState>
           <AppPagination
             :page="page"

@@ -27,7 +27,7 @@ useSeoMeta({ title: () => `文章列表 第 ${page.value} 页` })
 
     <ArticleListSkeleton v-if="status === 'pending'" :count="4" />
     <ErrorState v-else-if="status === 'error'" description="文章加载失败，请稍后重试。">
-      <button class="btn-primary" @click="refresh">重试</button>
+      <SdButton @click="refresh">重试</SdButton>
     </ErrorState>
     <template v-else>
       <div class="space-y-3.5">

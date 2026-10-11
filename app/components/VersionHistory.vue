@@ -66,7 +66,7 @@ function close() {
           <div class="min-w-0">
             <p class="truncate text-sm">
               <span class="font-semibold">v{{ v.versionNo }}</span>
-              <span v-if="v.versionNo === currentVersionNo" class="sd-badge ml-2 bg-soft text-primary-fg">当前</span>
+              <SdBadge v-if="v.versionNo === currentVersionNo" tone="soft" class="ml-2">当前</SdBadge>
               <span class="ml-2 text-muted">{{ v.title }}</span>
             </p>
             <p class="sd-hint">{{ v.createTime }}</p>

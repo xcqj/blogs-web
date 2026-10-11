@@ -60,11 +60,11 @@ async function onChange(e: Event) {
       <button class="sd-act" :disabled="uploading" @click="pick">
         <span class="i-mdi:upload" aria-hidden="true" />{{ uploading ? '上传中…' : '上传封面' }}
       </button>
-      <input
-        class="sd-input max-w-80 flex-1"
-        :value="modelValue"
+      <SdInput
+        :model-value="modelValue"
         placeholder="或粘贴图片 URL"
-        @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        class="max-w-80 flex-1"
+        @update:model-value="emit('update:modelValue', $event)"
       />
       <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onChange" />
     </div>

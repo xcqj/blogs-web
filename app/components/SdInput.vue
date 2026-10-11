@@ -16,6 +16,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), { modelValue: '', type: 'text' })
+
+// attrs（class/aria-label 等）透传到 input 本体而非包裹 div；显式绑定写在其后，优先级更高
+defineOptions({ inheritAttrs: false })
 const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>()
 
 const uid = useId()
@@ -27,6 +30,7 @@ const descId = `sd-desc-${uid}`
   <div :class="label || hint || error ? 'sd-field' : ''">
     <label v-if="label" :for="inputId" class="sd-label">{{ label }}</label>
     <input
+      v-bind="$attrs"
       :id="inputId"
       :type="type"
       :value="modelValue"

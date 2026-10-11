@@ -28,16 +28,11 @@ async function submit() {
 <template>
   <div class="mt-6">
     <template v-if="logged">
-      <textarea
-        v-model="content"
-        rows="3"
-        placeholder="写下你的评论…"
-        class="sd-textarea"
-      />
+      <SdTextarea v-model="content" :rows="3" placeholder="写下你的评论…" />
       <div class="mt-3 flex items-center gap-3">
-        <button :disabled="submitting || !content.trim()" class="btn-primary" @click="submit">
+        <SdButton :disabled="submitting || !content.trim()" @click="submit">
           {{ submitting ? '提交中…' : '发表评论' }}
-        </button>
+        </SdButton>
         <span v-if="err" class="text-xs text-danger">{{ err }}</span>
       </div>
     </template>

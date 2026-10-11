@@ -38,16 +38,16 @@ useModalA11y({
         {{ pending.options.target }}
       </p>
       <div class="mt-5 flex justify-end gap-2">
-        <button class="btn-secondary" @click="settleConfirm(false)">
+        <SdButton variant="secondary" @click="settleConfirm(false)">
           {{ pending.options.cancelText || '取消' }}
-        </button>
-        <button
-          :class="pending.options.danger ? 'btn-danger' : 'btn-primary'"
+        </SdButton>
+        <SdButton
+          :variant="pending.options.danger ? 'danger' : 'primary'"
           data-autofocus
           @click="settleConfirm(true)"
         >
           {{ pending.options.confirmText || '确认' }}
-        </button>
+        </SdButton>
       </div>
     </div>
     </div>

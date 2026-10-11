@@ -57,7 +57,7 @@ useSeoMeta({ title: '个人资料 · 作者中心', robots: 'noindex,follow' });
     </header>
 
     <ErrorState v-if="ready && !logged" title="请先登录" description="个人资料需要登录后访问。">
-      <NuxtLink to="/" class="btn-ghost">返回首页</NuxtLink>
+      <SdButton to="/" variant="ghost">返回首页</SdButton>
     </ErrorState>
 
     <div v-else-if="status === 'pending'" class="sd-card h-64 animate-pulse" />
@@ -81,14 +81,7 @@ useSeoMeta({ title: '个人资料 · 作者中心', robots: 'noindex,follow' });
 
       <div class="sd-field">
         <label class="sd-label" for="bio">个人简介（bio）</label>
-        <textarea
-          id="bio"
-          v-model="bio"
-          rows="4"
-          maxlength="500"
-          class="sd-textarea"
-          placeholder="一句话介绍你自己，会展示在公开主页与文章作者卡片"
-        />
+        <SdTextarea id="bio" v-model="bio" :rows="4" :maxlength="500" placeholder="一句话介绍你自己，会展示在公开主页与文章作者卡片" />
         <div class="flex items-center justify-between">
           <p class="sd-hint">最多 500 字；留空则不展示</p>
           <p class="sd-hint">{{ bio.length }}/500</p>
@@ -98,13 +91,13 @@ useSeoMeta({ title: '个人资料 · 作者中心', robots: 'noindex,follow' });
       <p v-if="error" class="rounded-md bg-danger-bg px-3 py-2 text-sm text-danger">{{ error }}</p>
 
       <div class="flex justify-end gap-2 border-t border-border pt-4">
-        <button class="btn-ghost" :disabled="saving" @click="reset">取消</button>
-        <button class="btn-primary" :disabled="saving" @click="save">{{ saving ? '保存中…' : '保存资料' }}</button>
+        <SdButton variant="ghost" :disabled="saving" @click="reset">取消</SdButton>
+        <SdButton :disabled="saving" @click="save">{{ saving ? '保存中…' : '保存资料' }}</SdButton>
       </div>
     </div>
 
     <ErrorState v-else title="资料加载失败" description="请稍后重试，或重新登录。">
-      <NuxtLink to="/" class="btn-ghost">返回首页</NuxtLink>
+      <SdButton to="/" variant="ghost">返回首页</SdButton>
     </ErrorState>
   </section>
 </template>

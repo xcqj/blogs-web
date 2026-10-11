@@ -57,14 +57,7 @@ useModalA11y({ isOpen: () => props.open, container: () => panelEl.value, onClose
                 从正文生成
               </button>
             </div>
-            <textarea
-              v-model="summary"
-              rows="4"
-              maxlength="500"
-              class="sd-textarea"
-              :disabled="readOnly"
-              placeholder="列表页展示的摘要，留空则不写"
-            />
+            <SdTextarea v-model="summary" :rows="4" :maxlength="500" :disabled="readOnly" placeholder="列表页展示的摘要，留空则不写" />
             <p class="sd-hint">{{ summary.length }}/500</p>
           </div>
 

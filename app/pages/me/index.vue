@@ -112,14 +112,14 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
         <p class="mt-1 text-sm text-muted">作者中心 · 服务端按 author_id 隔离，仅显示你自己的文章</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <NuxtLink to="/me/profile" class="btn-ghost">个人资料</NuxtLink>
-        <NuxtLink :to="editTarget()" class="btn-primary">＋ 新建文章</NuxtLink>
+        <SdButton to="/me/profile" variant="ghost">个人资料</SdButton>
+        <SdButton :to="editTarget()">＋ 新建文章</SdButton>
       </div>
     </header>
 
     <!-- 未登录：守卫已唤起登录弹层，这里给占位说明，不发无谓请求 -->
     <ErrorState v-if="ready && !logged" title="请先登录" description="作者中心需要登录后访问，登录框已为你打开。">
-      <NuxtLink to="/" class="btn-ghost">返回首页</NuxtLink>
+      <SdButton to="/" variant="ghost">返回首页</SdButton>
     </ErrorState>
 
     <template v-else>
@@ -158,7 +158,7 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
           :title="logged ? '这里还没有文章' : '未登录'"
           description="新建一篇文章开始写作；草稿不会出现在读者前台。"
         >
-          <NuxtLink to="/me/new" class="btn-primary mt-1">写第一篇</NuxtLink>
+          <SdButton to="/me/new" class="mt-1">写第一篇</SdButton>
         </EmptyState>
         <AppPagination
           :page="page"
