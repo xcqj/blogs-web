@@ -328,10 +328,13 @@ h4 { font-size: var(--text-lg); line-height: var(--lh-lg); letter-spacing: var(-
 .sd-roll-icon {
   position: relative;
   display: inline-block;
-  /* 图标元素实际尺寸 = 1.2em × 1.2em（presetIcons scale 1.2），容器按 em 对齐才不会被裁 */
-
+  /* 图标元素实际尺寸 = 1.2em × 1.2em（presetIcons scale 1.2），容器按 em 对齐才不会被裁；
+     overflow:hidden 必须保留——第二份箭头平时藏在下方，漏了就会看到两个箭头 */
   width: 1.2em;
-  height: 1.2em;}
+  height: 1.2em;
+  overflow: hidden;
+  vertical-align: middle;
+}
 .sd-roll-icon > span {
   position: absolute;
   inset: 0;
