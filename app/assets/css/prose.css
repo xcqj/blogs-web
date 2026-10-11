@@ -21,11 +21,19 @@
   margin-top: 0;
 }
 
+/* 导语：正文首段大一号并转次级色，给「进入正文」一个节奏点（非 p 起头的文章自然不命中） */
+.prose > p:first-child {
+  font-size: var(--text-lg);
+  line-height: var(--lh-lg);
+  color: var(--text-muted);
+}
+
 .prose p {
-  margin: 0 0 var(--space-5);
+  margin: 0 0 var(--space-6);
 }
 
 .prose h2 {
+  position: relative;
   font-size: var(--text-xl);
   line-height: var(--lh-xl);
   font-weight: 700;
@@ -33,11 +41,20 @@
   margin: var(--space-8) 0 var(--space-4);
   scroll-margin-top: 80px;
 }
+/* 章节标记：h2 前一条短横线，比纯留白更有结构感（颜色走 dim，不抢标题） */
+.prose h2::before {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 2px;
+  margin-bottom: var(--space-3);
+  background: var(--accent-fg);
+}
 
 .prose h3 {
   font-size: var(--text-lg);
   line-height: var(--lh-lg);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: var(--ls-title);
   scroll-margin-top: 80px;
   margin: var(--space-6) 0 var(--space-3);
@@ -51,6 +68,18 @@
 
 .prose li {
   margin: var(--space-2) 0;
+}
+
+.prose li::marker {
+  color: var(--text-dim);
+}
+
+/* 富文本图片常包在 figure 里：图注居中次级色，避免被当成正文段落 */
+.prose figcaption {
+  margin-top: var(--space-2);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-dim);
 }
 
 .prose > :last-child {
@@ -116,6 +145,8 @@
 
 .prose a:hover {
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .prose hr {
@@ -146,7 +177,7 @@
 
 .prose th {
   background: var(--surface);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* 响应式（design/responsive.html「表格：xs/sm 横向滚动」）：窄屏让宽表可横滚，不撑破 68ch */

@@ -12,9 +12,9 @@ const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10
 </script>
 
 <template>
-  <article class="sd-card card-hover flex gap-4 p-4">
+  <article class="sd-card card-hover group flex gap-4 p-4">
     <!-- 缩略图固定不拉伸：w-40 h-28 = 160×112（10:7，对齐掘金）；窄屏隐藏，无图不预留空位 -->
-    <NuxtLink v-if="article.coverUrl" :to="`/post/${article.articleId}`" class="hidden shrink-0 sm:block">
+    <NuxtLink v-if="article.coverUrl" :to="`/post/${article.articleId}`" class="hidden shrink-0 overflow-hidden rounded-md sm:block">
       <!-- 显式 width/height 让浏览器在图片下载前就算出比例，防 CLS（加载完布局跳动）；
            列表图在首屏之下，用 lazy + async 解码 -->
       <img
@@ -24,14 +24,14 @@ const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10
         height="112"
         loading="lazy"
         decoding="async"
-        class="sd-thumb h-28 w-40"
+        class="sd-thumb h-28 w-40 transition-[transform,filter] duration-300 ease-out group-hover:scale-[1.04] group-hover:[filter:none]"
       />
     </NuxtLink>
 
     <div class="min-w-0 flex-1">
       <NuxtLink
         :to="`/post/${article.articleId}`"
-        class="block truncate text-xl font-bold tracking-[var(--ls-title)] transition hover:text-primary"
+        class="relative block truncate text-xl font-bold tracking-[var(--ls-title)] transition hover:text-primary after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-primary after:transition-[width] after:duration-200 group-hover:after:w-full"
       >
         {{ article.title }}
       </NuxtLink>
