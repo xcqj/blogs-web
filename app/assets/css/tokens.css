@@ -283,13 +283,15 @@ h4 { font-size: var(--text-lg); line-height: var(--lh-lg); letter-spacing: var(-
   }
 }
 
-/* ---------- 滚轴按钮（借鉴 neura-nova .primary-button，改为逐字交错版） ----------
-   每个字符各自一个遮罩：两份同字符纵向排列（block 自然堆叠），hover 时各字符上滚一行、
-   第二份补位；相邻字符用 --i 递增延迟形成「逐字滚动」。图标两份用绝对定位，永远在圆心。
-   无障碍：滚动内容整体 aria-hidden，语义由 SdRollButton 给按钮的 aria-label 承担。 */
+/* ---------- 滚轴按钮（neura-nova .primary-button 的逐字翻牌版） ----------
+   每个字符一个遮罩：两份同字，hover 时逐字交错「翻牌」——旧字向上翻走并淡出，
+   新字从下方绕底边翻正并淡入（perspective + rotateX），比纯位移厚一层。
+   图标两份同样叠放上滚（无外圈，箭头 14px）。无障碍：滚动内容 aria-hidden，
+   语义由 SdRollButton 给按钮的 aria-label 承担。 */
 .sd-roll-chars {
   display: inline-flex;
   align-items: baseline;
+  perspective: 260px;
 }
 .sd-roll {
   position: relative;
@@ -301,40 +303,48 @@ h4 { font-size: var(--text-lg); line-height: var(--lh-lg); letter-spacing: var(-
 .sd-roll > span {
   display: block;
   height: 1.15em;
-  line-height: 1.15em; /* 单行高度 = 遮罩高度，否则上滚后会被裁一截 */
-  transition: transform var(--t) var(--ease-out);
-  /* 离开时反向交错（末字先落），进入时正向交错（首字先起） */
-  transition-delay: calc((var(--n, 1) - var(--i, 0)) * 18ms);
+  line-height: 1.15em; /* 单行高度 = 遮罩高度，否则翻转后会被裁一截 */
+  backface-visibility: hidden;
+  transition: transform var(--t-slow) var(--ease-out), opacity var(--t) ease-out;
+  transition-delay: calc((var(--n, 1) - var(--i, 0)) * 18ms); /* 离开：反向交错 */
+}
+/* 第二份平时躺在下方（rotateX 近 90° 且透明），hover 才翻正 */
+.sd-roll > span:last-child {
+  transform: translateY(100%) rotateX(-88deg);
+  opacity: 0;
+}
+.group:hover .sd-roll > span:first-child,
+.group:focus-visible .sd-roll > span:first-child {
+  transform: translateY(-100%) rotateX(88deg);
+  opacity: 0;
+  transition-delay: calc(var(--i, 0) * 26ms);
+}
+.group:hover .sd-roll > span:last-child,
+.group:focus-visible .sd-roll > span:last-child {
+  transform: translateY(0) rotateX(0deg);
+  opacity: 1;
+  transition-delay: calc(var(--i, 0) * 26ms);
 }
 .sd-roll-icon {
   position: relative;
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  overflow: hidden;
-  vertical-align: middle;
-  border: 1.5px solid currentColor;
-  border-radius: var(--radius-full);
-}
+  /* 图标元素实际尺寸 = 1.2em × 1.2em（presetIcons scale 1.2），容器按 em 对齐才不会被裁 */
+
+  width: 1.2em;
+  height: 1.2em;}
 .sd-roll-icon > span {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform var(--t) var(--ease-out);
+  transition: transform var(--t-slow) var(--ease-out);
 }
 .sd-roll-icon > span > i {
-  font-size: 11px; /* 20px 圆内留余量，视觉更居中 */
+  font-size: 1em; /* 跟随按钮字号：中号按钮上比原先 11px 明显更大 */
 }
-
 .sd-roll-icon > span:last-child {
-  transform: translateY(100%); /* 第二份平时藏在圆下方 */
-}
-.group:hover .sd-roll-chars .sd-roll > span,
-.group:focus-visible .sd-roll-chars .sd-roll > span {
-  transform: translateY(-100%);
-  transition-delay: calc(var(--i, 0) * 26ms);
+  transform: translateY(100%);
 }
 .group:hover .sd-roll-icon > span:first-child,
 .group:focus-visible .sd-roll-icon > span:first-child {
