@@ -32,7 +32,7 @@ useSeoMeta({
           {{ siteName }} —— 一个多作者技术博客。从源码到系统，一层层往深处读：阅读、搜索与评论。
         </p>
         <!-- 主 CTA 用黄底黑字（sun-summit 的签名用法），次级动作才用描边按钮 -->
-        <a href="#latest" class="btn-cta btn-lg mt-7">开始阅读 →</a>
+        <SdButton href="#latest" variant="cta" size="lg" class="mt-7">开始阅读 →</SdButton>
       </div>
       <!-- 纵深叠层：< 768 隐藏（性能与首屏，见 design/responsive.html），md 缩小 / lg 并排；three.js 属桶B -->
       <div class="hidden md:block md:h-64 lg:h-80">
@@ -54,7 +54,7 @@ useSeoMeta({
             title="文章加载失败"
             description="网络异常或服务暂不可用，请稍后重试。"
           >
-            <button class="btn-primary" @click="refreshPage">重试</button>
+            <SdButton @click="refreshPage">重试</SdButton>
           </ErrorState>
           <div v-else key="list" class="space-y-3.5">
             <ArticleCard v-for="a in page?.rows" :key="a.articleId" :article="a" />
@@ -63,7 +63,7 @@ useSeoMeta({
               title="还没有文章"
               description="这个列表暂时是空的，去别处看看或稍后再来。"
             >
-              <NuxtLink to="/tags" class="btn-ghost mt-1">逛标签</NuxtLink>
+              <SdButton to="/tags" variant="ghost" class="mt-1">逛标签</SdButton>
             </EmptyState>
           </div>
         </Transition>
@@ -80,27 +80,27 @@ useSeoMeta({
              禁用 JS 或脚本加载失败时内容照常可见，不会白屏 -->
         <div v-reveal>
           <h2 class="sd-eyebrow mb-4">热门标签</h2>
-          <div class="sd-card p-5">
+          <SdCard padding="md">
             <div class="flex flex-wrap gap-2">
               <TagChip v-for="t in hot" :key="t.tagId" :slug="t.slug" :name="`${t.name} · ${t.articleCount ?? 0}`" />
               <span v-if="!hot?.length" class="text-xs text-muted">暂无</span>
             </div>
-          </div>
+          </SdCard>
         </div>
         <div v-reveal="90">
           <h2 class="sd-eyebrow mb-4">精选标签</h2>
-          <div class="sd-card p-5">
+          <SdCard padding="md">
             <div class="flex flex-wrap gap-2">
               <TagChip v-for="t in featured" :key="t.tagId" :slug="t.slug" :name="t.name" />
               <span v-if="!featured?.length" class="text-xs text-muted">暂无</span>
             </div>
-          </div>
+          </SdCard>
         </div>
         <div v-reveal="180">
           <h2 class="sd-eyebrow mb-4">关于</h2>
-          <div class="sd-card p-5">
+          <SdCard padding="md">
             <p class="text-sm text-muted">{{ siteName }} · 多作者技术博客前台，基于 Nuxt 4 SSR。</p>
-          </div>
+          </SdCard>
         </div>
       </aside>
     </div>

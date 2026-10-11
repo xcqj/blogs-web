@@ -58,7 +58,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
           </NuxtLink>
           <button class="hidden text-xs text-muted transition hover:text-text md:inline" @click="logout">退出</button>
         </template>
-        <button v-else class="btn-primary btn-sm" @click="showLogin">登录</button>
+        <SdButton v-else size="sm" @click="showLogin">登录</SdButton>
 
         <!-- 移动汉堡按钮（<768） -->
         <button
