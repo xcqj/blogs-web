@@ -45,7 +45,7 @@ function retry() {
 <style scoped>
 .code404 {
   font-size: 64px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1;
   letter-spacing: -2px;
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));

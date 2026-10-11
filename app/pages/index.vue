@@ -24,7 +24,7 @@ useSeoMeta({
     <!-- Hero -->
     <section class="surface-hero relative overflow-hidden rounded-xl border border-border p-6 md:grid md:grid-cols-[1.15fr_0.85fr] md:items-center md:gap-6 md:p-12">
       <div>
-        <h1 class="text-display font-extrabold tracking-[var(--ls-display)]">
+        <h1 class="text-display leading-[var(--lh-display)] font-bold tracking-[var(--ls-display)]">
           把技术读到<br class="hidden sm:block" />
           <span class="text-primary">深处</span>
         </h1>

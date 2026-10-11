@@ -54,8 +54,8 @@ export default defineNuxtConfig({
       ],
       meta: [
         // 浏览器界面色跟随新色板（与 tokens.css 的 --bg 一致，不可写旧值）
-        { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0a1015' },
-        { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#e9f2f7' }
+        { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#14120f' },
+        { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#f4f1ea' }
       ]
     }
   },

@@ -17,8 +17,8 @@ import {
 export default defineConfig({
   shortcuts: {
     'flex-center': 'flex items-center justify-center',
-    // 容器两档：列表/首页宽档 1080，正文窄档 68ch
-    'sd-wrap': 'mx-auto w-full max-w-[var(--container)] px-5',
+    // 容器两档：列表/首页宽档 1080（本轮不动），正文窄档 68ch；边距 24 / 桌面 32
+    'sd-wrap': 'mx-auto w-full max-w-[var(--container)] px-6 lg:px-8',
     'sd-measure': 'max-w-[var(--measure)]',
 
     // ---------- 卡片 / 面板：半透明边 + elevation，hover 升一级并轻微上浮（②B） ----------

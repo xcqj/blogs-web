@@ -3,8 +3,8 @@
    - 深色为默认（:root 直接给值），浅色由 @nuxtjs/color-mode 在 <html> 打
      class="light" 覆盖；同时保留 [data-theme] 选择器以兼容 design/ mockup。
    - 页面/组件一律通过 uno.config.ts 的语义类消费这些变量，不写魔法数字。
-   - 色板来源：sun-summit 模板（实测 blue-100/200/300/500/700 + yellow-500 +
-     almost-black）；该模板只提供浅色，深色由同一蓝灰色相派生。
+   - 色板来源（2026-10-11 打磨轮 2）：暖纸方向，取 neura-nova 实测 #f5f0e8/#fefaf3/#211e1d/#585858 与 kanzo #2f2c25，强调黄取 omnera #ffd500；深色由同一暖色相派生。
+     （上一代 sun-summit 蓝灰板作废）
    - 分层机制来源：jason.blog（色阶分层 + 半透明分隔线 + 三档文字 + 克制圆角）。
    - 全部前景/底色对已实测通过 WCAG AA（见 tooling/shot/contrast.mjs，16 项全过）。
    ===================================================================== */
@@ -26,11 +26,11 @@
   --text-2xl: 32px;     --lh-2xl: 1.25;
   --text-3xl: 44px;     --lh-3xl: 1.15;
   --text-4xl: 56px;     --lh-4xl: 1.1;
-  --text-display: clamp(40px, 6vw, 72px); --lh-display: 1.04;
+  --text-display: clamp(44px, 6.5vw, 88px); --lh-display: 1.02;
 
   /* 负字距阶梯：只在 ≥24px 的标题上用。
      ⚠️ 中文方块字上限远低于拉丁——实测 -.045em 会让笔画相接，故取 CJK 安全档 */
-  --ls-display: -0.03em;
+  --ls-display: -0.04em;
   --ls-h1: -0.022em;
   --ls-h2: -0.018em;
   --ls-title: -0.008em;
@@ -46,13 +46,13 @@
   /* 间距阶梯（4px 基准）；--section-pad 用于区块内边距，留白节奏是质感主力 */
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
   --space-5: 24px; --space-6: 32px; --space-8: 48px; --space-10: 64px; --space-12: 96px;
-  --section-pad: 44px;
+  --section-pad: 64px;
 
   /* 三级文字：原只有 text/muted 两档，层级靠字号硬撑；补第三档给 meta/计数 */
   /* elevation 三级：阴影只表达"浮起高度"，不承担装饰；深色下比浅色更重 */
-  --e1: 0 1px 2px rgb(0 0 0 / 0.4);
-  --e2: 0 2px 4px rgb(0 0 0 / 0.3), 0 8px 20px -6px rgb(0 0 0 / 0.55);
-  --e3: 0 4px 8px rgb(0 0 0 / 0.35), 0 24px 60px -12px rgb(0 0 0 / 0.75);
+  --e1: 0 1px 2px rgb(0 0 0 / 0.28);
+  --e2: 0 2px 4px rgb(0 0 0 / 0.22), 0 8px 20px -6px rgb(0 0 0 / 0.45);
+  --e3: 0 4px 8px rgb(0 0 0 / 0.28), 0 24px 60px -12px rgb(0 0 0 / 0.6);
 
   /* 动效：全站只有三档时长 + 两条曲线；离场用 --t 配 ease-inout，比进场更快 */
   --t-fast: 140ms; --t: 200ms; --t-slow: 280ms;
@@ -66,42 +66,42 @@
 /* ---------- 深色（默认）：蓝灰阶派生，黄作 CTA 点缀 ---------- */
 :root {
   color-scheme: dark;
-  --bg: #0a1015;
-  --surface: #101a21;
-  --elevated: #16232c;
-  --raised: #1d2e39;
-  --text: #e9f2f7;
-  --text-muted: #a8c0cf;
-  --text-dim: #7b95a6;
+  --bg: #14120f;
+  --surface: #1c1916;
+  --elevated: #232019;
+  --raised: #2b2721;
+  --text: #f4f1ea;
+  --text-muted: #b5ada2;
+  --text-dim: #8a8378;
   /* 分隔线用半透明而非实色灰：自动适配任何底色，不会在深色上显生硬 */
-  --border: rgb(233 242 247 / 0.09);
-  --border-strong: rgb(233 242 247 / 0.17);
+  --border: rgb(244 241 234 / 0.09);
+  --border-strong: rgb(244 241 234 / 0.17);
   /* --accent 作按钮底/边框；--accent-fg 作前景强调（链接、chip 文字、hover 标题）。
-     必须拆开：蓝灰主色做底够，做小字对比度不足 */
-  --accent: #b3d3e6;
-  --accent-strong: #cbe3f1;
-  --accent-press: #8fb8cf;
-  --accent-ink: #14232c;
-  --accent-fg: #b3d3e6;
-  --accent-soft: rgb(179 211 230 / 0.15);
-  --accent-line: rgb(179 211 230 / 0.4);
+     必须拆开：暖灰主色做底够，做小字对比度不足 */
+  --accent: #e4dbc9;
+  --accent-strong: #f2ece0;
+  --accent-press: #cdc2ab;
+  --accent-ink: #14120f;
+  --accent-fg: #e4dbc9;
+  --accent-soft: rgb(228 219 201 / 0.14);
+  --accent-line: rgb(228 219 201 / 0.4);
   /* CTA 黄：模板的签名用法——主行动按钮用黄底黑字，而非把主色当按钮底 */
-  --cta: #ffe87d;
-  --cta-strong: #fff2a8;
+  --cta: #ffd500;
+  --cta-strong: #ffe55c;
   --cta-ink: #1a1c1c;
-  --chip-bg: rgb(179 211 230 / 0.15);
-  --chip-border: rgb(179 211 230 / 0.3);
+  --chip-bg: rgb(228 219 201 / 0.14);
+  --chip-border: rgb(228 219 201 / 0.28);
   /* 旧 glow 机制保留变量名（6 处在用）但强度大幅调低：主按钮不再发光 */
-  --glow: rgb(179 211 230 / 0.28);
-  --glow-soft: rgb(179 211 230 / 0.1);
+  --glow: rgb(228 219 201 / 0.26);
+  --glow-soft: rgb(228 219 201 / 0.1);
   --shadow-glow: var(--e2);
-  --layer-fill: linear-gradient(135deg, #2b4251, #1b2c37);
-  --ph-1: #2b4251;
-  --ph-2: #1b2c37;
-  --code-bg: #0d151c;
-  --code-text: #e9f2f7;
-  --logo-back: #e9f2f7;
-  --logo-front: #b3d3e6;
+  --layer-fill: linear-gradient(135deg, #3a342b, #232019);
+  --ph-1: #3a342b;
+  --ph-2: #232019;
+  --code-bg: #0e0c0a;
+  --code-text: #f4f1ea;
+  --logo-back: #f4f1ea;
+  --logo-front: #ffd500;
   --danger: #e0685f;
   /* danger 实心按钮上的文字色：深色下 #e0685f 配白字只 3.32:1，必须用深字 */
   --danger-ink: #1a1c1c;
@@ -109,7 +109,7 @@
   /* 状态徽标：草稿=中性、用户隐藏=橙、管理员下线=红；warn 由琥珀改橙以避开黄 CTA */
   --warn: #e0955a;
   --warn-bg: rgb(224 149 90 / 0.14);
-  --muted-bg: rgb(168 192 207 / 0.14);
+  --muted-bg: rgb(181 173 162 / 0.14);
   --hero-bg: radial-gradient(120% 120% at 85% 20%, var(--accent-soft), transparent 60%), var(--surface);
 }
 
@@ -117,51 +117,51 @@
 :root.light,
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #e9f2f7;
-  --surface: #ffffff;
+  --bg: #f4f1ea;
+  --surface: #fdfbf6;
   --elevated: #ffffff;
-  --raised: #dfeaf2;
-  --text: #1a1c1c;
-  --text-muted: #33505f;
-  --text-dim: #527488;
-  --border: rgb(26 28 28 / 0.1);
-  --border-strong: rgb(26 28 28 / 0.18);
-  /* 模板原色 blue-500 #587c92 配白字只有 4.45:1 不达 AA，故主按钮底用 blue-700 */
-  --accent: #4b6272;
-  --accent-strong: #3d5261;
-  --accent-press: #2f4150;
+  --raised: #efebe2;
+  --text: #211e1d;
+  --text-muted: #585858;
+  --text-dim: #6f6759;
+  --border: rgb(33 30 29 / 0.1);
+  --border-strong: rgb(33 30 29 / 0.22);
+  /* 主色改墨棕（kanzo 实测 #2f2c25）：中性近黑，做按钮底配白字 13.9:1、做小字 12.3:1 */
+  --accent: #2f2c25;
+  --accent-strong: #211e1d;
+  --accent-press: #171514;
   --accent-ink: #ffffff;
-  --accent-fg: #4b6272;
-  --accent-soft: #dbe8f2;
-  --accent-line: rgb(88 124 146 / 0.4);
-  /* ⚠️ --accent-soft 要与 --bg 拉开：两者曾同为 #e9f2f7，
-     导致 chip 直接放在页面底（如详情页 meta 行）时背景隐形、看起来像普通文本 */
-  --cta: #ffe87d;
-  --cta-strong: #fbd75a;
+  --accent-fg: #2f2c25;
+  /* --accent-soft 必须与 --bg 拉开：两者若同色，chip 直接放在页面底时背景会隐形 */
+  --accent-soft: #e8e2d6;
+  --accent-line: rgb(47 44 37 / 0.4);
+  /* CTA 黄由 #ffe87d（淡黄发灰）提到 #ffd500（omnera 实测值）：饱和黄才跳 */
+  --cta: #ffd500;
+  --cta-strong: #ffe04d;
   --cta-ink: #1a1c1c;
-  --chip-bg: #dbe8f2;
-  --chip-border: rgb(75 98 114 / 0.24);
-  --glow: rgb(75 98 114 / 0.2);
-  --glow-soft: rgb(75 98 114 / 0.08);
+  --chip-bg: #e8e2d6;
+  --chip-border: rgb(47 44 37 / 0.24);
+  --glow: rgb(47 44 37 / 0.2);
+  --glow-soft: rgb(47 44 37 / 0.08);
   --shadow-glow: var(--e1);
-  --layer-fill: linear-gradient(135deg, #cfe3ee, #b3d3e6);
-  --ph-1: #cfe3ee;
-  --ph-2: #b3d3e6;
-  --code-bg: #101a21;
-  --code-text: #e9f2f7;
-  --logo-back: #1a1c1c;
-  --logo-front: #4b6272;
+  --layer-fill: linear-gradient(135deg, #e8e2d6, #d8cfc0);
+  --ph-1: #e8e2d6;
+  --ph-2: #d8cfc0;
+  --code-bg: #211e1d;
+  --code-text: #f4f1ea;
+  --logo-back: #211e1d;
+  --logo-front: #ffd500;
   --danger: #b91c1c;
   --danger-ink: #ffffff;
   --danger-bg: rgb(185 28 28 / 0.08);
   --warn: #b45309;
   --warn-bg: rgb(180 83 9 / 0.1);
-  --muted-bg: rgb(82 116 136 / 0.12);
-  --hero-bg: radial-gradient(120% 120% at 85% 20%, rgb(179 211 230 / 0.55), transparent 60%), var(--surface);
+  --muted-bg: rgb(88 88 88 / 0.12);
+  --hero-bg: radial-gradient(120% 120% at 85% 20%, #efe9dd, transparent 60%), var(--surface);
   /* 浅色下阴影要更轻，否则白卡发脏 */
-  --e1: 0 1px 2px rgb(26 28 28 / 0.06);
-  --e2: 0 2px 4px rgb(26 28 28 / 0.06), 0 8px 20px -8px rgb(26 28 28 / 0.14);
-  --e3: 0 4px 10px rgb(26 28 28 / 0.08), 0 24px 50px -12px rgb(26 28 28 / 0.2);
+  --e1: 0 1px 2px rgb(33 30 29 / 0.06);
+  --e2: 0 2px 4px rgb(33 30 29 / 0.06), 0 8px 20px -8px rgb(33 30 29 / 0.14);
+  --e3: 0 4px 10px rgb(33 30 29 / 0.08), 0 24px 50px -12px rgb(33 30 29 / 0.2);
 }
 
 /* ---------- 基础层：底色/正文/链接跟随 token ---------- */

@@ -53,7 +53,7 @@ useSeoMeta({
       <span class="i-mdi:arrow-left" aria-hidden="true" />返回文章列表
     </NuxtLink>
     <header>
-      <h1 class="max-w-[24ch] text-3xl font-extrabold leading-[var(--lh-3xl)] tracking-[var(--ls-h1)]">{{ version?.title }}</h1>
+      <h1 class="max-w-[24ch] text-3xl font-bold leading-[var(--lh-3xl)] tracking-[var(--ls-h1)]">{{ version?.title }}</h1>
 
       <!-- meta 条：头像 + 作者 + 日期 + 阅读量 + 标签 -->
       <div class="mt-4 flex flex-wrap items-center gap-3 border-b border-border pb-5">

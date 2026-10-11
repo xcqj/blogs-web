@@ -31,18 +31,18 @@ const ratio = (fg, bg, base) => {
 };
 
 const THEMES = {
-  // sun-summit 蓝灰阶：深色版由同一色相派生（模板本身只给浅色）
+  // 暖纸（2026-10-11 打磨轮 2）：深色版由同一暖色相派生
   dark: {
-    bg: '#0a1015', surface: '#101a21', elevated: '#16232c',
-    ink: '#e9f2f7', ink2: '#a8c0cf', ink3: '#7b95a6',
-    accent: '#b3d3e6', accentInk: '#14232c', accentSoft: 'rgba(179,211,230,.15)',
-    accentFg: '#b3d3e6', cta: '#ffe87d', ctaInk: '#1a1c1c'
+    bg: '#14120f', surface: '#1c1916', elevated: '#232019',
+    ink: '#f4f1ea', ink2: '#b5ada2', ink3: '#8a8378',
+    accent: '#e4dbc9', accentInk: '#14120f', accentSoft: 'rgba(228,219,201,.14)',
+    accentFg: '#e4dbc9', cta: '#ffd500', ctaInk: '#1a1c1c'
   },
   light: {
-    bg: '#e9f2f7', surface: '#ffffff', elevated: '#ffffff',
-    ink: '#1a1c1c', ink2: '#33505f', ink3: '#527488',
-    accent: '#4b6272', accentInk: '#ffffff', accentSoft: '#e9f2f7',
-    accentFg: '#4b6272', cta: '#ffe87d', ctaInk: '#1a1c1c'
+    bg: '#f4f1ea', surface: '#fdfbf6', elevated: '#ffffff',
+    ink: '#211e1d', ink2: '#585858', ink3: '#6f6759',
+    accent: '#2f2c25', accentInk: '#ffffff', accentSoft: '#e8e2d6',
+    accentFg: '#2f2c25', cta: '#ffd500', ctaInk: '#1a1c1c'
   }
 };
 // [前景, 背景, 场景, 门槛, 背景所落的 base（默认 surface）]
@@ -55,7 +55,8 @@ const CASES = [
   ['accentFg', 'surface', '链接 / 标题 hover', 4.5],
   ['accentFg', 'accentSoft', 'chip 文字', 4.5, 'surface'],
   ['ctaInk', 'cta', 'CTA 黄按钮文字', 4.5],
-  ['ink', 'bg', '正文 / 页面底', 4.5]
+  ['ink', 'bg', '正文 / 页面底', 4.5],
+  ['ink3', 'bg', 'meta / 页面底（chip 场景）', 4.5]
 ];
 
 for (const [name, t] of Object.entries(THEMES)) {

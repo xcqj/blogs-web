@@ -220,7 +220,7 @@ async function submit(publish: boolean) {
   border-bottom: 1px solid var(--border);
   color: var(--text);
   font-size: var(--text-2xl);
-  font-weight: 800;
+  font-weight: 700;
   line-height: var(--lh-2xl);
   padding: 0.375rem 0;
   margin-bottom: 1rem;

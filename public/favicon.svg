@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" fill="none">
   <!-- favicon：内嵌 prefers-color-scheme，浏览器标签页自动切深浅，无需 JS。
-       后框随主题（浅=近黑 / 深=浅蓝白），前框固定品牌蓝灰。 -->
+       后框随主题（浅=墨棕 / 深=暖白），前框固定品牌黄 #ffd500。 -->
   <style>
-    .sd-back  { stroke: #1a1c1c; }
-    .sd-front { stroke: #4b6272; }
+    .sd-back  { stroke: #211e1d; }
+    .sd-front { stroke: #ffd500; }
     @media (prefers-color-scheme: dark) {
-      .sd-back  { stroke: #e9f2f7; }
-      .sd-front { stroke: #b3d3e6; }
+      .sd-back  { stroke: #f4f1ea; }
+      .sd-front { stroke: #ffd500; }
     }
   </style>
   <rect class="sd-back"  x="6"  y="10" width="22" height="22" rx="6" stroke-width="2.8"/>
