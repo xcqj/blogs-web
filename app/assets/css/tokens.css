@@ -118,13 +118,13 @@
 :root[data-theme='light'] {
   color-scheme: light;
   --bg: #f4f1ea;
-  --surface: #fdfbf6;
-  --elevated: #ffffff;
+  --surface: #ffffff;
+  --elevated: #f8f5ee;
   --raised: #efebe2;
   --text: #211e1d;
   --text-muted: #585858;
   --text-dim: #6f6759;
-  --border: rgb(33 30 29 / 0.1);
+  --border: rgb(33 30 29 / 0.14);
   --border-strong: rgb(33 30 29 / 0.22);
   /* 主色改墨棕（kanzo 实测 #2f2c25）：中性近黑，做按钮底配白字 13.9:1、做小字 12.3:1 */
   --accent: #2f2c25;
@@ -159,7 +159,7 @@
   --muted-bg: rgb(88 88 88 / 0.12);
   --hero-bg: radial-gradient(120% 120% at 85% 20%, #efe9dd, transparent 60%), var(--surface);
   /* 浅色下阴影要更轻，否则白卡发脏 */
-  --e1: 0 1px 2px rgb(33 30 29 / 0.06);
+  --e1: 0 1px 2px rgb(33 30 29 / 0.08);
   --e2: 0 2px 4px rgb(33 30 29 / 0.06), 0 8px 20px -8px rgb(33 30 29 / 0.14);
   --e3: 0 4px 10px rgb(33 30 29 / 0.08), 0 24px 50px -12px rgb(33 30 29 / 0.2);
 }

@@ -74,7 +74,7 @@ export default defineConfig({
     'sd-h2': 'text-2xl font-bold tracking-[var(--ls-h2)]',
     'sd-muted': 'text-sm text-muted',
     'sd-dim': 'text-xs text-dim',
-    'sd-eyebrow': 'text-xs font-bold uppercase tracking-[0.06em] text-dim',
+    'sd-eyebrow': 'flex items-center gap-2.5 text-sm font-bold text-text before:block before:h-px before:w-5 before:bg-dim',
     // meta 行小圆点分隔符（design .dot）
     'sd-dot': 'inline-block h-1 w-1 shrink-0 rounded-full bg-dim opacity-60',
     // 列表缩略图：统一去饱和，消除真实照片与扁平 UI 的素材感

@@ -3,7 +3,7 @@
 // three.js 动态漂浮层属桶B：只走下面 <ClientOnly> 槽位注入，不进 SSR、不影响首屏与 SEO。
 // 颜色仍取 var()，几何尺寸是装饰艺术本身、封装在本组件内不外溢到页面。
 const layerStyle = (i: number) => ({
-  transform: `translateZ(${(i - 1) * 34}px)`,
+  transform: `translateZ(${(i - 1) * 26}px)`,
   opacity: String(Math.min(1, 0.35 + (i - 1) * 0.13))
 })
 </script>
@@ -29,23 +29,23 @@ const layerStyle = (i: number) => ({
   position: relative;
   /* 高度由外层容器按断点控制（md 缩小 / lg 并排），组件自身跟随父高 */
   height: 100%;
-  min-height: 240px;
+  min-height: 140px;
   perspective: 1100px;
 }
 .stack {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 190px;
-  height: 190px;
-  margin: -95px 0 0 -95px;
+  width: 140px;
+  height: 140px;
+  margin: -70px 0 0 -70px;
   transform-style: preserve-3d;
   transform: rotateX(58deg) rotateZ(45deg);
 }
 .stack--secondary {
-  width: 120px;
-  height: 120px;
-  margin: -60px 0 0 90px;
+  width: 90px;
+  height: 90px;
+  margin: -45px 0 0 52px;
   opacity: 0.45;
 }
 

@@ -21,21 +21,20 @@ useSeoMeta({
 
 <template>
   <div class="space-y-8">
-    <!-- Hero -->
-    <section class="surface-hero relative overflow-hidden rounded-xl border border-border p-6 md:grid md:grid-cols-[1.15fr_0.85fr] md:items-center md:gap-6 md:p-12">
+    <!-- Hero（打磨轮5 瘦身）：44px 一行标题 + 一句话 + 中号 CTA，叠层图形降为点缀（160px）。
+         内容站首屏应让位给文章列表，品牌图形不再占一屏（用户实测反馈） -->
+    <section class="surface-hero relative overflow-hidden rounded-xl border border-border p-6 md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-8 md:p-8">
       <div>
-        <h1 class="text-display leading-[var(--lh-display)] font-bold tracking-[var(--ls-display)]">
-          把技术读到<br class="hidden sm:block" />
-          <span class="text-primary">深处</span>
+        <h1>
+          把技术读到<span class="text-primary">深处</span>
         </h1>
-        <p class="mt-4 max-w-[46ch] text-muted">
+        <p class="mt-2.5 max-w-[52ch] text-muted">
           {{ siteName }} —— 一个多作者技术博客。从源码到系统，一层层往深处读：阅读、搜索与评论。
         </p>
-        <!-- 主 CTA 用黄底黑字（sun-summit 的签名用法），次级动作才用描边按钮 -->
-        <SdButton href="#latest" variant="cta" size="lg" class="mt-7">开始阅读 →</SdButton>
+        <SdButton href="#latest" variant="cta" class="mt-5">开始阅读 →</SdButton>
       </div>
-      <!-- 纵深叠层：< 768 隐藏（性能与首屏，见 design/responsive.html），md 缩小 / lg 并排；three.js 属桶B -->
-      <div class="hidden md:block md:h-64 lg:h-80">
+      <!-- 品牌母题点缀：< md 隐藏；three.js 属桶B，只走 ClientOnly 槽位 -->
+      <div class="hidden w-60 md:block md:h-44 lg:h-48">
         <HeroVisual />
       </div>
     </section>
@@ -79,24 +78,22 @@ useSeoMeta({
         <!-- v-reveal：侧栏面板错峰进场（M4）。隐藏态由 JS 在 mounted 加 class，
              禁用 JS 或脚本加载失败时内容照常可见，不会白屏 -->
         <div v-reveal>
-          <h2 class="sd-eyebrow mb-4">热门标签</h2>
+          <h2 class="sd-eyebrow mb-4">标签</h2>
           <SdCard padding="md">
+            <p class="mb-2.5 text-xs font-semibold text-dim">热门</p>
             <div class="flex flex-wrap gap-2">
               <TagChip v-for="t in hot" :key="t.tagId" :slug="t.slug" :name="`${t.name} · ${t.articleCount ?? 0}`" />
               <span v-if="!hot?.length" class="text-xs text-muted">暂无</span>
             </div>
-          </SdCard>
-        </div>
-        <div v-reveal="90">
-          <h2 class="sd-eyebrow mb-4">精选标签</h2>
-          <SdCard padding="md">
+            <div class="my-4 border-t border-border" />
+            <p class="mb-2.5 text-xs font-semibold text-dim">精选</p>
             <div class="flex flex-wrap gap-2">
               <TagChip v-for="t in featured" :key="t.tagId" :slug="t.slug" :name="t.name" />
               <span v-if="!featured?.length" class="text-xs text-muted">暂无</span>
             </div>
           </SdCard>
         </div>
-        <div v-reveal="180">
+        <div v-reveal="90">
           <h2 class="sd-eyebrow mb-4">关于</h2>
           <SdCard padding="md">
             <p class="text-sm text-muted">{{ siteName }} · 多作者技术博客前台，基于 Nuxt 4 SSR。</p>
