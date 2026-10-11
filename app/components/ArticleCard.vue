@@ -31,7 +31,7 @@ const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10
     <div class="min-w-0 flex-1">
       <NuxtLink
         :to="`/post/${article.articleId}`"
-        class="block truncate text-lg font-bold tracking-[var(--ls-title)] transition hover:text-primary"
+        class="block truncate text-xl font-bold tracking-[var(--ls-title)] transition hover:text-primary"
       >
         {{ article.title }}
       </NuxtLink>

@@ -55,7 +55,7 @@ useSeoMeta({
           >
             <SdButton @click="refreshPage">重试</SdButton>
           </ErrorState>
-          <div v-else key="list" class="space-y-3.5">
+          <div v-else key="list" class="space-y-4">
             <ArticleCard v-for="a in page?.rows" :key="a.articleId" :article="a" />
             <EmptyState
               v-if="!page?.rows?.length"
@@ -74,7 +74,7 @@ useSeoMeta({
 
       <!-- 侧栏标题与左列「最新文章」同规格并提到面板外：
            两列顶部结构一致，标题对标题、卡片对第一张卡片自然对齐（不靠魔法值 margin） -->
-      <aside class="space-y-4">
+      <aside class="space-y-4 self-start lg:sticky lg:top-20">
         <!-- v-reveal：侧栏面板错峰进场（M4）。隐藏态由 JS 在 mounted 加 class，
              禁用 JS 或脚本加载失败时内容照常可见，不会白屏 -->
         <div v-reveal>

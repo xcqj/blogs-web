@@ -48,7 +48,7 @@ useSeoMeta({
 
       <ArticleListSkeleton v-if="status === 'pending'" :count="3" />
       <template v-else>
-        <div class="space-y-3.5">
+        <div class="space-y-4">
           <ArticleCard v-for="a in articles?.rows" :key="a.articleId" :article="a" />
         </div>
         <EmptyState v-if="!articles?.rows?.length" title="暂无公开文章" description="这位作者还没有公开的文章。" />

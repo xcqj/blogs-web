@@ -54,7 +54,7 @@ useSeoMeta({
           <SdButton @click="refresh">重试</SdButton>
         </ErrorState>
         <template v-else>
-          <div class="space-y-3.5">
+          <div class="space-y-4">
             <ArticleCard v-for="a in data?.rows" :key="a.articleId" :article="a" />
           </div>
           <EmptyState
