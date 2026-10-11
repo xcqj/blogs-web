@@ -283,47 +283,66 @@ h4 { font-size: var(--text-lg); line-height: var(--lh-lg); letter-spacing: var(-
   }
 }
 
-/* ---------- 滚轴按钮（借鉴 neura-nova 的 .primary-button） ----------
-   文字与箭头各两份，纵向堆叠在遮罩内；整枚按钮 hover / 键盘 focus 时同时上滚一行，
-   第二份补位。第二份内容由使用方标 aria-hidden，读屏只念一次。 */
-.sd-roll,
-.sd-roll-icon {
+/* ---------- 滚轴按钮（借鉴 neura-nova .primary-button，改为逐字交错版） ----------
+   每个字符各自一个遮罩：两份同字符纵向排列（block 自然堆叠），hover 时各字符上滚一行、
+   第二份补位；相邻字符用 --i 递增延迟形成「逐字滚动」。图标两份用绝对定位，永远在圆心。
+   无障碍：滚动内容整体 aria-hidden，语义由 SdRollButton 给按钮的 aria-label 承担。 */
+.sd-roll-chars {
   display: inline-flex;
-  flex-direction: column;
+  align-items: baseline;
+}
+.sd-roll {
+  position: relative;
+  display: inline-block;
+  height: 1.15em;
   overflow: hidden;
   vertical-align: bottom;
 }
-.sd-roll {
+.sd-roll > span {
+  display: block;
   height: 1.15em;
+  line-height: 1.15em; /* 单行高度 = 遮罩高度，否则上滚后会被裁一截 */
+  transition: transform var(--t) var(--ease-out);
+  /* 离开时反向交错（末字先落），进入时正向交错（首字先起） */
+  transition-delay: calc((var(--n, 1) - var(--i, 0)) * 18ms);
 }
 .sd-roll-icon {
+  position: relative;
+  display: inline-block;
   width: 20px;
   height: 20px;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  vertical-align: middle;
   border: 1.5px solid currentColor;
   border-radius: var(--radius-full);
 }
-.sd-roll > span,
 .sd-roll-icon > span {
-  flex: 0 0 auto;
-  transition: transform var(--t) var(--ease-out);
-}
-/* 单行高度必须等于遮罩高度，否则上移后文字/图标会被裁掉一截（实测：文字行高 19.8 vs 遮罩 13.8） */
-.sd-roll > span {
-  line-height: 1.15em;
-}
-.sd-roll-icon > span {
-  height: 20px;
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform var(--t) var(--ease-out);
 }
-.group:hover .sd-roll > span,
-.group:hover .sd-roll-icon > span,
-.group:focus-visible .sd-roll > span,
-.group:focus-visible .sd-roll-icon > span {
+.sd-roll-icon > span > i {
+  font-size: 11px; /* 20px 圆内留余量，视觉更居中 */
+}
+
+.sd-roll-icon > span:last-child {
+  transform: translateY(100%); /* 第二份平时藏在圆下方 */
+}
+.group:hover .sd-roll-chars .sd-roll > span,
+.group:focus-visible .sd-roll-chars .sd-roll > span {
   transform: translateY(-100%);
+  transition-delay: calc(var(--i, 0) * 26ms);
+}
+.group:hover .sd-roll-icon > span:first-child,
+.group:focus-visible .sd-roll-icon > span:first-child {
+  transform: translateY(-100%);
+}
+.group:hover .sd-roll-icon > span:last-child,
+.group:focus-visible .sd-roll-icon > span:last-child {
+  transform: translateY(0);
 }
 @media (prefers-reduced-motion: reduce) {
   .sd-roll > span,

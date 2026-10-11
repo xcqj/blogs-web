@@ -1,25 +1,32 @@
 <script setup lang="ts">
-// 滚轴按钮（打磨轮 9，借鉴 neura-nova 的 .primary-button：文字与箭头各两份，
-// overflow-hidden 遮罩内 hover 时整行上滚，第二份补位——详见 tokens.css 的 .sd-roll 系列）。
-// - 内容由 props 给（label / icon），SdButton 的全部属性经 $attrs 透传（variant/size/to/type/loading…）
-// - 第二份文案与图标均为 aria-hidden，读屏只念一次；键盘 focus 也触发滚动（:focus-visible 见 tokens.css）
+// 滚轴按钮（打磨轮 9 修订，借鉴 neura-nova 的 .primary-button）：
+// - **逐字滚动**：label 拆成字符，每字一个遮罩（两份同字堆叠），hover 时逐字上滚并依次延迟
+//   （--i 递增 delay；离开时反向，末字先落）——整块文字一起滚是错的，观感差很多
+// - 箭头图标两份用绝对定位叠在圆内（上一版用 flex 竖排会把图标顶出圆圈）
+// - 无障碍：滚动内容整体 aria-hidden，语义由按钮的 aria-label 承担（否则读屏会逐字念）
 interface Props {
   label: string
   icon?: string
 }
 
-withDefaults(defineProps<Props>(), { icon: 'i-mdi:arrow-right' })
+const props = withDefaults(defineProps<Props>(), { icon: 'i-mdi:arrow-right' })
+
+// 空格换成不换行空格，避免被折叠导致字符遮罩错位
+const chars = computed(() => [...props.label].map((c) => (c === ' ' ? '\u00A0' : c)))
 </script>
 
 <template>
-  <SdButton v-bind="$attrs" class="group">
-    <span class="sd-roll">
-      <span>{{ label }}</span>
-      <span aria-hidden="true">{{ label }}</span>
+  <SdButton v-bind="$attrs" class="group" :aria-label="label">
+    <span class="sd-roll-chars" aria-hidden="true" :style="{ '--n': chars.length }">
+      <span v-for="(ch, i) in chars" :key="i" class="sd-roll" :style="{ '--i': i }">
+        <span>{{ ch }}</span>
+        <span>{{ ch }}</span>
+      </span>
     </span>
+    <!-- 图标再包一层：i-mdi 类自带固定宽高（1.2em），直接给外层 span 会压掉 inset:0 的撑满与居中 -->
     <span class="sd-roll-icon" aria-hidden="true">
-      <span :class="icon" />
-      <span :class="icon" />
+      <span><i :class="icon" /></span>
+      <span><i :class="icon" /></span>
     </span>
   </SdButton>
 </template>
