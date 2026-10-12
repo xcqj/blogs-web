@@ -230,6 +230,17 @@ M1~M17 机制对照表（每条带证据/我们现状/判定/成本）、授权�
   Lenis 亦 MIT——所以障碍不在授权，而在“要不要为 80% 效果多引 30KB 依赖”；建议先零依赖实现，GSAP 留给桶 B
 - ❌ **不吸收**：M16 响应式圆角变量（revoul）——与已锁的 2/2/4 单族圆角直接冲突
 
+### 2.13 首页/列表页模块化中改（2026-10-13，参考 jason.blog + yuanpu 模板）
+
+用户三项决策（澄清轮逐项选定）：**范围=仅首页/列表页**（`index.vue` + `page/[n].vue`）；**力度=中改**（保留双栏骨架、补模块，不做单栏全重构）；**yuanpu 按结构特征落地**（暗色极简 / CSS 网格 / 标签化 / CTA 色块；模板预览是 iframe，拿不到像素级视觉，不要求复刻）。视觉基调跟随 jason.blog：内容优先、精选 + 归档时间线、数字分页。
+
+- [x] **精选文章区** `app/components/FeaturedArticle.vue`：Hero 之下通栏大卡，取 §5.1 列表**首条派生**（契约无精选文章接口、§7.1 featured 仅标签，**零后端改动**）；md+ 双栏（文案 + 8:5 封面，封面链接对辅助技术隐藏、不占 Tab）；摘要 `line-clamp-2`；「阅读全文 →」`btn-cta`。
+- [x] **归档分组** `app/utils/archiveGroup.ts`（纯函数 `groupByMonth`）+ `app/components/ArchiveGroup.vue`：按 `publishedAt` 年月分组（`2026 · 10` 组头 + 篇数 + 发丝线），**只对当前页分组、不跨页聚合**；首页排除精选首条后分组，`/page/{n}` 全量分组；组内沿用 `ArticleCard` 行式卡片（保持 2026-10-08 定稿形态，不改流式行）。
+- [x] **CTA band** `app/components/CtaBand.vue`：页尾 `--cta` 黄底高对比色块（token 反相用法：`bg-cta` + `text-cta-ink`）；主按钮新增 **`btn-ink` 变体**（墨底黄字，`uno.config.ts` shortcut 族 + `SdButton` variant 同步扩展），次按钮墨描边、hover 反相为墨底黄字；纯静态链接（`/me/new` 走既有 `useRequireAuth` 守卫，不调新接口）。
+- [x] **边界与收敛**：全站仅 1 篇且被精选消费时不出空状态，改出「更多文章即将发布。」弱提示；`/page/{n}` 页头 `mb-5`→`mb-6` 归 token 刻度；CTA 文案避开与 Hero 口号重复（「下一篇，从你开始」）。
+- [x] **验收**：`npm run build` 全绿；SSR markup 核验（精选/组头/CTA/`btn-ink` 均在首屏 HTML）；playwright 三视口实测（临时脚本，已删；playwright 包 `--no-save` 临时装、已卸）：深/浅主题 CTA band 均 `rgb(255,213,0)`、ink 按钮 `#1a1c1c`/`#ffd500`、桌面 1440 / 移动 390 / `/page/2` 横向溢出均为 **0**、移动端 CTA 按钮纵排。⚠️ 截图中文呈方框系**本机 WSL 未装 CJK 字体**（`fc-list` 0 条）而非站点问题，视觉验收需在用户机器浏览器进行（与 S9/M5 同例）。
+- 偏差备案：间距仍走 UnoCSS 默认刻度（取值与 token 刻度对齐：16/24/32/48/64），颜色/字号/阴影/动效全部 token——与仓库现状一致；**tokens.css 本轮零改动**（现有 token 已覆盖新模块需求，无需加档位）。
+
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 
 - 三层 API 边界：只调 `/blog/public/**` + `/blog/article|user/**`，**禁 `/blog/admin/**`**；作者自助发文/编辑/隐藏/删除在**作者中心**（D29，走 `/blog/article/**`），平台治理仍仅 plus-ui。

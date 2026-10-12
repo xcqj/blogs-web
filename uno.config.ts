@@ -35,6 +35,8 @@ export default defineConfig({
     'btn-cta': 'btn bg-cta text-cta-ink hover:bg-cta-strong active:bg-cta',
     'btn-ghost': 'btn bg-transparent text-muted hover:bg-soft hover:text-primary-fg',
     'btn-danger': 'btn bg-danger-bg text-danger hover:bg-danger hover:text-danger-ink',
+    // CTA 色块内的反相主按钮：墨底黄字（--cta 签名用法的反相），仅用于 bg-cta 底色上
+    'btn-ink': 'btn bg-cta-ink text-cta hover:-translate-y-0.5 hover:shadow-e2 active:translate-y-0',
     'btn-sm': 'h-7.5 rounded-sm px-2.5 text-xs',
     'btn-lg': 'h-11 rounded-md px-5 text-base',
     'btn-pill': 'rounded-full',
@@ -75,6 +77,8 @@ export default defineConfig({
     'sd-muted': 'text-sm text-muted',
     'sd-dim': 'text-xs text-dim',
     'sd-eyebrow': 'flex items-center gap-2.5 text-sm font-bold text-text before:block before:h-px before:w-5 before:bg-dim',
+    // 归档分组头（jason.blog 年月归档语义）：组头标签 + 右侧发丝线与计数由使用方模板给
+    'sd-archive-head': 'flex items-center gap-2.5 text-sm font-bold text-muted',
     // meta 行小圆点分隔符（design .dot）
     'sd-dot': 'inline-block h-1 w-1 shrink-0 rounded-full bg-dim opacity-60',
     // 列表缩略图：统一去饱和，消除真实照片与扁平 UI 的素材感
