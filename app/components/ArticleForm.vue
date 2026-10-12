@@ -117,8 +117,11 @@ async function submit(publish: boolean) {
       publish ? '读者已可在列表与搜索中看到它' : '仅你自己可见，可继续编辑',
       { key: 'article-save', action: isEdit.value ? undefined : { label: '去编辑', to: `/me/${id}/edit` } }
     );
-    if (!isEdit.value && id) {
-      // 新建成功后切到编辑路由，后续保存走 PUT 而不是重复创建
+    if (publish) {
+      // 发布成功后直接返回文章列表（新建/编辑一致）
+      await router.replace('/me');
+    } else if (!isEdit.value && id) {
+      // 新建草稿后切到编辑路由，后续保存走 PUT 而不是重复创建
       await router.replace(`/me/${id}/edit`);
     } else {
       await load();
