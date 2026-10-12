@@ -2,7 +2,7 @@
 
 > 派生实现清单，**不是排期/状态权威源**。切片级状态以 `../RuoYi-Vue-Plus/docs/ROADMAP.md`（S9/S12 + §6 D21/D27/D28/D29）为准；本文件只做 blog-web 页面/组件粒度的 TODO 拆解，引用 S9/S12 与契约章节，不复制状态。
 > 权威源：API 契约 `../RuoYi-Vue-Plus/docs/blog-api.md`；红线 `AGENTS.md`；编码规范 `.codex/skills/nuxt-frontend-coding/SKILL.md` + `references/nuxt.md`。
-> 范围（2026-10-06 定）：**完整 S9 剩余**（2026-10-07 追加 **S12 作者中心**，D29 修订 D24，见 §2.8）；D28 附加模块（`@nuxtjs/seo`/`@nuxt/image`/shiki/`@nuxt/eslint`）统一标 `⏸ 按需/MVP 后再定`，只作可选增强，不纳入本轮承诺。
+> 范围（2026-10-06 定）：**完整 S9 剩余**（2026-10-07 追加 **S12 作者中心**，D29 修订 D24，见 §2.8；2026-10-13 追加 **S14 社交登录落地 / S17 PWA+SEO / S20 Lenis** 面试亮点，见 §2.15~§2.17，状态以 ROADMAP v0.4 为准）；D28 附加模块（`@nuxtjs/seo`/`@nuxt/image`/shiki/`@nuxt/eslint`）统一标 `⏸ 按需/MVP 后再定`，只作可选增强，不纳入本轮承诺。
 
 ## 0. 正常 Nuxt 流程（本清单的推进模板）
 
@@ -270,3 +270,28 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 ```
 
 每个里程碑一次小步 commit；涉及后端仓库的部署项按"零后端代码"边界只做 infra/文档。
+
+## 2.15 S14 社交登录落地（blog-web 侧，2026-10-13 规划）
+
+> 后端改造（`SocialAuthStrategy` 自动注册 / justauth 配置 / web 客户端加 social grant）见 ROADMAP S14/D34；本节只列 blog-web 侧。红线不变：token 走 cookie + Nitro 代理，业务代码不手写认证头；**微信/QQ/钉钉因企业资质不接入**（已评估边界）。
+
+- [ ] `LoginModal` 增加 GitHub / Gitee 登录按钮：点击经 `server/api/auth/binding/[source].ts` 代理取授权 URL（`/auth/binding/{source}`）后跳转第三方
+- [ ] Nitro 落地路由 `server/api/auth/social/callback`（或页面路由）：收 `code`/`state` → 调后端 `/auth/login`（grantType=social，clientid=web）→ 成功种 httpOnly cookie 并跳回登录前页面 → 失败走统一错误提示（复用 `app/utils/apiError.ts`）
+- [ ] 验收：新用户首次 GitHub 登录自动建号并进入登录态；二次登录直达已绑定账号；解绑后回本地账号；授权链路无 cookie/token 泄露（DevTools 核验）
+
+## 2.16 S17 PWA + SEO 三件套（2026-10-13 规划）
+
+- [ ] `@vite-pwa/nuxt` 接入：manifest（名称/图标/主题色随 token）+ Workbox 策略（app shell precache / 文章页 stale-while-revalidate / API network-first）+ 离线回退页；**`/me/**` 与需登录 API 不进 SW 缓存**（红线）；iOS 无 SW 的限制写进 README
+- [ ] `sitemap.xml`（Nitro route 查公共列表生成，含 lastmod）
+- [ ] `rss.xml`（RSS 2.0，最新 N 篇公共文章）
+- [ ] JSON-LD：`/post` 注 `Article` 结构化数据（headline/author/datePublished，在现有 `useSeoMeta` 基线上扩展）
+- [ ] `robots.txt` 声明 sitemap
+- [ ] 验收：Lighthouse PWA + SEO 分数留档（本地 Chrome）；断网刷新已加载文章可读；view-source 抽验结构化数据；移动视口回归
+
+## 2.17 S20 Lenis 平滑滚动（⏸ 待定，核心完成后）
+
+> D38 收缩后范围：仅 Lenis；hero 视差 / 逐字进场待定；**不做 three.js、不引 GSAP**。纯表现层，无契约/数据/状态机改动，独立 commit 随时可砍。
+
+- [ ] 引入 Lenis（约 30KB）+ 与 `useScrollDirection()` / 阅读进度条 / v-reveal 的叠加回归
+- [ ] `prefers-reduced-motion` 兜底（transitions.css 已有，确认 Lenis 同样尊重）
+- [ ] 验收：桌面/移动滚动手感人工确认；与页面过渡、PWA 无冲突
