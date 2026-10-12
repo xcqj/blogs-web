@@ -42,7 +42,8 @@ useSeoMeta({
 </script>
 
 <template>
-  <article v-if="article" class="sd-measure mx-auto">
+  <div v-if="article">
+    <article class="sd-measure mx-auto">
     <!-- 阅读进度：固定在顶栏下沿，用 scaleX 不动 width，避免每帧重排 -->
     <div
       class="read-progress fixed top-16 left-0 z-40 h-0.5 w-full bg-primary"
@@ -91,5 +92,8 @@ useSeoMeta({
       <EmptyState v-if="!comments?.rows?.length" title="还没有评论" description="成为第一个讨论这篇的人。" />
       <CommentForm :article-id="articleId" @posted="refreshComments" />
     </section>
-  </article>
+    </article>
+    <!-- 收尾 CTA band：置于 68ch 窄栏之外，全宽呈现（读者→作者转化入口） -->
+    <CtaBand class="mt-12" />
+  </div>
 </template>

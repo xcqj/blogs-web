@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 首页（design/home.html 定稿版式 + 2026-10-13 模块化中改）：静态 Hero（左文案 + 右纵深叠层，移动端隐藏）
-// + 精选文章区（列表首条派生）+ 双栏「归档分组的最新文章 / 标签侧栏」+ 收尾 CTA band。
+// + 双栏「按月归档分组的文章列表 / 标签侧栏」+ 收尾 CTA band。
 // 数据仍走 §5.1/§7.1/§7.2 三个 SSR useAsyncData，版式与数据解耦；零新接口。
 import type { ArticleSummary, PageResult, TagItem } from '~/types/blog'
 
@@ -10,11 +10,8 @@ const { data: page, status: pageStatus, refresh: refreshPage } = await useAsyncD
 const { data: featured } = await useAsyncData('home-featured-tags', () => $fetch<TagItem[]>('/api/blog/public/tags/featured'))
 const { data: hot } = await useAsyncData('home-hot-tags', () => $fetch<TagItem[]>('/api/blog/public/tags/hot', { query: { limit: 12 } }))
 
-// 精选区取列表首条：契约无「精选文章」接口（§7.1 featured 仅标签），零后端改动；
-// 排除首条后按年月归档分组（groupByMonth 保持后端 published_at 倒序，只对当前页分组）
-const featuredArticle = computed(() => page.value?.rows?.[0])
-const listArticles = computed(() => page.value?.rows?.slice(1) ?? [])
-const archiveGroups = computed(() => groupByMonth(listArticles.value))
+// 按 publishedAt 年月归档分组（jason.blog 归档语义；groupByMonth 保持后端倒序，只对当前页分组）
+const archiveGroups = computed(() => groupByMonth(page.value?.rows ?? []))
 
 const siteName = useRuntimeConfig().public.siteName
 useSeoMeta({
@@ -46,9 +43,6 @@ useSeoMeta({
       </div>
     </section>
 
-    <!-- 精选文章区：列表首条做头条呈现（无精选文章接口，见 script 注释） -->
-    <FeaturedArticle v-if="featuredArticle" :article="featuredArticle" />
-
     <!-- 最新文章 + 侧栏 -->
     <div id="latest" class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <section>
@@ -66,21 +60,19 @@ useSeoMeta({
             <SdButton @click="refreshPage">重试</SdButton>
           </ErrorState>
           <div v-else key="list">
-            <!-- 归档分组：排除精选首条后按年月分组（jason.blog 归档语义） -->
+            <!-- 归档分组：按年月分组（jason.blog 归档语义）；无文章时走空状态 -->
             <div v-if="archiveGroups.length" class="space-y-6">
               <ArchiveGroup v-for="g in archiveGroups" :key="g.key" :label="g.label" :count="g.items.length">
                 <ArticleCard v-for="a in g.items" :key="a.articleId" :article="a" />
               </ArchiveGroup>
             </div>
             <EmptyState
-              v-else-if="!page?.rows?.length"
+              v-else
               title="还没有文章"
               description="这个列表暂时是空的，去别处看看或稍后再来。"
             >
               <SdButton to="/tags" variant="ghost" class="mt-1">逛标签</SdButton>
             </EmptyState>
-            <!-- 全站仅 1 篇且已被精选区消费：列表为空但站点非空，不出空状态 -->
-            <p v-else class="text-sm text-muted">更多文章即将发布。</p>
           </div>
         </Transition>
         <div v-if="page?.total" class="mt-4 flex items-center justify-between text-sm text-muted">

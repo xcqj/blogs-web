@@ -241,6 +241,16 @@ M1~M17 机制对照表（每条带证据/我们现状/判定/成本）、授权�
 - [x] **验收**：`npm run build` 全绿；SSR markup 核验（精选/组头/CTA/`btn-ink` 均在首屏 HTML）；playwright 三视口实测（临时脚本，已删；playwright 包 `--no-save` 临时装、已卸）：深/浅主题 CTA band 均 `rgb(255,213,0)`、ink 按钮 `#1a1c1c`/`#ffd500`、桌面 1440 / 移动 390 / `/page/2` 横向溢出均为 **0**、移动端 CTA 按钮纵排。⚠️ 截图中文呈方框系**本机 WSL 未装 CJK 字体**（`fc-list` 0 条）而非站点问题，视觉验收需在用户机器浏览器进行（与 S9/M5 同例）。
 - 偏差备案：间距仍走 UnoCSS 默认刻度（取值与 token 刻度对齐：16/24/32/48/64），颜色/字号/阴影/动效全部 token——与仓库现状一致；**tokens.css 本轮零改动**（现有 token 已覆盖新模块需求，无需加档位）。
 
+### 2.14 反馈修正与全站风格统一（2026-10-13，承接 §2.13）
+
+用户三点反馈及处理：
+
+- [x] **CTA band 回暖纸克制风**：整块 `bg-cta` 黄太跳 → 改 `bg-elevated` + `border-strong`，黄色收缩为唯一焦点（`btn-cta` 主按钮，即 --cta 签名用法「主行动按钮黄底黑字」）；同步移除唯一用途消失的 **`btn-ink` 变体**（`uno.config.ts` shortcut + `SdButton` variant，防死代码）。
+- [x] **去掉精选文章区**：澄清——该块**并非标签精选驱动**（契约无精选文章接口，§7.1 featured 仅标签），而是取 §5.1 列表首条即**最新文章**，「精选」称号属误导；按用户要求整块移除，`FeaturedArticle.vue` 删除，首页列表恢复展示全部文章（归档分组基数回到全量 10 篇）。
+- [x] **读者页面风格统一**：`/tag/{slug}`、`/user/{userId}` 接入归档分组 + CTA band（后者标题由旧式 `uppercase tracking-[1.5px]` 改 `sd-eyebrow`，与全站一致）；`/tags`、`/post/{slug}`（置于 68ch 窄栏之外全宽呈现）接 CTA band；各页头间距归 token 刻度（mb-5→mb-6）、模块间距 space-y-8。**有意不接**：`/search`（瞬时 noindex 工具页）、`/register`（认证流）、`/me/*`（作者工作区，与读者转化语境不符）。
+- [x] **验收**：`npm run build` 全绿；SSR 六页抽查（CTA/归档组头均在，首页无 `#featured-title`/「阅读全文」残留）；playwright 实测：六页 CTA band 计算样式均为 `--elevated` 底 + `--border-strong` 边 + `--cta` 按钮（rgb(248,245,238)/22% 边/rgb(255,213,0)），桌面 1440 与移动 390 横向溢出均为 0。
+- 视觉备注：深色为项目默认主题，CTA band 在深色下层次更清晰（--elevated #232019 / --bg #14120f）；本机 WSL 无 CJK 字体截图仍为方框，最终视觉以用户机器浏览器为准。
+
 ## 3. 红线与约定提醒（与 `AGENTS.md` 同源，不在此重复细则）
 
 - 三层 API 边界：只调 `/blog/public/**` + `/blog/article|user/**`，**禁 `/blog/admin/**`**；作者自助发文/编辑/隐藏/删除在**作者中心**（D29，走 `/blog/article/**`），平台治理仍仅 plus-ui。

@@ -35,8 +35,6 @@ export default defineConfig({
     'btn-cta': 'btn bg-cta text-cta-ink hover:bg-cta-strong active:bg-cta',
     'btn-ghost': 'btn bg-transparent text-muted hover:bg-soft hover:text-primary-fg',
     'btn-danger': 'btn bg-danger-bg text-danger hover:bg-danger hover:text-danger-ink',
-    // CTA 色块内的反相主按钮：墨底黄字（--cta 签名用法的反相），仅用于 bg-cta 底色上
-    'btn-ink': 'btn bg-cta-ink text-cta hover:-translate-y-0.5 hover:shadow-e2 active:translate-y-0',
     'btn-sm': 'h-7.5 rounded-sm px-2.5 text-xs',
     'btn-lg': 'h-11 rounded-md px-5 text-base',
     'btn-pill': 'rounded-full',

@@ -21,6 +21,9 @@ const { data: articles, status } = await useAsyncData(
   { watch: [userId, page] }
 )
 
+// 按 publishedAt 年月归档分组（与首页 / /page/{n} 同构；只对当前页分组，不跨页聚合）
+const archiveGroups = computed(() => groupByMonth(articles.value?.rows ?? []))
+
 useSeoMeta({
   title: () => (user.value ? `${user.value.nickName} · 作者主页` : '用户主页'),
   description: () => (user.value ? `${user.value.nickName} 的公开文章与简介。` : '用户主页。'),
@@ -31,7 +34,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <section class="space-y-6">
+  <section class="space-y-8">
     <!-- 资料 hero（design/app.css .profile-hero；用户不存在或不可见则不显示卡片） -->
     <div v-if="user" class="surface-hero flex items-center gap-4 rounded-lg border border-border p-6">
       <AppAvatar :name="user.nickName" :src="user.avatarUrl" size="lg" />
@@ -44,14 +47,16 @@ useSeoMeta({
 
     <!-- 公开文章 -->
     <div>
-      <h2 class="mb-4 text-sm uppercase tracking-[1.5px] text-muted">TA 的公开文章</h2>
+      <h2 class="sd-eyebrow mb-4">TA 的公开文章</h2>
 
       <ArticleListSkeleton v-if="status === 'pending'" :count="3" />
       <template v-else>
-        <div class="space-y-4">
-          <ArticleCard v-for="a in articles?.rows" :key="a.articleId" :article="a" />
+        <div v-if="archiveGroups.length" class="space-y-6">
+          <ArchiveGroup v-for="g in archiveGroups" :key="g.key" :label="g.label" :count="g.items.length">
+            <ArticleCard v-for="a in g.items" :key="a.articleId" :article="a" />
+          </ArchiveGroup>
         </div>
-        <EmptyState v-if="!articles?.rows?.length" title="暂无公开文章" description="这位作者还没有公开的文章。" />
+        <EmptyState v-else-if="!articles?.rows?.length" title="暂无公开文章" description="这位作者还没有公开的文章。" />
         <AppPagination
           :page="page"
           :total="articles?.total ?? 0"
@@ -60,5 +65,7 @@ useSeoMeta({
         />
       </template>
     </div>
+
+    <CtaBand />
   </section>
 </template>
