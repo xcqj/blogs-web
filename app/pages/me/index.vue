@@ -31,11 +31,15 @@ function filterOf(key: string): Record<string, string> {
 
 const empty = () => ({ rows: [], total: 0 }) as PageResult<AuthorArticle>
 
+// SSR 期带登录态的 fetch 必须走 useRequestFetch（转发浏览器 Cookie），
+// 全局 $fetch 的内部请求不带 Cookie 会恒 401——详见 useAuth.ts 同款注释（S14 实测坑）。
+const requestFetch = useRequestFetch()
+
 const { data: list, status: listStatus, refresh: refreshList } = await useAsyncData(
   `me-articles-${tab.value}-${page.value}`,
   () =>
     logged.value
-      ? $fetch<PageResult<AuthorArticle>>('/api/blog/article/my', {
+      ? requestFetch<PageResult<AuthorArticle>>('/api/blog/article/my', {
           query: { pageNum: page.value, pageSize, ...filterOf(tab.value) }
         })
       : Promise.resolve(empty()),
@@ -49,7 +53,7 @@ const { data: counts, refresh: refreshCounts } = await useAsyncData(
     logged.value
       ? Promise.all(
           TABS.map((t) =>
-            $fetch<PageResult<AuthorArticle>>('/api/blog/article/my', {
+            requestFetch<PageResult<AuthorArticle>>('/api/blog/article/my', {
               query: { pageNum: 1, pageSize: 1, ...filterOf(t.key) }
             }).then((r) => [t.key, r.total] as const)
           )

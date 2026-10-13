@@ -14,9 +14,16 @@ interface Session {
 /**
  * 登录态：SSR 可读（useAsyncData 走 /api/auth/session，服务端读 httpOnly cookie）。
  * 浏览器不持有 token，只拿到脱敏的登录状态与昵称头像。
+ *
+ * ⚠️ 必须用 useRequestFetch() 而非全局 $fetch：SSR 阶段全局 $fetch 的内部请求
+ * **不转发浏览器 Cookie**，session 端点拿不到 token 恒返回未登录——社交登录 302 落地、
+ * 直接刷新、直达 /me 全部掉登录态（S14 实测：payload 里 auth-session 恒为 logged:false，
+ * 而同 cookie 直连该 API 返回 logged:true）。useRequestFetch 绑定当前请求事件并转发请求头。
+ * 客户端导航时 requestFetch 退化为普通 fetch，浏览器自动带 cookie，行为不变。
  */
 export function useAuth() {
-  const { data: session, refresh, status } = useAsyncData<Session>('auth-session', () => $fetch('/api/auth/session'), {
+  const requestFetch = useRequestFetch()
+  const { data: session, refresh, status } = useAsyncData<Session>('auth-session', () => requestFetch('/api/auth/session'), {
     lazy: true,
     default: () => ({ logged: false, profile: null })
   })
