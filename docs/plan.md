@@ -283,6 +283,11 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - ⚠️ **dev 模式坑（2026-10-13 实测，必修）**：dev 服务器启动后**新增 `server/utils/` 文件不会刷新自动导入注册表**（`.nuxt/imports.d.ts` 仍是启动时快照，HMR 不补），运行时报 `Xxx is not defined` 500——本次社交登录三件套（authLogin/socialLogin）+ login.post.ts 重构全部中招。**新增/改名 server/utils 文件后必须重启 `npm run dev`**；判断方法：curl 报错体的 `message` 是 `Xxx is not defined` 即此坑，与代码无关
 - [ ] 验收（待后端 env 与 web 客户端 social grant 就绪后联调）：新用户首次 GitHub 登录自动建号并进入登录态；二次登录直达已绑定账号；解绑后回本地账号；授权链路无 cookie/token 泄露（DevTools 核验）
 
+**联调期实测发现并修复的两个问题（2026-10-13，commit `870ddd2`/`9c96847`）**：
+
+1. **GitHub `redirect_uri` 精确匹配**：GitHub 对 redirect_uri 做含 query 的**整串精确匹配**，注册的 Authorization callback URL 必须与后端配置完全一致——即需注册为 `http://localhost:3000/social-callback?source=github`（JustAuth 惯例：平台来源放 redirect-uri query，落地路由读 `query.source`）。只注册裸路径会报 "The redirect_uri is not associated with this application"。Gitee 同理（用户已配带 query 的地址，授权成功）。
+2. **SSR 登录态丢失（根因修复）**：SSR 阶段全局 `$fetch` 的内部请求**不转发浏览器 Cookie**，`/api/auth/session` 恒返回 `logged:false`（同 cookie 直连该 API 返回 `true`，payload 对比实证）。影响面=所有 SSR 整页加载：社交登录 302 落地、任何刷新、直达 `/me` 全部掉登录态；密码登录走 CSR `refresh()` 一直正常，故 S9/S12 未暴露。修法：`useAuth` + `/me` + `/me/profile` 的登录态 fetch 统一改 `useRequestFetch()`（SSR 转发请求头、客户端退化为普通 fetch）。修复后生产产物实测：带 cookie SSR 首页渲染「作者中心/许愿/退出」、`/me` 出数据。**今后所有 SSR 期需要登录态的 fetch 一律用 useRequestFetch，禁止裸用全局 $fetch**（已写入本条纪律）。
+
 ## 2.16 S17 PWA + SEO 三件套（2026-10-13 规划）
 
 - [ ] `@vite-pwa/nuxt` 接入：manifest（名称/图标/主题色随 token）+ Workbox 策略（app shell precache / 文章页 stale-while-revalidate / API network-first）+ 离线回退页；**`/me/**` 与需登录 API 不进 SW 缓存**（红线）；iOS 无 SW 的限制写进 README
