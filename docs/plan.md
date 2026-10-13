@@ -304,3 +304,13 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [ ] 引入 Lenis（约 30KB）+ 与 `useScrollDirection()` / 阅读进度条 / v-reveal 的叠加回归
 - [ ] `prefers-reduced-motion` 兜底（transitions.css 已有，确认 Lenis 同样尊重）
 - [ ] 验收：桌面/移动滚动手感人工确认；与页面过渡、PWA 无冲突
+
+## 2.18 S15 阅读量 Redis 异步计数（blog-web 侧，2026-10-14 实施）
+
+> 后端改造（ViewCountService 两段 Lua / flush / 降级 / 契约 §5.2 语义修订）见 ROADMAP S15 与 D35；本节只列 blog-web 侧。核心收益：详情读路径不再写 DB 行锁，同人 30min 窗口去重。
+
+- [x] `server/utils/blog.ts`：`blogGet` 增可选 `headers` 参数（默认空，向后兼容，其余 19 个代理零改动）
+- [x] `server/api/blog/public/articles/[id].get.ts`：种/读 `blog-web-visitor` httpOnly cookie（`node:crypto` `randomUUID()`，maxAge 1 年，secure=!dev/sameSite lax）→ 以 query `visitorId` 转发后端；已登录时经 `getAuthCookie` 读 session cookie 转发 `Authorization` 头（服务端读取不触浏览器），使后端按 userId 去重优先于 visitorId
+- [x] 自测：`npm run build` 绿 + 产物抽验（详情代理 chunk 的 `getCookie/setCookie/getAuthCookie/blogGet/randomUUID` 全部正确 import，延续 S14 抽验纪律）
+- [ ] 联调验收（待用户重启 8081 + dev）：同一浏览器 30min 内重复打开同一文章，`viewCount` 只 +1；DevTools 确认 `blog-web-visitor` 为 httpOnly 且请求带 `?visitorId=`；换浏览器/清 cookie 后再打开 +1；DB 值在 10s 内追上展示值（`docker exec blog-mysql` 只读 SELECT）；停 Redis 降级演练留人工
+- ⚠️ 与 S14 同源的两个既有纪律继续适用：① 新增 `server/utils` 文件才需重启 dev（本次只改既有文件，HMR 即生效）；② SSR 期需要登录态的 fetch 用 `useRequestFetch`（本次详情代理是服务端路由、不涉及）

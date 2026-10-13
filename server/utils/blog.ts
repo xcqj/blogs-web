@@ -1,12 +1,21 @@
 // Nitro 服务端工具：把对后端的请求收敛到一处，统一注入基址、解 RuoYi envelope。
 // 只在 server/ 运行，浏览器不可见（apiBase、appClientId 都是 server-only runtimeConfig）。
 
-/** 后端 GET，自动解包 { code, msg, data } 并返回 data。 */
-export async function blogGet<T>(event: any, path: string, query?: Record<string, any>): Promise<T> {
+/**
+ * 后端 GET，自动解包 { code, msg, data } 并返回 data。
+ * headers 可选（S15：详情代理转发登录态 token 走用户级阅读量去重；向后兼容，其余代理零改动）。
+ */
+export async function blogGet<T>(
+  event: any,
+  path: string,
+  query?: Record<string, any>,
+  headers?: Record<string, string>
+): Promise<T> {
   const { apiBase } = useRuntimeConfig(event)
   const res = await $fetch<ApiEnvelope<T>>(`${apiBase}${path}`, {
     method: 'GET',
-    query
+    query,
+    headers
   })
   if (res.code !== 200) {
     throw createError({ statusCode: 502, statusMessage: res.msg || '后端返回异常', data: res })
