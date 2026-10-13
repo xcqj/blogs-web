@@ -9,6 +9,15 @@ const props = defineProps<{ article: ArticleSummary }>()
 
 // 日期截断后端 "yyyy-MM-dd HH:mm:ss" 前 10 位，避免 SSR 端 Date/locale 差异与浏览器 API
 const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10))
+
+// §6 / D36 服务端高亮（S16）：只有搜索结果（ES 命中）才带 highlight，列表/详情缺失。
+// 摘要位片段优先级：summary 命中 > content 命中（摘要没中时正文片段更有信息量）> 原摘要。
+// v-html 安全依据（契约 §6）：片段内命中词为唯一新增标签 <em>，其余 HTML 已被 ES 默认
+// 编码器转义（encoder=html），后端不再二次加工——可信任直接渲染，不得拼原始正文。
+const titleHtml = computed(() => props.article.highlight?.title?.[0] ?? null)
+const summaryHtml = computed(
+  () => props.article.highlight?.summary?.[0] ?? props.article.highlight?.content?.[0] ?? null
+)
 </script>
 
 <template>
@@ -33,12 +42,16 @@ const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10
         :to="`/post/${article.articleId}`"
         class="relative block truncate text-xl font-bold tracking-[var(--ls-title)] transition hover:text-primary after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-primary after:transition-[width] after:duration-200 group-hover:after:w-full"
       >
-        {{ article.title }}
+        <!-- 搜索命中时渲染服务端高亮片段（含 <em>），否则纯文本标题 -->
+        <span v-if="titleHtml" v-html="titleHtml" />
+        <template v-else>{{ article.title }}</template>
       </NuxtLink>
       <!-- 摘要截 1 行：用 truncate（nowrap+ellipsis）而非 line-clamp-1——后者依赖 -webkit-box，
            新版 Chromium 已改由标准 line-clamp 接管并可能不出省略号。
-           无摘要时整行不渲染（上版用 min-h-7 预留行高，实测在无摘要条目里造成一大块死白） -->
-      <p v-if="article.summary" class="mt-1 truncate text-sm text-muted">
+           无摘要时整行不渲染（上版用 min-h-7 预留行高，实测在无摘要条目里造成一大块死白）。
+           搜索命中且摘要未中时降级渲染正文片段（summaryHtml 已含降级链），否则原摘要 -->
+      <p v-if="summaryHtml" class="mt-1 truncate text-sm text-muted" v-html="summaryHtml" />
+      <p v-else-if="article.summary" class="mt-1 truncate text-sm text-muted">
         {{ article.summary }}
       </p>
       <!-- 标签与元信息同行（右端），不再单独占一行 -->
@@ -55,3 +68,14 @@ const displayDate = computed(() => (props.article.publishedAt || '').slice(0, 10
     </div>
   </article>
 </template>
+
+<style scoped>
+/* §6 / D36 搜索高亮：服务端片段 <em> 包裹命中词，样式走 token（accent-fg 前景强调，
+   深浅色自适应）；not-italic 消 UA 默认斜体，字重微调让命中词"跳"但不刺眼。
+   :deep 必须——v-html 注入的节点不带 scoped data 属性 */
+.sd-card :deep(em) {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--accent-fg);
+}
+</style>
