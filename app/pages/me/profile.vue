@@ -6,9 +6,12 @@ import type { BlogUserProfile } from '~/types/author';
 
 const { logged, ready } = useRequireAuth();
 
+// SSR 期带登录态的 fetch 必须走 useRequestFetch（转发浏览器 Cookie），全局 $fetch 不带 Cookie 会恒 401
+const requestFetch = useRequestFetch();
+
 const { data: prof, status } = await useAsyncData(
   'my-profile',
-  () => (logged.value ? $fetch<BlogUserProfile>('/api/blog/user/profile') : Promise.resolve(null)),
+  () => (logged.value ? requestFetch<BlogUserProfile>('/api/blog/user/profile') : Promise.resolve(null)),
   { watch: [logged] }
 );
 
