@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { open, hide } = useLoginModal()
 const { login } = useAuth()
+const route = useRoute()
 
 const form = reactive({ username: '', password: '', code: '' })
 const uuid = ref('')
@@ -8,6 +9,7 @@ const captchaImg = ref('')
 const captchaEnabled = ref(true)
 const loading = ref(false)
 const error = ref('')
+const socialLoading = ref<'' | 'github' | 'gitee'>('')
 
 async function refreshCaptcha() {
   try {
@@ -28,6 +30,26 @@ watch(open, (v) => { if (v) refreshCaptcha() }, { immediate: true })
 // 不再自写 addEventListener，避免与抽屉/确认框三处各缺一样。
 const modalEl = ref<HTMLElement>();
 useModalA11y({ isOpen: () => open.value, container: () => modalEl.value, onClose: hide });
+
+// 社交登录（S14 / D34）：经服务端代理取授权 URL 后**整页**跳第三方。
+// 授权完成由平台带回 /social-callback（Nitro 落地路由用 code/state 换 token 种 cookie）再 302 回当前页面。
+// 必须整页导航：目标是第三方外部站点，Nuxt navigateTo 只处理站内路由。
+// 微信/QQ/钉钉因企业资质门槛不接入（D34 已评估边界）。
+async function socialLogin(source: 'github' | 'gitee') {
+  if (socialLoading.value) return
+  socialLoading.value = source
+  error.value = ''
+  try {
+    const { url } = await $fetch<{ url: string }>(`/api/auth/binding/${source}`, {
+      query: { return: route.fullPath }
+    })
+    window.location.href = url
+  } catch (e: any) {
+    // 后端未配该平台凭据（.env 未填）时授权地址不可用，走统一错误文案
+    error.value = apiErrorText(e, '社交登录启动失败，请稍后重试')
+    socialLoading.value = ''
+  }
+}
 
 async function submit() {
   if (loading.value) return
@@ -110,6 +132,39 @@ async function submit() {
             :disabled="loading"
             class="mt-1"
           />
+
+          <!-- 社交登录（S14 / D34）：与账密入口并列，首次登录自动建号（后端 socialAutoRegister） -->
+          <div class="flex items-center gap-3 pt-1">
+            <span class="h-px flex-1 bg-border-strong"></span>
+            <span class="text-xs text-dim">其他方式登录</span>
+            <span class="h-px flex-1 bg-border-strong"></span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              class="flex items-center justify-center gap-2 rounded-md border border-border-strong bg-raised py-2.5 text-sm text-text transition hover:border-primary/60 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="!!socialLoading"
+              @click="socialLogin('github')"
+            >
+              <span v-if="socialLoading === 'github'" class="i-mdi:loading animate-spin" aria-hidden="true" />
+              <span v-else class="i-mdi:github" aria-hidden="true" />
+              GitHub
+            </button>
+            <button
+              type="button"
+              class="flex items-center justify-center gap-2 rounded-md border border-border-strong bg-raised py-2.5 text-sm text-text transition hover:border-primary/60 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="!!socialLoading"
+              @click="socialLogin('gitee')"
+            >
+              <svg v-if="socialLoading !== 'gitee'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
+                <path d="M15.5 9h-3.5v6h3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+              <span v-else class="i-mdi:loading animate-spin" aria-hidden="true" />
+              Gitee
+            </button>
+          </div>
 
           <!-- PRD v0.2 §3.1/§16：不存在独立的「作者资格申请」流程，注册后即可发文。
                原「请联系管理员开通」属 v0.1 USER/AUTHOR 分层时代的口径，已作废。 -->

@@ -275,9 +275,11 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 
 > 后端改造（`SocialAuthStrategy` 自动注册 / justauth 配置 / web 客户端加 social grant）见 ROADMAP S14/D34；本节只列 blog-web 侧。红线不变：token 走 cookie + Nitro 代理，业务代码不手写认证头；**微信/QQ/钉钉因企业资质不接入**（已评估边界）。
 
-- [ ] `LoginModal` 增加 GitHub / Gitee 登录按钮：点击经 `server/api/auth/binding/[source].ts` 代理取授权 URL（`/auth/binding/{source}`）后跳转第三方
-- [ ] Nitro 落地路由 `server/api/auth/social/callback`（或页面路由）：收 `code`/`state` → 调后端 `/auth/login`（grantType=social，clientid=web）→ 成功种 httpOnly cookie 并跳回登录前页面 → 失败走统一错误提示（复用 `app/utils/apiError.ts`）
-- [ ] 验收：新用户首次 GitHub 登录自动建号并进入登录态；二次登录直达已绑定账号；解绑后回本地账号；授权链路无 cookie/token 泄露（DevTools 核验）
+- [x] `LoginModal` 增加 GitHub / Gitee 登录按钮：点击经 `server/api/auth/binding/[source].ts` 代理取授权 URL（`/auth/binding/{source}`）后跳转第三方（2026-10-13 S14：按钮带 mdi 图标 + loading 态，`return=route.fullPath` 记回跳路径；第三方是外部站点必须整页导航）
+- [x] Nitro 落地路由 `server/routes/social-callback.get.ts`：收 `code/state`（source 由 redirect-uri 的 `?source=` 带回）→ 调后端 `/auth/login`（grantType=social，clientid=web，复用 `server/utils/authLogin.ts` 加密链路）→ 成功种 httpOnly cookie 并 302 回登录前页面 → 失败带 `?social_error=<后端原文>` 跳回，由 `app/plugins/socialLanding.client.ts` 弹 toast 并清理 query（成功弹 `social_login=1` 同机制）
+- [x] 附带重构：`login.post.ts` 的加密/判定/种 cookie 链路抽为 `server/utils/authLogin.ts`（password 与 social 两种 grantType 共用，防两处漂移）；`server/utils/socialLogin.ts` 管 source 白名单 + return cookie（仅站内相对路径，防开放重定向）
+- [x] 自测：`npm run build` 绿 + **编译产物抽验**（binding/social-callback/login 三个 chunk 的 import 头逐一核对——纯 build 绿不足为凭，曾漏写 socialLogin.ts 时 esbuild 不报错、产物留裸标识符，运行时会 ReferenceError，故补这条抽验纪律）
+- [ ] 验收（待后端 env 与 web 客户端 social grant 就绪后联调）：新用户首次 GitHub 登录自动建号并进入登录态；二次登录直达已绑定账号；解绑后回本地账号；授权链路无 cookie/token 泄露（DevTools 核验）
 
 ## 2.16 S17 PWA + SEO 三件套（2026-10-13 规划）
 
