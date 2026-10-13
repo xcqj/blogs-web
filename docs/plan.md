@@ -314,3 +314,5 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] 自测：`npm run build` 绿 + 产物抽验（详情代理 chunk 的 `getCookie/setCookie/getAuthCookie/blogGet/randomUUID` 全部正确 import，延续 S14 抽验纪律）
 - [ ] 联调验收（待用户重启 8081 + dev）：同一浏览器 30min 内重复打开同一文章，`viewCount` 只 +1；DevTools 确认 `blog-web-visitor` 为 httpOnly 且请求带 `?visitorId=`；换浏览器/清 cookie 后再打开 +1；DB 值在 10s 内追上展示值（`docker exec blog-mysql` 只读 SELECT）；停 Redis 降级演练留人工
 - ⚠️ 与 S14 同源的两个既有纪律继续适用：① 新增 `server/utils` 文件才需重启 dev（本次只改既有文件，HMR 即生效）；② SSR 期需要登录态的 fetch 用 `useRequestFetch`（本次详情代理是服务端路由、不涉及）
+
+**联调期修复（2026-10-14，SSR cookie 断链·第二现场，commit 见下）**：修复 Redisson codec 陷阱后，「每次刷新阅读量仍 +1」——根因：`/post` 详情页 SSR 取数用全局 `$fetch`，**内部请求不转发浏览器 Cookie**（与 S14 useAuth 同款坑的第二个现场），详情代理因此读不到 visitorId cookie（SSR 每次生成新 UUID，去重永不命中）也读不到 token（登录用户不走 userId 去重）；SPA 内导航是浏览器直连所以一直正常，故只有「刷新/直达」暴露。修复：`/post/[slug].vue` 的文章 useAsyncData 改 `useRequestFetch()`。实证：带 `blog-web-visitor` cookie 打 SSR 页面 → Redis 出现对应 `v{}` 去重键；带 token+visitor → 出现 `u{}` 键（登录 userId 路径）。**纪律补丁：今后任何「SSR 取数 + 下游服务端路由依赖 cookie」的链路，取数侧一律 `useRequestFetch`；服务端路由能种/读 cookie 不代表调用方带得了 cookie（curl 直打代理两种都正常，极具迷惑性）**

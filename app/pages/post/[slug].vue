@@ -6,9 +6,15 @@ import type { ArticleDetail, Comment, PageResult } from '~/types/blog'
 const route = useRoute()
 const articleId = computed(() => String(route.params.slug || ''))
 
+// SSR 取数必须走 useRequestFetch：全局 $fetch 的内部请求不转发浏览器 Cookie（S14 同款坑），
+// 详情代理因此读不到 visitorId/token cookie——表现为刷新页面时阅读量去重永不命中
+// （SSR 每次生成新 UUID）、登录用户也不走 userId 去重；SPA 内导航是浏览器直连所以一直正常。
+// 其它公共页（列表/搜索/标签/用户页）不依赖 cookie，保持全局 $fetch 不动。
+const requestFetch = useRequestFetch()
+
 const { data: article, error } = await useAsyncData(
   `article-${articleId.value}`,
-  () => $fetch<ArticleDetail>(`/api/blog/public/articles/${articleId.value}`),
+  () => requestFetch<ArticleDetail>(`/api/blog/public/articles/${articleId.value}`),
   { watch: [articleId] }
 )
 const { data: comments, refresh: refreshComments } = await useAsyncData(
