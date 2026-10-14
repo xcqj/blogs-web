@@ -21,6 +21,12 @@
     "@iconify-json/mdi": "^1.2.3",
     "@nuxtjs/color-mode": "^4.0.1",
     "@unocss/nuxt": "^66.10.5",
-    "unocss": "^66.10.5"
+    "@vite-pwa/nuxt": "^1.1.1",
+    "unocss": "^66.10.5",
+    "workbox-cacheable-response": "^7.4.1",
+    "workbox-expiration": "^7.4.1",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1",
+    "workbox-strategies": "^7.4.1"
   }
 }

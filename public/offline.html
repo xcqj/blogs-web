@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- S17 离线回退页：被 SW 预缓存，内容页导航离线且无缓存时由 sw.ts handlerDidError 回退到此。
+     自包含静态页（内联样式 + 品牌 token 色值），不依赖 Nuxt CSS 管线。 -->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>离线 · Stack Depth</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #14120f;
+      --fg: #f4f1ea;
+      --muted: #a89f8f;
+      --border: #3a352d;
+      --accent: #ffd500;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.7;
+    }
+    .card {
+      max-width: 30rem;
+      width: 100%;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 48px 32px;
+    }
+    .mark { margin-bottom: 24px; }
+    h1 { font-size: 1.375rem; font-weight: 700; letter-spacing: 0.02em; }
+    p { margin-top: 12px; font-size: 0.9375rem; color: var(--muted); }
+    .actions { margin-top: 28px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    button, a {
+      appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    button { background: var(--accent); border-color: var(--accent); color: #14120f; font-weight: 600; }
+    button:hover { filter: brightness(1.08); }
+    a { background: transparent; color: var(--fg); }
+    a:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="mark">
+      <!-- 品牌标记：复刻 favicon 双圆角框（深色模式配色） -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="44" height="44" fill="none" aria-hidden="true">
+        <rect x="6" y="10" width="22" height="22" rx="6" stroke="#f4f1ea" stroke-width="2.8" />
+        <rect x="12" y="6" width="22" height="22" rx="6" stroke="#ffd500" stroke-width="2.8" />
+      </svg>
+    </div>
+    <h1>当前处于离线状态</h1>
+    <p>您访问的页面还没有缓存到本地。恢复网络连接后即可正常浏览；此前读过的文章在离线时仍可继续阅读。</p>
+    <div class="actions">
+      <button type="button" onclick="location.reload()">重新加载</button>
+      <a href="/">返回首页</a>
+    </div>
+  </main>
+</body>
+</html>

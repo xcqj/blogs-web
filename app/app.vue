@@ -8,4 +8,7 @@
        两者只在客户端事件回调里产生内容，SSR 期间恒为空，故不必套 ClientOnly -->
   <AppToaster />
   <AppConfirmDialog />
+  <!-- PWA（S17）：@vite-pwa/nuxt Nuxt 4 模式需显式挂载才会注入 <link rel="manifest">；
+       SW 注册由模块自带 client 插件（pwa.client，useRegisterSW immediate）自动完成，无需手写 -->
+  <VitePwaManifest />
 </template>
