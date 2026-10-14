@@ -37,13 +37,40 @@ const { progress } = useReadingProgress()
 
 // head getter 在 setup 上下文之外执行，composable 必须先在 setup 顶层取好再引用
 const siteName = useRuntimeConfig().public.siteName
+const siteUrl = useRuntimeConfig().public.siteUrl
 
 useSeoMeta({
   title: () => (version.value?.title ? `${version.value.title} · ${siteName}` : '文章'),
   description: () => version.value?.summary || '',
   ogTitle: () => version.value?.title || '文章',
   ogDescription: () => version.value?.summary || '',
-  ogType: 'article'
+  ogType: 'article',
+  // S17 SEO 扩展（D30 不引 @nuxtjs/seo，unhead 原生承载）：规范 URL + 封面图（无封面则省略）
+  ogUrl: () => `${siteUrl}/post/${articleId.value}`,
+  ogImage: () => version.value?.coverUrl || undefined
+})
+
+// S17 JSON-LD Article 结构化数据（view-source 可抽验）：在 useSeoMeta 基线之外用 useHead 注入 ld+json
+const canonicalUrl = computed(() => `${siteUrl}/post/${articleId.value}`)
+// 后端时间 "yyyy-MM-dd HH:mm:ss" → ISO 8601 本地时间（schema.org datePublished/dateModified 接受）
+const isoLocal = (t?: string) => (t ? t.replace(' ', 'T') : undefined)
+
+const jsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: version.value?.title || '文章',
+  description: version.value?.summary || undefined,
+  image: version.value?.coverUrl || undefined,
+  datePublished: isoLocal(article.value?.publishedAt),
+  dateModified: isoLocal(version.value?.createTime),
+  author: { '@type': 'Person', name: article.value?.authorName || '佚名' },
+  publisher: { '@type': 'Organization', name: siteName },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl.value }
+}))
+
+useHead({
+  link: computed(() => [{ rel: 'canonical', href: canonicalUrl.value }]),
+  script: computed(() => [{ type: 'application/ld+json', innerHTML: JSON.stringify(jsonLd.value) }])
 })
 </script>
 

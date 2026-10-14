@@ -38,7 +38,10 @@ export default defineNuxtConfig({
     rsaPublicKey: '',
     rsaPrivateKey: '',
     public: {
-      siteName: 'Stack Depth'
+      siteName: 'Stack Depth',
+      // 站点对外绝对地址（S17 SEO：sitemap/rss loc、robots Sitemap 行、/post canonical/JSON-LD）
+      // dev 默认 localhost:3000；生产经 NUXT_PUBLIC_SITE_URL 覆盖（S13 部署时配真实域名）
+      siteUrl: 'http://localhost:3000'
     }
   },
 

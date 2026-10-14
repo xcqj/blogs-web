@@ -3,6 +3,7 @@
 # 构建：docker build -t blog-web .   （必须在 blog-web 目录内执行，上下文勿跨仓库）
 # 运行：环境变量全部走 NUXT_* 注入（server-only runtimeConfig 在启动时读取，无需重新构建）
 #   NUXT_API_BASE / NUXT_APP_CLIENT_ID / NUXT_RSA_PUBLIC_KEY / NUXT_RSA_PRIVATE_KEY
+#   NUXT_PUBLIC_SITE_URL（S17 SEO：sitemap/rss/robots 绝对地址，生产配真实域名）
 # 注意：.env 已被 .dockerignore 排除，真实密钥绝不进镜像层；由编排以 env_file/secret 注入。
 
 # ---------- 构建阶段 ----------
