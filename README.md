@@ -123,16 +123,35 @@ SW 缓存策略（顺序即优先级）：
 
 **iOS 限制（实事求是）**：iOS Safari **不支持 Service Worker**——离线阅读、安装到主屏幕后的独立窗口体验在 iOS 上不可用；`apple-touch-icon`（180px）仍生效（"添加到主屏幕"有品牌图标）。PWA 完整体验（安装/离线）需桌面或 Android Chrome；线上 HTTPS 下的完整体验归 S13。localhost 属 secure context，本地可完整开发验收。
 
-### Lighthouse 验收留档（本地 Chrome，生产构建）
-
-> 待人工执行后填写（Windows 侧 Chrome，`localhost:3100` 生产构建下跑 Lighthouse）。
+### Lighthouse 验收留档（2026-10-15，Windows 侧 Chrome，生产构建）
 
 | 类别 | 分数 | 备注 |
 |---|---|---|
-| PWA | 待填 | installable / offline 预期通过 |
-| SEO | 待填 | JSON-LD / meta / canonical / robots / sitemap |
-| Performance | 待填 | 参考值，不作 S17 门槛 |
-| Best Practices | 待填 | — |
+| SEO | **100** | JSON-LD / meta / canonical / robots / sitemap 全过 |
+| Performance | **100** | 参考值，不作 S17 门槛 |
+| Accessibility | **100** | — |
+| Best Practices | **96** | 非 S17 门槛，详情未追（无阻断项） |
+| PWA | —（无此类别） | **Lighthouse 12.0（2024-05）起移除了 PWA 类别**，当前 Chrome DevTools 不再跑 PWA 分；可安装性改由 Chrome 地址栏安装图标 + DevTools → Application 手动核验 |
+
+PWA 手动核验（已由 Agent 无头 Chrome 全链路复验 + 人工复测清单）：
+
+- [x] Service Worker 注册并激活（`/sw.js`，activated and controlling）
+- [x] Cache Storage：`workbox-precache-v2-*`（49 条：js/css + offline.html + 图标 + manifest + `_nuxt/builds`）、`sd-pages`、`sd-public-api`
+- [x] 断网**刷新**已读文章：200 完整渲染
+- [x] 断网导航未读文章：回落 `/offline.html`（"当前离线"页）
+- [x] 断网直开 `/offline.html`：200
+- [x] `/me/**` 与认证 API 零缓存（白名单构造 + 无头实测 `sd-pages` 无 `/me` key）
+- [ ] 人工复测：Chrome 地址栏安装图标可安装到桌面（按钮级验收留人工）
+
+### 验收期根因修复记录（2026-10-15，headless Chrome 复现定位）
+
+人工验收首测发现 SW 全部不生效（DevTools：`redundant`、零缓存、断网全失败）。无头 Chrome 复现后定位到**两个独立根因**，均已修复并全链路复验（详见 commit `9195294`）：
+
+1. **`@vite-pwa/nuxt` 生产默认 `manifestTransforms` 会改写 `.html` 条目 URL**——它面向「预渲染路由页」把 `offline.html` 改成 `offline`（clean-URL 规则），导致预缓存请求 404 → SW install 失败被静默丢弃。修法：`nuxt.config` 提供自定义 `manifestTransforms`（保留 `.html` 原 URL，复刻模块对 `_nuxt/builds` appManifest 的 revision 处理）。
+2. **顶层直接调用 `self.skipWaiting()/clientsClaim()` 会导致 Chrome 下 SW 脚本求值失败**（注册同样被静默丢弃）。修法：移入 `activate` 事件（规范位置）。
+3. 附带修复：离线回退原先用 `caches.match('/offline.html')` 匹配不到带 `?__WB_REVISION__` 查询串的预缓存键，改用 `matchPrecache('/offline.html')`。
+
+> 调试方法备忘（面试可讲）：Node 桩环境求值 sw.js → Playwright 无头 Chrome 复现（`channel: 'chromium'`，headless shell 不支持 SW）→ 给 workbox-build 打桩 dump manifestEntries → 二分定位到模块默认 transform。这类「模块默认假设与自定义 public 页面冲突」的问题，看 DevTools 的 `redundant` 状态 + 零缓存即可快速识别。
 
 ### 本地验收步骤
 
@@ -143,7 +162,7 @@ NITRO_PORT=3100 node .output/server/index.mjs
 # 打开 http://localhost:3100
 ```
 
-人工验收清单：① Lighthouse PWA + SEO 分数填上表；② DevTools → Application → Service Workers 确认已注册、Cache Storage 有 `sd-pages`/`sd-public-api`/workbox-precache；③ DevTools Network 切 Offline，**刷新**一篇已读文章仍可读、未读导航回落 `offline.html`；④ 访问 `/me`（登录态）确认无任何缓存写入（红线）；⑤ view-source 抽验 `/post/{id}` 的 JSON-LD；⑥ 移动视口回归；⑦ iOS Safari 人工确认上述限制描述属实。
+人工验收清单：① Lighthouse SEO 等分数已填上表（PWA 类别已被 Lighthouse 移除，见上）；② DevTools → Application → Service Workers 确认已注册、Cache Storage 三个缓存齐全；③ DevTools Network 切 Offline，**刷新**一篇已读文章仍可读、未读导航回落 `offline.html`；④ 登录态访问 `/me` 确认无任何缓存写入（红线）；⑤ view-source 抽验 `/post/{id}` 的 JSON-LD；⑥ 移动视口回归（含 390px 滚动中态：顶栏与进度条应一并收起，commit `0f0a57e`）；⑦ iOS Safari 人工确认上述限制描述属实；⑧ 若浏览器曾装过修复前的坏 SW：DevTools → Application → Service Workers → Unregister 后刷新。
 
 图标再生成（品牌标记改版时）：`node tooling/gen-pwa-icons.mjs`（纯 Node 写 PNG，本机无 PIL/rsvg，产物落 `public/icons/`）。
 

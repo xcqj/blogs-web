@@ -309,6 +309,16 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - **自测协议已跑**：`npm run build` 全绿 ×3；curl 七端点（sitemap 索引/分块/越界块、rss、robots、manifest、sw.js、offline.html）全 200；XML 输出 minidom 良构校验；`/post` view-source 抽验 JSON-LD + canonical + og:url；预缓存清单 49 条抽验（offline.html/4 图标/manifest 齐）；grep 静态断言（无 `/blog/admin` 调用、SW 红线、robots 已删）；git diff 自审无越界。
 - ⏸ **人工待办**（不代跑）：Lighthouse PWA+SEO 分数（Windows Chrome，localhost:3100 生产构建）→ 填 README 留档表；DevTools 核验 SW 注册与 Cache Storage；Offline 刷新已读文章可读 + 未读回落 offline.html；`/me` 登录态确认无缓存写入；iOS Safari 限制确认；移动视口回归；S13 部署时配 `NUXT_PUBLIC_SITE_URL`；ROADMAP §3 S17 状态行与实施结果更新（跨仓，用户择机）；面试前 `blog_s16_cleanup.sql` 执行后 sitemap 收缩验证（可选）。
 
+**人工验收期修复（2026-10-15，用户首测发现 SW 全部不生效：DevTools redundant、零缓存、断网全失败；无头 Chrome 复现定位，2 个 commit：`9195294` PWA / `0f0a57e` 移动视口）**：
+
+- **根因 1（模块默认 transform 冲突）**：`@vite-pwa/nuxt` 生产默认 `manifestTransforms` 面向「预渲染路由页」把 `.html` 条目按 clean-URL 规则改写——本站唯一 html `offline.html` 被改成 `offline` → 预缓存 404 → SW install 失败被静默丢弃。定位路径：Node 桩求值 sw.js 正常 → Playwright 无头 Chrome（`channel:'chromium'`，headless shell 不支持 SW）复现"注册即消失" → 给 workbox-build 打桩 dump manifestEntries 发现条目已损坏 → 读到模块源码 `createManifestTransform` 实锤。修法：`nuxt.config` 自定义 `manifestTransforms`（保留 `.html` 原 URL + 复刻 `_nuxt/builds` appManifest 的 UUID-json 去 revision 处理）。
+- **根因 2（SW 生命周期 API 调用位置）**：顶层直接 `self.skipWaiting()/clientsClaim()` 在 Chrome 下致「ServiceWorker script evaluation failed」，注册同样被静默丢弃（Node 桩求值却正常，极具迷惑性）；二分实验确认。修法：移入 `activate` 事件（规范位置）。
+- **根因 3（离线回退匹配）**：`caches.match('/offline.html')` 匹配不到带 `?__WB_REVISION__` 查询串的预缓存键 → 改 `matchPrecache('/offline.html')`。
+- **M11 移动视口回归（用户截图发现）**：窄屏顶栏下滑隐藏后，`top-16` 定位的悬浮元素孤悬——阅读进度条经包裹层随顶栏同步上移+淡出（内层 scaleX 与外层位移 transform 分离，避免 transform 冲突）；作者中心编辑器吸顶操作条 `top` 收回 0 贴住视顶。桌面经 `@media (max-width:767px)` 零回归（1440px 实测原样）。验证：390px 滚至 40%，顶栏/进度条同步 `translateY(-4rem)`+淡出，进度 `scaleX(0.754)` 数学正确。
+- **修复后全链路复验（无头 Chrome）**：安装→激活→49 条预缓存（offline.html/builds/manifest 齐全）；断网刷新已读文章 200；断网导航未读文章回落 offline.html；断网直开 offline.html 200；`/me` 访问后 `sd-pages` 零泄漏（红线 PASS）。
+- **Lighthouse 实侧（2026-10-15，Windows Chrome）**：SEO 100 / Performance 100 / Accessibility 100 / Best Practices 96；**PWA 类别已被 Lighthouse 12.0（2024-05）移除**，可安装性改由 Chrome 安装图标 + DevTools Application 手动核验（Agent 已无头复验，按钮级安装留人工）。
+- ⏸ **剩余人工事项**：浏览器安装到桌面按钮级验收；登录态 `/me` 人工复测（Agent 侧已用未登录态验证零泄漏）；iOS Safari 限制确认；S13 配 `NUXT_PUBLIC_SITE_URL`；ROADMAP §3 S17 状态更新（跨仓）；`blog_s16_cleanup.sql` 面试前执行后 sitemap 收缩验证（可选）。
+
 ## 2.17 S20 Lenis 平滑滚动（⏸ 待定，核心完成后）
 
 > D38 收缩后范围：仅 Lenis；hero 视差 / 逐字进场待定；**不做 three.js、不引 GSAP**。纯表现层，无契约/数据/状态机改动，独立 commit 随时可砍。
