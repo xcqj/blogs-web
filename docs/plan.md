@@ -290,12 +290,24 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 
 ## 2.16 S17 PWA + SEO 三件套（2026-10-13 规划）
 
-- [ ] `@vite-pwa/nuxt` 接入：manifest（名称/图标/主题色随 token）+ Workbox 策略（app shell precache / 文章页 stale-while-revalidate / API network-first）+ 离线回退页；**`/me/**` 与需登录 API 不进 SW 缓存**（红线）；iOS 无 SW 的限制写进 README
-- [ ] `sitemap.xml`（Nitro route 查公共列表生成，含 lastmod）
-- [ ] `rss.xml`（RSS 2.0，最新 N 篇公共文章）
-- [ ] JSON-LD：`/post` 注 `Article` 结构化数据（headline/author/datePublished，在现有 `useSeoMeta` 基线上扩展）
-- [ ] `robots.txt` 声明 sitemap
-- [ ] 验收：Lighthouse PWA + SEO 分数留档（本地 Chrome）；断网刷新已加载文章可读；view-source 抽验结构化数据；移动视口回归
+- [x] `@vite-pwa/nuxt` 接入：manifest（名称/图标/主题色随 token）+ Workbox 策略（app shell precache / 文章页 stale-while-revalidate / API network-first）+ 离线回退页；**`/me/**` 与需登录 API 不进 SW 缓存**（红线）；iOS 无 SW 的限制写进 README
+- [x] `sitemap.xml`（Nitro route 查公共列表生成，含 lastmod）
+- [x] `rss.xml`（RSS 2.0，最新 N 篇公共文章）
+- [x] JSON-LD：`/post` 注 `Article` 结构化数据（headline/author/datePublished，在现有 `useSeoMeta` 基线上扩展）
+- [x] `robots.txt` 声明 sitemap
+- [ ] 验收：Lighthouse PWA + SEO 分数留档（本地 Chrome）；断网刷新已加载文章可读；view-source 抽验结构化数据；移动视口回归（**留人工**）
+
+**实施结果（2026-10-14，blog-web 仓 2 commit 均标 S17：`1437ad2` SEO / `7237ea1` PWA；零后端改动，ROADMAP §3 状态行属跨仓更新留人工）**：
+
+- **版本兼容**：`@vite-pwa/nuxt@1.1.1`（依赖 vite-plugin-pwa `^1.2.0` → 实际装 1.3.0，peer vite `^3~^8`）与本仓 nuxt 4.6.0 + vite 8.3.3 兼容，无降级；workbox 运行时包 5 个显式装为 devDeps。
+- **PWA 架构决策**：选 **injectManifest 手写 `app/sw/sw.ts`** 而非 generateSW——generateSW 的 navigateFallback 是 SPA app-shell 语义（导航一律回退文档），与 SSR 站「文章页 SWR + 离线回退」组合互相遮蔽；手写 SW 使红线逐行可审计。注意 Nuxt 4 的 Vite root 指向 `app/`，模块 `srcDir:'sw'` 即 `app/sw`（曾误放根目录 `sw/`，报 `Cannot resolve entry module app/sw/sw.ts`）。
+- **红线实现=白名单**：文档导航 SWR 只匹配 `/`、`/page/`、`/post/`、`/tag/`、`/tags/`、`/user/` 前缀，`/me/**`、`/register`、`/social-callback` 天然不在列；`/api/blog/article|user|auth|resource` 不注册任何规则（静态断言：sw.js 中 `me/`、auth api 字样 0 命中；无 NavigationRoute catch-all）。
+- **sitemap 分页方案**（2 万演示数据）：index（`/sitemap.xml`）+ 分块 `/sitemap/{n}.xml`（500/块 → 41 块），服务端 `defineCachedEventHandler` 10min + `Cache-Control`；`lastmod` = publishedAt 转 W3C datetime；演示数据清理后自然收缩为 1 块。
+- **robots.txt 静态文件删除**改 Nitro route（静态资源优先级高于 route，且需注入运行时 `siteUrl` 的 Sitemap 绝对行）；`runtimeConfig.public` 新增 `siteUrl`（`NUXT_PUBLIC_SITE_URL`，S13 部署配真实域名）。
+- **Nuxt 4 manifest link 需显式挂载**：`<VitePwaManifest />`（app.vue）——模块只注册组件不自动注入 head；SW 注册由模块自带 `pwa.client` 插件（`useRegisterSW immediate`）自动完成，SSR 安全。
+- **图标**：本机无 PIL/rsvg/inkscape，`tooling/gen-pwa-icons.mjs` 纯 Node 写 PNG（zlib + IHDR/IDAT/IEND/CRC32 + 圆角矩形 SDF 光栅化 + 4×4 超采样），产出 192/512/maskable-512/apple-180 四张，复刻 favicon 双框品牌标记。
+- **自测协议已跑**：`npm run build` 全绿 ×3；curl 七端点（sitemap 索引/分块/越界块、rss、robots、manifest、sw.js、offline.html）全 200；XML 输出 minidom 良构校验；`/post` view-source 抽验 JSON-LD + canonical + og:url；预缓存清单 49 条抽验（offline.html/4 图标/manifest 齐）；grep 静态断言（无 `/blog/admin` 调用、SW 红线、robots 已删）；git diff 自审无越界。
+- ⏸ **人工待办**（不代跑）：Lighthouse PWA+SEO 分数（Windows Chrome，localhost:3100 生产构建）→ 填 README 留档表；DevTools 核验 SW 注册与 Cache Storage；Offline 刷新已读文章可读 + 未读回落 offline.html；`/me` 登录态确认无缓存写入；iOS Safari 限制确认；移动视口回归；S13 部署时配 `NUXT_PUBLIC_SITE_URL`；ROADMAP §3 S17 状态行与实施结果更新（跨仓，用户择机）；面试前 `blog_s16_cleanup.sql` 执行后 sitemap 收缩验证（可选）。
 
 ## 2.17 S20 Lenis 平滑滚动（⏸ 待定，核心完成后）
 

@@ -85,6 +85,68 @@ npm run preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
+## S17 PWA + SEO（2026-10-14 实施）
+
+ROADMAP v0.4 S17 切片：PWA 应用化 + SEO 三件套。**零后端改动**（数据源全部走既有 `/blog/public/**`），只动本仓。
+
+### SEO 端点
+
+| 端点 | 说明 |
+|---|---|
+| `/sitemap.xml` | sitemap **索引**（protocol: sitemapindex）。先查公共列表拿 total 计算块数 |
+| `/sitemap/{n}.xml` | 分块 urlset，每块 500 篇（`SITEMAP_CHUNK_SIZE`）。2 万篇 → 41 块；演示数据清理后自然收缩为 1 块。每条含 `loc`（`/post/{articleId}`）+ `lastmod`（W3C datetime） |
+| `/rss.xml` | RSS 2.0，最新 20 篇公共文章（title/link/guid/pubDate/description，XML 转义） |
+| `/robots.txt` | Nitro 动态产出（原静态文件已删）：`Disallow: /me/` + `Disallow: /register` + 绝对地址 `Sitemap:` 行 |
+| `/post/{id}` 页 | JSON-LD `Article`（headline/description/image/datePublished/dateModified/author/publisher/mainEntityOfPage）+ `<link rel="canonical">` + ogUrl/ogImage，在既有 `useSeoMeta` 基线上扩展（D30：不引 `@nuxtjs/seo`） |
+
+- 服务端 `defineCachedEventHandler` 缓存（sitemap 10min / rss 30min）+ `Cache-Control` 响应头，爬虫高频访问不重复打后端。
+- 站点绝对地址统一取 `runtimeConfig.public.siteUrl`（默认 `http://localhost:3000`，`NUXT_PUBLIC_SITE_URL` 覆盖；**S13 上线时配真实域名**）。
+
+### PWA
+
+`@vite-pwa/nuxt@1.1.1`（→ vite-plugin-pwa 1.3.0，兼容本仓 vite 8）+ **injectManifest 手写 SW**（`app/sw/sw.ts`）。选 injectManifest 而非 generateSW 的原因：generateSW 的 `navigateFallback` 是 SPA app-shell 语义（导航一律回退文档），与 SSR 站「文章页 SWR + 离线回退」组合会互相遮蔽；手写 SW 才能逐条审计缓存红线。
+
+SW 缓存策略（顺序即优先级）：
+
+| # | 匹配 | 策略 | 说明 |
+|---|---|---|---|
+| ① | 预缓存清单 | precache | app shell：构建 js/css + public 资源（favicon/offline.html/图标） |
+| ② | 文档导航**白名单** `/` `/page/` `/post/` `/tag/` `/tags/` `/user/` | stale-while-revalidate | 秒开 + 后台更新；`handlerDidError` 回退 `/offline.html` |
+| ③ | `/api/blog/public/**` | network-first（3s 超时回落缓存） | 公共匿名数据；100 条 / 24h 上限 |
+
+**缓存红线（硬性）**：
+
+- `/me/**` 路由（作者中心）**不进 SW 缓存**——② 为白名单匹配，`/me/**` 不在列即直通网络，从构造上杜绝（非黑名单）；
+- 需登录 API（`/api/blog/article|user|auth|resource/**`）**不注册任何 SW 规则**，请求 cookie 与响应一律不落缓存；
+- `registerType: 'autoUpdate'`（新版本自动接管）；dev 不注册 SW（`devOptions` 关闭），验收走生产构建；
+- 与 Nitro 代理兼容：SW 只拦截浏览器同源请求，SSR 期服务端→后端调用对 SW 不可见。
+
+**iOS 限制（实事求是）**：iOS Safari **不支持 Service Worker**——离线阅读、安装到主屏幕后的独立窗口体验在 iOS 上不可用；`apple-touch-icon`（180px）仍生效（"添加到主屏幕"有品牌图标）。PWA 完整体验（安装/离线）需桌面或 Android Chrome；线上 HTTPS 下的完整体验归 S13。localhost 属 secure context，本地可完整开发验收。
+
+### Lighthouse 验收留档（本地 Chrome，生产构建）
+
+> 待人工执行后填写（Windows 侧 Chrome，`localhost:3100` 生产构建下跑 Lighthouse）。
+
+| 类别 | 分数 | 备注 |
+|---|---|---|
+| PWA | 待填 | installable / offline 预期通过 |
+| SEO | 待填 | JSON-LD / meta / canonical / robots / sitemap |
+| Performance | 待填 | 参考值，不作 S17 门槛 |
+| Best Practices | 待填 | — |
+
+### 本地验收步骤
+
+```bash
+npm run build
+# 注意：3000 若被 nuxt dev 占用，用 NITRO_PORT 换端口起生产服务
+NITRO_PORT=3100 node .output/server/index.mjs
+# 打开 http://localhost:3100
+```
+
+人工验收清单：① Lighthouse PWA + SEO 分数填上表；② DevTools → Application → Service Workers 确认已注册、Cache Storage 有 `sd-pages`/`sd-public-api`/workbox-precache；③ DevTools Network 切 Offline，**刷新**一篇已读文章仍可读、未读导航回落 `offline.html`；④ 访问 `/me`（登录态）确认无任何缓存写入（红线）；⑤ view-source 抽验 `/post/{id}` 的 JSON-LD；⑥ 移动视口回归；⑦ iOS Safari 人工确认上述限制描述属实。
+
+图标再生成（品牌标记改版时）：`node tooling/gen-pwa-icons.mjs`（纯 Node 写 PNG，本机无 PIL/rsvg，产物落 `public/icons/`）。
+
 ## 视觉基线截图（本地验证工具，不参与构建）
 
 `tooling/shot/` 是一个**独立小包**：不写进主 `package.json`、不进 `dependencies`、不进 Docker 镜像。
