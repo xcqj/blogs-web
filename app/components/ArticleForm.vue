@@ -26,6 +26,11 @@ const isEdit = computed(() => !!props.articleId);
 const readOnly = computed(() => detail.value?.visibility === '2');
 const isPublished = computed(() => detail.value?.status === '1');
 
+// 与顶栏滚动隐藏联动（M11 修复，S17 移动视口回归发现）：窄屏顶栏下滑隐藏时，
+// 本操作条的 top 从 4rem 收回 0 贴住视顶（功能性元素不能随顶栏一起消失，
+// 也不留空隙）；桌面不受影响（CSS 媒体查询限制，同 .site-header 口径）。
+const { hideHeader } = useScrollDirection();
+
 // 客户端校验只是体验；权威校验在后端（§3.1 约束：title/content 必填、tagNames 1~6）
 const canSave = computed(
   () => !saving.value && !readOnly.value && title.value.trim() && content.value.trim() && tagNames.value.length >= 1 && tagNames.value.length <= 6
@@ -138,7 +143,7 @@ async function submit(publish: boolean) {
 <template>
   <section>
     <!-- 操作条：贴在顶栏（h-16）下方，写作时始终可保存/发布 -->
-    <div class="sticky top-16 z-20 mb-4 flex flex-wrap items-center gap-2 rounded-md border border-border bg-elevated px-3 py-2.5">
+    <div class="sd-sticky-top sticky top-16 z-20 mb-4 flex flex-wrap items-center gap-2 rounded-md border border-border bg-elevated px-3 py-2.5" :class="{ 'is-header-hidden': hideHeader }">
       <NuxtLink to="/me" class="sd-act no-underline">← 我的文章</NuxtLink>
       <h1 class="text-base font-semibold">{{ isEdit ? '编辑文章' : '新建文章' }}</h1>
       <StatusBadge v-if="detail" :status="detail.status" :visibility="detail.visibility" />

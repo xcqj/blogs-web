@@ -80,6 +80,28 @@
   will-change: transform;
 }
 
+/* ---------- 顶栏隐藏时的连带收起（M11 修复：S17 移动视口回归发现） ----------
+   窄屏下滑隐藏顶栏后，靠 top-16 定位的悬浮元素必须随之一同处理，否则顶栏消失后
+   它们孤零零悬在距顶 4rem 处（阅读进度条）或留一条空隙（编辑器吸顶操作条）。
+   与 .site-header.is-hidden 同一媒体查询口径与过渡 token：
+   - 进度条：随顶栏一并上移+淡出（装饰性元素，顶栏隐藏即沉浸阅读）
+   - 编辑器吸顶操作条：top 收回 0 贴住视顶（功能性元素，隐藏顶栏后仍需可用） */
+.read-progress-wrap {
+  transition: transform var(--t) var(--ease-out), opacity var(--t) var(--ease-out);
+}
+.sd-sticky-top {
+  transition: top var(--t) var(--ease-out);
+}
+@media (max-width: 767px) {
+  .read-progress-wrap.is-hidden {
+    transform: translateY(-4rem);
+    opacity: 0;
+  }
+  .sd-sticky-top.is-header-hidden {
+    top: 0;
+  }
+}
+
 /* ---------- 减少动态效果：全局兜底（M15） ----------
    注意用 0.01ms 而非 0，以保证 transitionend/animationend 仍会触发，
    依赖事件做清理的逻辑（如 Toast 移除）不会被卡住 */

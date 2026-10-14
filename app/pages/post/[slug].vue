@@ -32,8 +32,11 @@ if (error.value || !article.value) {
 
 const version = computed(() => article.value!.currentVersion)
 const displayDate = computed(() => (article.value?.publishedAt || '').slice(0, 10))
-// 阅读进度条（M10）：长文刚需，给读者“还剩多少”的位置感
+// 阅读进度条（M10）：长文刚需，给读者“还剩多少”的位置感。
+// 与顶栏联动（M11 修复）：窄屏顶栏下滑隐藏时进度条随之一并收起，不孤悬在 top-16
+// （桌面不受影响：CSS 媒体查询限制，同 .site-header 口径）。
 const { progress } = useReadingProgress()
+const { hideHeader } = useScrollDirection()
 
 // head getter 在 setup 上下文之外执行，composable 必须先在 setup 顶层取好再引用
 const siteName = useRuntimeConfig().public.siteName
@@ -77,12 +80,15 @@ useHead({
 <template>
   <div v-if="article">
     <article class="sd-measure mx-auto">
-    <!-- 阅读进度：固定在顶栏下沿，用 scaleX 不动 width，避免每帧重排 -->
-    <div
-      class="read-progress fixed top-16 left-0 z-40 h-0.5 w-full bg-primary"
-      :style="{ transform: `scaleX(${progress})` }"
-      aria-hidden="true"
-    />
+    <!-- 阅读进度：包裹层负责随顶栏隐藏一起收起（is-hidden 由 hideHeader 驱动，
+         内层 read-progress 专职 scaleX，两者 transform 不冲突） -->
+    <div class="read-progress-wrap fixed left-0 top-16 z-40 w-full" :class="{ 'is-hidden': hideHeader }">
+      <div
+        class="read-progress h-0.5 w-full bg-primary"
+        :style="{ transform: `scaleX(${progress})` }"
+        aria-hidden="true"
+      />
+    </div>
     <NuxtLink to="/" class="mb-6 inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-primary">
       <span class="i-mdi:arrow-left" aria-hidden="true" />返回文章列表
     </NuxtLink>
