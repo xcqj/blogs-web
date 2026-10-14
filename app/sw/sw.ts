@@ -13,7 +13,7 @@
 // 与 Nitro 代理的兼容性：SW 只拦截浏览器同源请求；SSR 期服务端→后端的调用对 SW 不可见。
 // 离线回退：内容页 SWR 挂 handlerDidError，缓存未命中且离线时回退 /offline.html（已预缓存）。
 
-import { precacheAndRoute } from 'workbox-precaching'
+import { matchPrecache, precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
 import { NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
@@ -26,18 +26,32 @@ declare const self: ServiceWorkerGlobalScope & {
 // ① app shell 预缓存
 precacheAndRoute(self.__WB_MANIFEST)
 
+// activate 时即时接管（skipWaiting + clientsClaim）：新版本无需等所有标签关闭即生效
+// （registerType autoUpdate 配套，workbox-window 的 autoUpdate 监听会刷新页面完成切换），
+// 首次安装也借此尽快接管当前页。
+// ⚠️ 必须放在 activate 事件里调用：顶层直接调 skipWaiting/clientsClaim 在 Chrome 下会抛错，
+// 导致 SW 脚本求值失败、注册被静默丢弃（表现为 DevTools 里 redundant、零缓存——S17 实测）。
+self.addEventListener('activate', (event) => {
+  event.waitUntil(Promise.all([self.skipWaiting(), self.clientsClaim()]))
+})
+
 // ② 内容页导航白名单（SWR）。红线的实现方式=白名单而非黑名单：
 // 只有这些前缀的文档导航进缓存，/me/** 等不在列即直通网络，从构造上杜绝误缓存。
+// /offline.html 入列：它自身被离线直访时也走 SWR（未缓存则经离线回退拿到预缓存副本）。
 const CONTENT_NAV = ({ request, url }: { request: Request; url: URL }) =>
   request.destination === 'document' &&
-  (url.pathname === '/' || /^\/(page|post|tag|tags|user)\//.test(url.pathname))
+  (url.pathname === '/' ||
+    url.pathname === '/offline.html' ||
+    /^\/(page|post|tag|tags|user)\//.test(url.pathname))
 
 // 公共 API 前缀（匿名数据，可缓存）。需登录的 /api/blog/article|user|auth|resource 故意不在内。
 const PUBLIC_API_PREFIX = '/api/blog/public/'
 
-// 离线回退插件：策略整体失败（离线且无缓存）时回退预缓存的 /offline.html
+// 离线回退插件：策略整体失败（离线且无缓存）时回退预缓存的 /offline.html。
+// 必须用 matchPrecache 而非 caches.match：预缓存键带 ?__WB_REVISION__ 查询串，
+// 裸 caches.match('/offline.html') 匹配不到（实测离线回退失效的根因）。
 const offlineFallback = {
-  handlerDidError: async () => (await self.caches.match('/offline.html')) ?? Response.error()
+  handlerDidError: async () => (await matchPrecache('/offline.html')) ?? Response.error()
 }
 
 const okResponse = new CacheableResponsePlugin({ statuses: [0, 200] })

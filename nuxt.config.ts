@@ -48,7 +48,25 @@ export default defineNuxtConfig({
       // app shell 预缓存：构建产物（js/css）+ public 资源（favicon.svg / offline.html / icons）。
       // SSR 站无按路由 html 产物，html 通配实际只命中 offline.html——正是离线回退所需。
       globPatterns: ['**/*.{js,css,html,png,svg}'],
-      maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
+      maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+      // 自定义 manifestTransforms：顶掉 @vite-pwa/nuxt 的生产默认 transform。
+      // 默认 transform 面向「预渲染路由页」会把所有 .html 条目改写成无扩展名 URL
+      // （offline.html → offline），导致预缓存 404 → SW install 失败被丢弃（redundant、零缓存）。
+      // 本站是 SSR 站、唯一 html 就是离线回退页，必须原样保留 URL；同时复刻模块对
+      // Nuxt appManifest 的处理：_nuxt/builds/ 下 UUID meta json 去 revision
+      // （查询串会使 SW 匹配不到 Nuxt 客户端的无查询请求，离线取不到构建清单）。
+      manifestTransforms: [
+        async (entries: Array<{ url: string; revision: string | null }>) => {
+          const appManifestFolder = '_nuxt/builds/'
+          const uuidJson = /(\/)?[0-9a-f]{8}\b-[0-9a-f]{4}\b-[0-9a-f]{4}\b-[0-9a-f]{4}\b-[0-9a-f]{12}\.json$/i
+          for (const e of entries) {
+            if (e.url.startsWith(appManifestFolder) && uuidJson.test(e.url)) {
+              e.revision = null
+            }
+          }
+          return { manifest: entries, warnings: [] }
+        }
+      ]
     }
   },
 
