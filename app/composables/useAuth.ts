@@ -44,12 +44,13 @@ export function useAuth() {
   }
 
   /**
-   * 注册（PRD §5.1 AUTH-01）。注意：**注册不产生登录态**——后端 `/auth/register` 返回 `R<Void>`
-   * 且会消费掉本次验证码，同一组 code+uuid 无法复用于登录，故这里不像 login 那样 refresh()，
-   * 调用方应在成功后引导用户回到登录再认证一次。
+   * 注册（PRD §5.1 AUTH-01）。注册即登录（S22 / D35）：后端 `/auth/register` 注册成功后直接下发
+   * token 并由 Nitro 代理种 httpOnly cookie，故与 login 一样在成功后 refresh() 刷新会话；
+   * 页面应在成功后直接跳转回来源页，不再有「注册完再手动登录一次」的中间态。
    */
   async function register(payload: { username: string; password: string; code?: string; uuid?: string }) {
     await $fetch('/api/auth/register', { method: 'POST', body: payload })
+    await refresh()
   }
 
   return { session, status, ready, logged, profile, login, logout, register, refresh }

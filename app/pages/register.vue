@@ -4,12 +4,20 @@
 // 置 true，见 ROADMAP 第 50 行）；它不在 blog-api.md 契约范围内，故契约里查不到 /auth/**。
 //
 // 视觉沿用 LoginModal（叠框母题 + 带 label 的 SdInput + 滚轴按钮），保持一致的第一眼。
-// ⚠️ 注册成功**不产生登录态**：后端 `AuthController#register` 返回 `R<Void>` 不下发 token，且
-//    `SysRegisterService` 会吃掉本次验证码（Redis deleteObject），同一组 code+uuid 无法就地再登录一次。
-//    所以成功后切成成功态、让用户再走一遍登录（与 plus-ui「注册后将返回登录页继续完成认证」同口径）。
+// 注册即登录（S22 / D35）：后端 `AuthController#register` 注册成功后直接下发 token，Nitro 代理种
+// httpOnly cookie，`useAuth.register` 内已 refresh() 刷新会话——成功后跳回来源页，
+// 不再有「注册完再手动登录一次」的中间态（旧口径：后端返回 R<Void> 不下发 token）。
 const { logged, ready, register } = useAuth()
 const { show: showLogin } = useLoginModal()
+const route = useRoute()
 const toast = useToast()
+
+// 回来源页：LoginModal「立即注册」带 ?return=当前路径。仅接受站内相对路径（拒绝 // 开头与
+// 协议相对地址），防开放重定向；无参数或非法值回首页。
+const returnPath = computed(() => {
+  const ret = route.query.return
+  return typeof ret === 'string' && ret.startsWith('/') && !ret.startsWith('//') ? ret : '/'
+})
 
 const form = reactive({ username: '', password: '', confirm: '', code: '' })
 const uuid = ref('')
@@ -17,7 +25,6 @@ const captchaImg = ref('')
 const captchaEnabled = ref(true)
 const loading = ref(false)
 const error = ref('')
-const done = ref(false)
 
 async function refreshCaptcha() {
   try {
@@ -62,8 +69,9 @@ async function submit() {
     form.password = ''
     form.confirm = ''
     form.code = ''
-    done.value = true
-    toast.ok('注册成功', '账号已创建，请用它登录一次完成认证', { key: 'register' })
+    // 注册即登录：会话已在 register() 内刷新，告知后跳回来源页（toast 为模块级单例，导航后仍显示）
+    toast.ok('注册成功', '欢迎加入，已为你完成登录')
+    navigateTo(returnPath.value)
   } catch (e: any) {
     error.value = apiErrorText(e, '注册失败')
     refreshCaptcha() // 验证码一次性：用掉即失效，失败后必须换一张
@@ -97,14 +105,6 @@ useSeoMeta({ title: '注册', robots: 'noindex,follow' })
           <SdButton variant="ghost" to="/">返回首页</SdButton>
           <SdButton to="/me">进入作者中心</SdButton>
         </div>
-      </div>
-
-      <!-- 注册成功：提示补一次登录（此时尚未建立会话） -->
-      <div v-else-if="done" class="space-y-4">
-        <p class="text-sm text-muted">
-          账号创建成功。注册接口只建档、不下发凭证，请用刚注册的用户名登录一次完成认证。
-        </p>
-        <SdRollButton block label="去登录" @click="showLogin()" />
       </div>
 
       <form v-else class="space-y-3.5" @submit.prevent="submit">

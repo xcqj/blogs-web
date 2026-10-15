@@ -169,7 +169,7 @@ async function submit() {
           <!-- PRD v0.2 §3.1/§16：不存在独立的「作者资格申请」流程，注册后即可发文。
                原「请联系管理员开通」属 v0.1 USER/AUTHOR 分层时代的口径，已作废。 -->
           <p class="text-xs text-dim">
-            还没有账号？<NuxtLink to="/register" class="text-primary hover:underline" @click="hide">立即注册</NuxtLink>
+            还没有账号？<NuxtLink :to="{ path: '/register', query: { return: route.fullPath } }" class="text-primary hover:underline" @click="hide">立即注册</NuxtLink>
           </p>
         </form>
       </div>

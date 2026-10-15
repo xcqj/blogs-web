@@ -2,12 +2,14 @@
 // clientId/grantType 服务端注入；后端开启 api-decrypt 且 /auth/register 带 @ApiEncrypt，故请求体需 AES+RSA 加密，
 // 响应同理加密，用前端解密私钥还原。
 //
-// ⚠️ 与 /auth/login 的三处差异（决定了本文件不能直接套用 login 的成功判定，务必保持同步更新）：
-//   1. 后端 `AuthController#register` 返回 `R<Void>`——**不下发 token**，所以这里只写状态、不建会话。
-//   2. `SysRegisterService#register` 会校验并**消费**一次图形验证码（RedisUtils.deleteObject，
-//      一次性），同一组 code+uuid 无法再用于登录，故"注册成功即自动登录"在此链路下做不到。
-//   3. 因此注册成功≠已登录：前端注册完后必须回到登录再认证一次（与 plus-ui 注册页
-//      「注册后将返回登录页继续完成认证」同口径）。
+// 注册即登录（S22 / D35）：后端 `AuthController#register` 注册成功后直接下发 token（R<LoginVo>，
+// 参照 S14 socialAutoRegister 口径），本代理按 login.post.ts 同口径把 access_token 种进
+// httpOnly cookie——token 绝不回传浏览器。
+// ⚠️ 与 /auth/login 仍存在的差异（决定了本文件保留自己的加解密主链而不套用 authLogin.ts）：
+//   1. SysRegisterService#register 会校验并**消费**一次图形验证码（RedisUtils.deleteObject，一次性）——
+//      这正是「注册后无法就地再调一次 /auth/login」的原因，也是后端改为注册接口本身下发 token 的原因（S22）。
+//   2. 客户端/授权类型校验在后端 register 内按 login 同口径完成。
+//   3. 兼容旧后端（R<Void> 无 token）：退回只建档，前端保持「注册成功、引导手动登录」旧行为。
 // 注册开关由系统参数 `sys.account.registerUser` 控制（ROADMAP §6 D9，S0 脚本已置 true），关闭时后端返回
 // R.fail("当前系统没有开启注册功能！")。
 export default defineEventHandler(async (event) => {
@@ -73,7 +75,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 502, statusMessage: '注册响应解析失败（加密链路未对齐）' })
   }
 
-  // 成功只能判 code：register 的 data 恒为 null，不存在 access_token
+  // 成功判 code；注册即登录（S22 / D35）时 data 为 LoginVo（access_token/expire_in/client_id）
   if (json.code !== 200) {
     if (!encrypted && json.code === 403) {
       throw createError({
@@ -83,6 +85,13 @@ export default defineEventHandler(async (event) => {
     }
     // 携带后端可读消息（注册开关未开 / 用户名已存在 / 验证码错误或失效）供前端提示
     throw createError({ statusCode: 500, statusMessage: json.msg || '注册失败' })
+  }
+
+  // 注册即登录：按 login.post.ts 同口径种 httpOnly cookie（兼容旧后端 R<Void> 无 token 时跳过）
+  if (json.data?.access_token) {
+    const expireIn = Number(json.data.expire_in || 0)
+    setAuthCookie(event, json.data.access_token, expireIn || 60 * 60 * 12)
+    return { registered: true, logged: true }
   }
 
   return { registered: true }

@@ -462,3 +462,18 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 3. 跨仓 ROADMAP §6 决策记录待随三轮精修验收一并登记（后端仓库）
 4. 3100 端口旧 preview 服务如仍在使用需重启（构建清 chunk 的已知行为，3000 已在每轮重启）
 
+## 2.20 S22 注册即登录（blog-web 侧，2026-10-16 实施）
+
+> 后端侧（`AuthController#register` 返回 `R<LoginVo>` + `SysLoginService#registerAutoLogin`）见 ROADMAP §3 S22 / §6 D35；本节只列 blog-web 侧。红线不变：token 只落 httpOnly cookie 由 Nitro 代理种，业务代码不手写认证头。
+
+背景：注册成功后旧流程是「成功态 + 去登录按钮」，用户须再手动登录一次。根因是后端 `R<Void>` 不下发 token 且注册即消费验证码（一次性），前端无法就地补登。用户 2026-10-16 确认改为「注册即登录」，跳转目标为「回来源页」。
+
+- [x] `server/api/auth/register.post.ts`：响应出现 `access_token` 时按 login.post.ts 同口径 `setAuthCookie` 种 httpOnly cookie，返回 `{registered:true, logged:true}`；**兼容旧后端**（`R<Void>` 无 token）时退回 `{registered:true}` 只建档——双栈部署窗口期不会把老后端响应当失败
+- [x] `app/pages/register.vue`：删除「去登录」成功态（`done` ref 与对应模板块）；成功改为 toast「欢迎加入，已为你完成登录」+ `navigateTo(returnPath)`；新增 `returnPath` computed：读 `route.query.return`，**仅接受站内相对路径**（`startsWith('/')` 且拒 `//` 开头，防开放重定向），无参/非法回首页
+- [x] `app/components/LoginModal.vue`：注册链接改 `:to="{ path: '/register', query: { return: route.fullPath } }"`——从任意页（如 `/post/{slug}`）发起注册，成功后落回该页
+- [x] `app/composables/useAuth.ts`：`register()` 成功后 `refresh()` 刷新会话（与 `login()` 一致），文档注释同步
+- [x] 自测：`npm run build` 绿 + 编译产物抽验（register.post chunk 含 `setAuthCookie`/`access_token`/`logged: true`、无裸标识符；客户端产物含新 toast 文案、旧「账号创建成功」成功态文案已消失）
+- [x] E2E 实测（Agent，2026-10-16）：另起 8082 后端（新代码）+ blog-web 生产实例（3002，`NUXT_API_BASE` 指向 8082；用户原 8081 实例未动），验证码明文经 Redis 读取后提交——六用例全过：① 注册 → `{registered:true,logged:true}` + httpOnly token cookie（JWT 含新 userId）；② `/api/auth/session` → logged:true；③ 带 cookie `/api/blog/user/profile` → 200；④ 无 cookie → 401；⑤ 错误验证码 →「验证码错误」不种 token；⑥ 重复用户名 →「注册账号已存在」不种 token。测试用户 `e2e_reg_20261016` 与临时实例均已清理
+- [ ] 人工事项：浏览器视觉验收——注册成功 toast 呈现、跳回来源页落地（建议从文章详情页发起）、移动视口回归
+
+
