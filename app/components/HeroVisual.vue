@@ -3,7 +3,9 @@
 // 叠层本体已收敛到 LayerStack 组件（logo/空态/CTA 同族），本组件只保留两件事：
 // ① <ClientOnly> 槽位——three.js 动态漂浮层属桶B，只走这里注入，不进 SSR（D38 后暂不使用）
 // ② hero 档参数：主栈 5 层 / 170px / zStep 30（原 6 层 / 140px / zStep 26——放大精简，
-//    层间距拉开让「一层层读到深处」的隐喻可读）；副栈缩到 88px、透明度 .3 沿对角线滑出
+//    层间距拉开让「一层层读到深处」的隐喻可读）；副栈缩到 88px、透明度 .3 沿对角线滑出；
+//    offsetY 34px：三轮精修实测 3D 投影质心偏高，叠层顶边被面板 overflow-hidden 裁 15px、
+//    底部空 74px——下移后顶/底 clearance 均衡（多视口实测调定）
 // ③ client-only 指针视差（≤3°，二轮精修：用户明确选择的首屏「活物」感）：
 //    - SSR 安全：全部逻辑在 onMounted 内（服务端不执行），模板零浏览器 API
 //    - 双守卫：仅 (hover: hover) and (pointer: fine)（触屏不挂，免误触抖动）；
@@ -50,7 +52,7 @@ onUnmounted(() => {
       <slot name="layers" />
     </ClientOnly>
 
-    <LayerStack :size="170" :z-step="30" secondary :secondary-size="88" secondary-opacity="0.3" />
+    <LayerStack :size="170" :z-step="30" :offset-y="44" secondary :secondary-size="88" secondary-opacity="0.3" />
   </div>
 </template>
 
