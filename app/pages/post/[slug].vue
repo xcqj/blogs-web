@@ -128,7 +128,8 @@ useHead({
     <section class="mt-10 border-t border-border pt-8">
       <h2 class="mb-4 text-xl font-bold tracking-[var(--ls-title)]">评论 {{ comments?.total ?? 0 }}</h2>
       <CommentList :items="comments?.rows" />
-      <EmptyState v-if="!comments?.rows?.length" title="还没有评论" description="成为第一个讨论这篇的人。" />
+      <!-- 窄栏（68ch）空态用 compact 图标：h-24 在窄栏内头重脚轻（清单6） -->
+      <EmptyState v-if="!comments?.rows?.length" icon-class="h-16 w-16" title="还没有评论" description="成为第一个讨论这篇的人。" />
       <CommentForm :article-id="articleId" @posted="refreshComments" />
     </section>
     </article>

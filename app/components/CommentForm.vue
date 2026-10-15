@@ -36,6 +36,15 @@ async function submit() {
         <span v-if="err" class="text-xs text-danger">{{ err }}</span>
       </div>
     </template>
-    <button v-else class="text-sm text-primary hover:underline" @click="showLogin">登录后可发表评论</button>
+    <!-- 未登录：详情页唯一转化点——统一空态母题（说明文案 + 明确登录按钮），
+         不再用角落里的裸文字链；窄栏（68ch）用 compact 图标 -->
+    <EmptyState
+      v-else
+      icon-class="h-16 w-16"
+      title="登录后参与讨论"
+      description="登录即可发表评论，与作者和读者交流你的阅读体会。"
+    >
+      <SdButton class="mt-1" @click="showLogin">去登录</SdButton>
+    </EmptyState>
   </div>
 </template>

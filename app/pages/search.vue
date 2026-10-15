@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // /search —— §6 公共搜索。keyword 与 page 都走 query，可分享/可前进后退；SSR 出结果首屏。
-import type { ArticleSummary, PageResult } from '~/types/blog'
+import type { ArticleSummary, PageResult, TagItem } from '~/types/blog'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,6 +20,11 @@ const { data, status, refresh } = await useAsyncData(
         })
       : Promise.resolve({ rows: [], total: 0 } as PageResult<ArticleSummary>),
   { watch: [keyword, page] }
+)
+
+// 搜索初始态：精选标签快捷 chips（§7.1 featured 代理，首页侧栏同款，零新接口）
+const { data: featuredTags } = await useAsyncData('search-featured-tags', () =>
+  $fetch<TagItem[]>('/api/blog/public/tags/featured')
 )
 
 function submit() {
@@ -72,7 +77,18 @@ useSeoMeta({
           />
         </template>
       </template>
-      <p v-else class="py-10 text-center text-sm text-muted">输入关键词开始搜索</p>
+      <!-- 初始态：统一空态母题 + 精选标签快捷 chips（链到 /tag/{slug}），
+           给「不知道搜什么」的读者一条浏览路径（清单2） -->
+      <EmptyState
+        v-else
+        title="搜索文章"
+        description="输入关键词，搜索文章标题、摘要与正文。"
+      >
+        <p class="w-full text-center text-xs text-dim">或者，从精选标签开始逛：</p>
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <TagChip v-for="t in featuredTags" :key="t.tagId" :slug="t.slug" :name="t.name" />
+        </div>
+      </EmptyState>
     </div>
   </section>
 </template>
