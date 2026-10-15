@@ -166,6 +166,18 @@ NITRO_PORT=3100 node .output/server/index.mjs
 
 图标再生成（品牌标记改版时）：`node tooling/gen-pwa-icons.mjs`（纯 Node 写 PNG，本机无 PIL/rsvg，产物落 `public/icons/`）。
 
+## S20 Lenis 平滑滚动（2026-10-15 实施）
+
+ROADMAP v0.4 S20 切片（D38 动效收缩后**仅保留 Lenis**；hero 视差 / 逐字进场待定，**不引 three.js / GSAP**）。纯表现层：无契约/数据/状态机改动，只动本仓三处（依赖 + 一个 client 插件 + 一段 CSS），整体删除即恢复原状。
+
+- `app/plugins/lenis.client.ts`（`.client` 后缀 = SSR 安全）：全局单例，`lenis@1.3.26`。配置为**温和默认**：`lerp: 0.1`（约 300~400ms 惯性），`syncTouch` 关闭（**移动端触摸保持原生跟手**，平滑只作用于桌面滚轮/触控板），`stopInertiaOnNavigate: true`（点击站内链接时清零惯性，与路由滚到顶、页面过渡不打架）。
+- **无障碍**：`prefers-reduced-motion: reduce` 时**完全不初始化**（html 上无 lenis class，原生滚动），并监听 `matchMedia` change——会话中途切换系统偏好即时生效。Lenis 自带的 `respectReducedMotion` 选项只影响 programmatic scrollTo，不禁用滚轮平滑，故门控必须自建（源码核实）。
+- `transitions.css` 追加官方推荐配套规则：平滑滚动期间（`lenis-smooth` class 存在时）把 `scroll-behavior` 中和为 `auto`，避免与 tokens.css 的 `scroll-behavior: smooth` 双动画叠加。
+- 与既有动效零冲突：顶栏方向感知 / 阅读进度条监听原生 scroll 事件（Lenis 驱动真实 scrollY，照常触发）、v-reveal 走 IntersectionObserver、弹层滚动锁用 body overflow。
+- ⚠️ **坑（Nuxt 4.6 实测）**：`app/plugins` 下 bare 包的静态默认导入会被 auto-import transform（unimport）整体剥离，运行时报 `Lenis is not defined` 白屏；插件内改用动态 `import('lenis')`（顺带代码分割）。与「`app/directives` 不会被自动注册」并列为本仓两个 transform 坑，详见 `docs/plan.md` §2.17。
+- 验证：`npm run build` 绿；无头 Chrome 冒烟全 PASS（lenis class、wheel 平滑渐进曲线、reduce 下回退原生滚动、SW 注册态无冲突、三视口零 console error）。
+- ⏸ 人工验收（留用户）：桌面滚轮/触控板手感、移动端真机跟手、系统减少动态效果切换实测、PWA 安装态叠加。
+
 ## 视觉基线截图（本地验证工具，不参与构建）
 
 `tooling/shot/` 是一个**独立小包**：不写进主 `package.json`、不进 `dependencies`、不进 Docker 镜像。

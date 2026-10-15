@@ -102,6 +102,25 @@
   }
 }
 
+/* ---------- Lenis 平滑滚动（S20）：官方推荐配套规则 ----------
+   取自 Lenis 文档；关键在第 2 条——`lenis-smooth` 类只在该平滑滚动期间出现在 <html> 上
+   （Lenis className getter 行为），此时把 tokens.css 的 `html { scroll-behavior: smooth }`
+   中和为 auto，避免 Lenis 程序化滚动与 CSS 原生平滑双动画叠加。
+   未启用 Lenis 时这些规则均不命中（html 上无 lenis class），对原生滚动零影响。 */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
 /* ---------- 减少动态效果：全局兜底（M15） ----------
    注意用 0.01ms 而非 0，以保证 transitionend/animationend 仍会触发，
    依赖事件做清理的逻辑（如 Toast 移除）不会被卡住 */

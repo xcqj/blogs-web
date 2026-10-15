@@ -319,13 +319,22 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - **Lighthouse 实侧（2026-10-15，Windows Chrome）**：SEO 100 / Performance 100 / Accessibility 100 / Best Practices 96；**PWA 类别已被 Lighthouse 12.0（2024-05）移除**，可安装性改由 Chrome 安装图标 + DevTools Application 手动核验（Agent 已无头复验，按钮级安装留人工）。
 - ⏸ **剩余人工事项**：浏览器安装到桌面按钮级验收；登录态 `/me` 人工复测（Agent 侧已用未登录态验证零泄漏）；iOS Safari 限制确认；S13 配 `NUXT_PUBLIC_SITE_URL`；ROADMAP §3 S17 状态更新（跨仓）；`blog_s16_cleanup.sql` 面试前执行后 sitemap 收缩验证（可选）。
 
-## 2.17 S20 Lenis 平滑滚动（⏸ 待定，核心完成后）
+## 2.17 S20 Lenis 平滑滚动（2026-10-15 实施）
 
 > D38 收缩后范围：仅 Lenis；hero 视差 / 逐字进场待定；**不做 three.js、不引 GSAP**。纯表现层，无契约/数据/状态机改动，独立 commit 随时可砍。
 
-- [ ] 引入 Lenis（约 30KB）+ 与 `useScrollDirection()` / 阅读进度条 / v-reveal 的叠加回归
-- [ ] `prefers-reduced-motion` 兜底（transitions.css 已有，确认 Lenis 同样尊重）
-- [ ] 验收：桌面/移动滚动手感人工确认；与页面过渡、PWA 无冲突
+- [x] 引入 Lenis（`lenis@1.3.26`，约 33KB dist；官方包名已从 `@studio-freight/lenis` 更名，核实 latest=1.3.26 后安装）+ 与 `useScrollDirection()` / 阅读进度条 / v-reveal 的叠加回归
+- [x] `prefers-reduced-motion` 兜底（transitions.css 已有，确认 Lenis 同样尊重）
+- [x] 验收：桌面/移动滚动手感人工确认；与页面过渡、PWA 无冲突
+
+实施结果（澄清轮三项决策：全站启用 / 温和默认 / 不初始化+监听切换）：
+
+- [x] `app/plugins/lenis.client.ts`（新增，全局 client-only 插件）：`matchMedia('(prefers-reduced-motion: reduce)')` 门控——偏好匹配**不创建实例**（html 无 lenis class，原生滚动原样回退），并监听 change 实现会话中途切换系统偏好时即时创建/销毁（`destroy()` 连 class 一并移除，撤销干净）。配置 `lerp: 0.1`（官方默认）+ `stopInertiaOnNavigate: true`（点站内链接清零惯性，与 Nuxt scrollBehavior 滚到顶、out-in 路由过渡不打架）；`smoothWheel`/`syncTouch` 取默认（true/false，移动端触摸保持原生跟手）。不 provide 实例（当前无消费方，YAGNI）。
+- [x] `app/assets/css/transitions.css`：尾部追加 Lenis 官方推荐配套规则，关键 `.lenis.lenis-smooth { scroll-behavior: auto !important }`——`lenis-smooth` 类仅在平滑滚动期间存在于 html（Lenis className getter 行为），中和 `tokens.css` 的 `html { scroll-behavior: smooth }`，防 Lenis 程序化滚动与 CSS 原生平滑双动画。
+- [x] 兼容性调研结论（均不改动）：`useScrollDirection`/`useReadingProgress` 监听原生 scroll 事件（Lenis 驱动真实 scrollY，照常触发）；`v-reveal` 走 IntersectionObserver；全仓无嵌套滚动容器、无 `scrollTo`/`scrollIntoView` 调用；弹层滚动锁用 body `overflow`。
+- ⚠️ **坑（本项目 Nuxt 4.6 实测）**：`app/plugins` 下 bare 包的**静态默认导入会被 auto-import transform（unimport）整体剥离**——产物 import 语句消失、`new Lenis(...)` 成自由标识符，运行时报 "Lenis is not defined" 白屏（错误页包裹）。改用**动态 `import('lenis')`** 修复（unimport 不触碰动态导入，且顺带代码分割）；与「directives 不会被自动注册」并列为本仓 Nuxt 4.6 两个 transform 坑。
+- 自测：`npm run build` 绿 + 产物抽验（lenis 入 client bundle、server bundle 0 命中、CSS 规则入产物）+ 无头 Chrome 冒烟全 PASS：html.lenis class、wheel 平滑渐进（采样曲线 57→156→271→…→563，lerp  ramp 非瞬跳）、路由跳转滚到顶且 class 仍在、reducedMotion=reduce 下无 class 且原生滚动可用、SW 注册状态下刷新正常、三视口（1440/移动 390/reduce）零 console error / 5xx。
+- ⏸ **剩余人工事项**（用户 Windows 侧浏览器）：① 桌面滚轮/触控板滚动手感确认（力度是否合适）；② 移动端真机触摸跟手确认（syncTouch 关闭 = 原生触摸，Lenis 仅桌面滚轮生效）；③ 系统「减少动态效果」偏好实际切换一次验证不劫持滚动；④ 与 PWA 安装态（standalone 窗口）叠加一次；⑤ ROADMAP §3 S20 状态更新（跨仓，留用户）。
 
 ## 2.18 S15 阅读量 Redis 异步计数（blog-web 侧，2026-10-14 实施）
 
