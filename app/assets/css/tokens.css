@@ -96,6 +96,11 @@
   --glow: rgb(228 219 201 / 0.26);
   --glow-soft: rgb(228 219 201 / 0.1);
   --shadow-glow: var(--e2);
+  /* 品牌叠层母题填充（LayerStack：Hero/CTA 收尾用）。
+     浅色档 2026-10-16 加深一档：原 #e8e2d6→#d8cfc0 打在近白 hero 底上近乎隐形，
+     图形对比不足；加深后与 panel 底拉开 ≥3:1（图形标准，人工核对）。
+     深色档不变（#3a342b→#232019 在暖黑底上本就分明）。
+     ⚠️ 仅 LayerStack 一处在用，改动爆炸半径为零 */
   --layer-fill: linear-gradient(135deg, #3a342b, #232019);
   --ph-1: #3a342b;
   --ph-2: #232019;
@@ -146,7 +151,8 @@
   --glow: rgb(47 44 37 / 0.2);
   --glow-soft: rgb(47 44 37 / 0.08);
   --shadow-glow: var(--e1);
-  --layer-fill: linear-gradient(135deg, #e8e2d6, #d8cfc0);
+  /* 浅色档加深（2026-10-16，详见上方深色档处注释） */
+  --layer-fill: linear-gradient(135deg, #ded4c2, #c8bca8);
   --ph-1: #e8e2d6;
   --ph-2: #d8cfc0;
   --code-bg: #211e1d;

@@ -26,7 +26,10 @@ useSeoMeta({
 <template>
   <div class="space-y-8">
     <!-- Hero（打磨轮5 瘦身）：44px 一行标题 + 一句话 + 中号 CTA，叠层图形降为点缀（160px）。
-         内容站首屏应让位给文章列表，品牌图形不再占一屏（用户实测反馈） -->
+         内容站首屏应让位给文章列表，品牌图形不再占一屏（用户实测反馈）。
+         2026-10-16 二轮精修：叠层真正放大（层 140→170px、容器 240→320px）解决「贴纸感」；
+         主栈 5 层 zStep 30 读出「一层层」隐喻；保持 items-center——视觉容器比文案块高，
+         底基线对齐会在左上撕出空洞，光学中心对齐才是平衡解（实测 87px 空洞后回退） -->
     <section class="surface-hero relative overflow-hidden rounded-xl border border-border p-6 md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-8 md:p-8">
       <div>
         <h1>
@@ -37,8 +40,9 @@ useSeoMeta({
         </p>
         <SdButton href="#latest" variant="cta" class="mt-5">开始阅读 →</SdButton>
       </div>
-      <!-- 品牌母题点缀：< md 隐藏；three.js 属桶B，只走 ClientOnly 槽位 -->
-      <div class="hidden w-60 md:block md:h-44 lg:h-48">
+      <!-- 品牌母题点缀：< md 隐藏；three.js 属桶B，只走 ClientOnly 槽位。
+           容器 320×192，叠层 union 约 255×230，对称溢出进 34px 面板内边距，不裁切 -->
+      <div class="hidden w-80 md:block md:h-48 lg:h-52">
         <HeroVisual />
       </div>
     </section>
