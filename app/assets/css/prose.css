@@ -140,6 +140,65 @@
   padding: 0;
 }
 
+/* ---------- 代码块复制钮（清单5）：由 code-copy.client.ts 注入的 .sd-code 容器承载 ----------
+   容器 relative：复制钮 absolute 到容器而非 pre 内，不随 pre 横向滚动跑掉。
+   克制小尺寸 ghost 钮：默认透明，hover/focus 才显形；触屏设备（hover: none）常显。
+   ::before 把点击热区扩到 44×44（视觉仍 28px）——满足 <640 触控目标 ≥44px 硬边界。
+   颜色只走既有 token（muted→text），不加新装饰；copied 反馈用全墨色 check。 */
+.sd-code {
+  position: relative;
+}
+
+.sd-code-copy {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--elevated);
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out),
+    background var(--t-fast) var(--ease-out);
+}
+
+/* 44px 触控热区（视觉尺寸不变） */
+.sd-code-copy::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.sd-code:hover .sd-code-copy,
+.sd-code-copy:focus-visible {
+  opacity: 1;
+}
+
+.sd-code-copy:hover {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.sd-code-copy.is-copied {
+  color: var(--text);
+  opacity: 1;
+}
+
+/* 触屏无 hover：常显，保证移动端可点 */
+@media (hover: none) {
+  .sd-code-copy {
+    opacity: 1;
+  }
+}
+
 .prose a {
   color: var(--accent-fg);
   text-decoration: none;

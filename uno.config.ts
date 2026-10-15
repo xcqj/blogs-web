@@ -179,5 +179,9 @@ export default defineConfig({
       }
     })
   ],
-  transformers: [transformerDirectives(), transformerVariantGroup()]
+  transformers: [transformerDirectives(), transformerVariantGroup()],
+  // 运行时动态注入 DOM 的类名不在任何模板里，按源码字面量也扫不到（.ts 不在默认
+  // 扫描范围，且放开扫描会被工具链字符串误提取出损坏规则）——用 safelist 精确声明：
+  // code-copy.client.ts 注入的复制/成功图标（清单5）
+  safelist: ['i-mdi:content-copy', 'i-mdi:check']
 });
