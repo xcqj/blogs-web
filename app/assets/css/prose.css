@@ -30,6 +30,8 @@
 
 .prose p {
   margin: 0 0 var(--space-6);
+  /* 正文渐进增强 pretty：避免段末单字孤行（CJK 长行场景），旧浏览器忽略（清单3） */
+  text-wrap: pretty;
 }
 
 .prose h2 {

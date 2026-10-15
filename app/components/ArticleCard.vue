@@ -38,9 +38,13 @@ const summaryHtml = computed(
     </NuxtLink>
 
     <div class="min-w-0 flex-1">
+      <!-- 标题：<sm 两行截断（390px 下 24px 单行仅约 12 字，两行给足语义；sm+ 保持 truncate 单行）。
+           实现要点：line-clamp-2 自带 display:-webkit-box，不能被 block 工具类覆盖（会静默失效），
+           故 sm+ 用 sm:block 复位；Chromium 新版对 -webkit-line-clamp 可能不出省略号——
+           上线前须 390px 实测，不达标则补标准 line-clamp 属性。balance 与两行截断组合生效 -->
       <NuxtLink
         :to="`/post/${article.articleId}`"
-        class="relative block truncate text-xl font-bold tracking-[var(--ls-title)] transition hover:text-primary after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-primary after:transition-[width] after:duration-200 group-hover:after:w-full"
+        class="relative line-clamp-2 text-xl font-bold tracking-[var(--ls-title)] [text-wrap:balance] transition hover:text-primary sm:block sm:truncate after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-primary after:transition-[width] after:duration-200 group-hover:after:w-full"
       >
         <!-- 搜索命中时渲染服务端高亮片段（含 <em>），否则纯文本标题 -->
         <span v-if="titleHtml" v-html="titleHtml" />

@@ -12,7 +12,9 @@ defineProps<{ items?: Comment[] }>()
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-2 text-sm">
           <span class="font-semibold">{{ c.userName }}</span>
-          <span class="text-xs text-muted">{{ c.createTime }}</span>
+          <!-- 时间截到分钟（增量B）：meta 行不显示秒级——秒对读者无信息量，
+               字符串 slice 为 SSR 安全手法（同 ArticleCard displayDate） -->
+          <span class="text-xs text-muted">{{ c.createTime.slice(0, 16) }}</span>
         </div>
         <!-- 评论为纯文本字段：{{ }} 自动转义，绝不 v-html（后端已按 sanitizePlainText 净化） -->
         <p class="mt-1.5 whitespace-pre-wrap break-words text-sm">{{ c.content }}</p>
