@@ -76,10 +76,17 @@ const summaryHtml = computed(
 <style scoped>
 /* §6 / D36 搜索高亮：服务端片段 <em> 包裹命中词，样式走 token（accent-fg 前景强调，
    深浅色自适应）；not-italic 消 UA 默认斜体，字重微调让命中词"跳"但不刺眼。
-   :deep 必须——v-html 注入的节点不带 scoped data 属性 */
+   :deep 必须——v-html 注入的节点不带 scoped data 属性。
+   三轮精修（用户截图反馈「关键词显示的不太明显」）：仅换字色不可辨——深浅主题下
+   --accent-fg（#e4dbc9/#2f2c25）与正文色（#f4f1ea/#211e1d）几乎同色，只剩字重差别。
+   改 chip 式：accent-soft 底 + accent-fg 字 + 微 padding/圆角（标准搜索高亮观感）。
+   该色对已过 contrast.mjs「chip 文字」门禁：深 8.98:1 / 浅 10.80:1。 */
 .sd-card :deep(em) {
   font-style: normal;
   font-weight: 600;
   color: var(--accent-fg);
+  background: var(--accent-soft);
+  padding: 0 0.15em;
+  border-radius: var(--radius-sm);
 }
 </style>
