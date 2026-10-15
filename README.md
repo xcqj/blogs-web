@@ -176,7 +176,7 @@ ROADMAP v0.4 S20 切片（D38 动效收缩后**仅保留 Lenis**；hero 视差 /
 - 与既有动效零冲突：顶栏方向感知 / 阅读进度条监听原生 scroll 事件（Lenis 驱动真实 scrollY，照常触发）、v-reveal 走 IntersectionObserver、弹层滚动锁用 body overflow。
 - ⚠️ **坑（Nuxt 4.6 实测）**：`app/plugins` 下 bare 包的静态默认导入会被 auto-import transform（unimport）整体剥离，运行时报 `Lenis is not defined` 白屏；插件内改用动态 `import('lenis')`（顺带代码分割）。与「`app/directives` 不会被自动注册」并列为本仓两个 transform 坑，详见 `docs/plan.md` §2.17。
 - 验证：`npm run build` 绿；无头 Chrome 冒烟全 PASS（lenis class、wheel 平滑渐进曲线、reduce 下回退原生滚动、SW 注册态无冲突、三视口零 console error）。
-- ⏸ 人工验收（留用户）：桌面滚轮/触控板手感、移动端真机跟手、系统减少动态效果切换实测、PWA 安装态叠加。
+- ✅ 人工验收通过（2026-10-15）：桌面滚轮/触控板手感、移动端真机跟手、系统减少动态效果切换实测、PWA 安装态叠加，均确认无问题。
 
 ## 视觉基线截图（本地验证工具，不参与构建）
 

@@ -334,7 +334,7 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] 兼容性调研结论（均不改动）：`useScrollDirection`/`useReadingProgress` 监听原生 scroll 事件（Lenis 驱动真实 scrollY，照常触发）；`v-reveal` 走 IntersectionObserver；全仓无嵌套滚动容器、无 `scrollTo`/`scrollIntoView` 调用；弹层滚动锁用 body `overflow`。
 - ⚠️ **坑（本项目 Nuxt 4.6 实测）**：`app/plugins` 下 bare 包的**静态默认导入会被 auto-import transform（unimport）整体剥离**——产物 import 语句消失、`new Lenis(...)` 成自由标识符，运行时报 "Lenis is not defined" 白屏（错误页包裹）。改用**动态 `import('lenis')`** 修复（unimport 不触碰动态导入，且顺带代码分割）；与「directives 不会被自动注册」并列为本仓 Nuxt 4.6 两个 transform 坑。
 - 自测：`npm run build` 绿 + 产物抽验（lenis 入 client bundle、server bundle 0 命中、CSS 规则入产物）+ 无头 Chrome 冒烟全 PASS：html.lenis class、wheel 平滑渐进（采样曲线 57→156→271→…→563，lerp  ramp 非瞬跳）、路由跳转滚到顶且 class 仍在、reducedMotion=reduce 下无 class 且原生滚动可用、SW 注册状态下刷新正常、三视口（1440/移动 390/reduce）零 console error / 5xx。
-- ⏸ **剩余人工事项**（用户 Windows 侧浏览器）：① 桌面滚轮/触控板滚动手感确认（力度是否合适）；② 移动端真机触摸跟手确认（syncTouch 关闭 = 原生触摸，Lenis 仅桌面滚轮生效）；③ 系统「减少动态效果」偏好实际切换一次验证不劫持滚动；④ 与 PWA 安装态（standalone 窗口）叠加一次；⑤ ROADMAP §3 S20 状态更新（跨仓，留用户）。
+- ✅ **人工验收通过**（2026-10-15，用户 Windows 侧浏览器）：桌面滚轮/触控板手感、移动端真机触摸跟手（syncTouch 关闭 = 原生触摸，Lenis 仅桌面滚轮生效，符合预期）、系统「减少动态效果」偏好切换实测不劫持滚动、PWA 安装态（standalone 窗口）叠加，四项均确认无问题。ROADMAP §3 S20 状态已同步跨仓关闭。
 
 ## 2.18 S15 阅读量 Redis 异步计数（blog-web 侧，2026-10-14 实施）
 
