@@ -423,3 +423,27 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] 用户反馈三处问题确认方向（多选问答）
 - [x] 实施 + agent 侧验收（4 commit；人工视觉验收待用户侧完成）
 
+### 三轮精修（2026-10-16，用户带四张截图反馈 → 4 个 polish commit）
+
+背景：用户 Windows 侧验收二轮后又提四处——① Hero 叠层「位置还是不对，上面看不到了」（红框）；② 搜索页关键词高亮不明显（红框）；③ 登录框「像二十年前的管理后台」；④ 新建文章页标题不明显（问是配色还是主次）。经多选问答确认：**Q1 选 A（offsetY 下移 + <lg 响应式缩放）/ Q2 选 A（chip 式高亮）/ Q3 选 A only（标签降级）/ Q4 选 A only（placeholder 升色）**。
+
+实施记录（4 个小步 commit，均标 polish）：
+
+| commit | 批次 | 文件 |
+|---|---|---|
+| `97463bf` | Hero 叠层裁切修复 | LayerStack.vue / HeroVisual.vue |
+| `87df1d3` | 搜索 chip 式高亮 | ArticleCard.vue |
+| `25881d8` | 表单标签降级 | uno.config.ts（sd-label 全局） |
+| `4167c18` | 标题 placeholder 升色 | ArticleForm.vue |
+
+- **Hero 叠层裁切（真 bug，预存于二轮放大后）**：实测叠层 union 顶边超出面板顶边 15px 被 `overflow-hidden` 裁切、底部空 74px、质心偏高；768/820 档更重。根因：3D 投影质心不在容器几何中心（translateZ 高层级向上展开更多），union 236px > 容器 221px。修复：LayerStack 架构升级——layer transform 从内联改为 CSS 变量驱动（`--i` 内联 + `--ls-z`/`--ls-zs` 消费，内联 transform 无法被媒体查询缩放）；新增 `offsetY` 属性（默认 0，CTA 不受影响）；`<lg` 内置 `--ls-ss .72`（尺寸）/`--ls-zs .6`（Z 步进）/`--ls-oss .6`（offset 同步缩放）。实测调参：offsetY 34→44（桌面 clearance 17/37→27/26），加 `--ls-oss` 后 md 档 75/40→58/59；多视口（1920~768）零裁切
+- **测量陷阱备案**：副叠层 `<lg` 时 `display:none`，其 layer 的 rect 全为 0，会污染 union 测量（曾得出假 -102px）；裁切实测须只取 `.stack:not(.stack--secondary) .layer`
+- **搜索高亮**：`<em>` 原仅换 `--accent-fg` 字色，而深浅主题下 accent-fg 与正文色几乎同色（#e4dbc9/#f4f1ea、#2f2c25/#211e1d），只剩字重差别；改 chip 式（accent-soft 底 + accent-fg 字 + 0.15em padding + radius-sm），与 TagChip 同配色对；对比度门禁重跑 18 项全过（chip 用例深 8.98:1 / 浅 10.80:1）
+- **表单标签降级**：`sd-label` 全局 `text-sm font-semibold text-muted` → `text-xs font-normal text-dim`（不动 mb-1.5 字段节奏）。爆炸半径（设计系统单一来源纪律）：LoginModal×3、register×4、CoverField×1、me/profile bio、PublishDrawer 封面；新色对过 AA（dim on surface 深 4.67 / 浅 5.40）
+- **标题 placeholder**：`.title-input` 裸 input 的 placeholder 吃 UA 默认半透明色，32px 大字号下淡灰；显式指定 `--text-muted`（6.88:1/7.89:1）
+- 验证：每批 npm run build 通过；每批全量 44 张冒烟零报错；实测（hero 多视口 clearance 27/26 与 58/59、em 计算样式、标签 12px/400/dim、产物 CSS 规则确认）；after 截图备份 `/tmp/shots-after-round3/`
+- **人工事项（用户侧）**：① Windows 视觉验收四项（Hero 叠层完整可见与均衡/搜索高亮可辨性/登录框标签语言/新建页标题 placeholder——后者需登录态，agent 无 token 未截图）；② me/profile 与 PublishDrawer 的标签降级观感确认（全局改动的连带页面）；③ 跨仓 ROADMAP §6 决策记录仍待登记
+
+- [x] 用户反馈四处问题确认方向（多选问答）
+- [x] 实施 + agent 侧验收（4 commit；人工视觉验收待用户侧完成）
+
