@@ -237,4 +237,10 @@ async function submit(publish: boolean) {
 .title-input:focus {
   border-bottom-color: var(--accent);
 }
+/* 三轮精修（用户截图反馈「标题不太明显」）：.title-input 是裸 input（无 sd-input 类），
+   placeholder 吃 UA 默认半透明继承色，32px 大字号下呈淡灰——显式指定 --text-muted
+   （dim 为备选；深浅双主题经 token 自动适配，6.88:1/7.89:1 过 AA） */
+.title-input::placeholder {
+  color: var(--text-muted);
+}
 </style>
