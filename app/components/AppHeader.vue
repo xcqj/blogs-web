@@ -58,7 +58,9 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
           </NuxtLink>
           <button class="hidden text-xs text-muted transition hover:text-text md:inline" @click="logout">退出</button>
         </template>
-        <SdRollButton v-else label="登录" @click="showLogin" />
+        <!-- 登录钮降重量（清单7）：soft 半透明底替代 accent 实底，hover 才升实底；
+             深色顶栏少一块高反光实底，重量让位内容（滚动字效保留） -->
+        <SdRollButton v-else label="登录" variant="soft" @click="showLogin" />
 
         <!-- 移动汉堡按钮（<768） -->
         <button

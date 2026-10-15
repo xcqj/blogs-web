@@ -4,7 +4,7 @@
 // - button 形态默认 type="button"（防 form 内误提交；要提交显式传 type="submit"）
 // - loading 出 spinner 并禁点；移动端 44px 触控规则作用在 btn-* 类名上，天然继承
 interface Props {
-  variant?: 'primary' | 'secondary' | 'cta' | 'ghost' | 'danger'
+  variant?: 'primary' | 'secondary' | 'cta' | 'ghost' | 'soft' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   to?: string
   href?: string
@@ -21,6 +21,7 @@ const variantCls: Record<NonNullable<Props['variant']>, string> = {
   secondary: 'btn-secondary',
   cta: 'btn-cta',
   ghost: 'btn-ghost',
+  soft: 'btn-soft',
   danger: 'btn-danger'
 }
 const sizeCls: Record<NonNullable<Props['size']>, string> = { sm: 'btn-sm', md: '', lg: 'btn-lg' }

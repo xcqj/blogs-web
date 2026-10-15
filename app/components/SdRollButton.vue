@@ -7,16 +7,18 @@
 interface Props {
   label: string
   icon?: string
+  // 透传给 SdButton 的 variant：声明式 prop 不进 $attrs，必须显式绑定（默认 primary 保持旧行为）
+  variant?: 'primary' | 'secondary' | 'cta' | 'ghost' | 'soft' | 'danger'
 }
 
-const props = withDefaults(defineProps<Props>(), { icon: 'i-mdi:arrow-right' })
+const props = withDefaults(defineProps<Props>(), { icon: 'i-mdi:arrow-right', variant: 'primary' })
 
 // 空格换成不换行空格，避免被折叠导致字符遮罩错位
 const chars = computed(() => [...props.label].map((c) => (c === ' ' ? '\u00A0' : c)))
 </script>
 
 <template>
-  <SdButton v-bind="$attrs" class="group" :aria-label="label">
+  <SdButton v-bind="$attrs" class="group" :variant="variant" :aria-label="label">
     <span class="sd-roll-chars" aria-hidden="true" :style="{ '--n': chars.length }">
       <span v-for="(ch, i) in chars" :key="i" class="sd-roll" :style="{ '--i': i }">
         <span>{{ ch }}</span>

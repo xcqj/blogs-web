@@ -34,6 +34,9 @@ export default defineConfig({
       'btn border border-border-strong bg-elevated text-text hover:bg-raised active:bg-surface',
     'btn-cta': 'btn bg-cta text-cta-ink hover:bg-cta-strong active:bg-cta',
     'btn-ghost': 'btn bg-transparent text-muted hover:bg-soft hover:text-primary-fg',
+    // soft 变体（清单7 顶栏登录钮降重量）：半透明 soft 底 + 前景强调字，hover 才升实底——
+    // 深色顶栏少一块高反光实底，重量让位内容；黄 CTA 仍是全站唯一强焦点
+    'btn-soft': 'btn bg-soft text-primary-fg hover:bg-primary hover:text-primary-ink active:bg-primary-strong active:text-primary-ink',
     'btn-danger': 'btn bg-danger-bg text-danger hover:bg-danger hover:text-danger-ink',
     'btn-sm': 'h-7.5 rounded-sm px-2.5 text-xs',
     'btn-lg': 'h-11 rounded-md px-5 text-base',
