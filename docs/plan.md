@@ -348,9 +348,9 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 
 **联调期修复（2026-10-14，SSR cookie 断链·第二现场，commit 见下）**：修复 Redisson codec 陷阱后，「每次刷新阅读量仍 +1」——根因：`/post` 详情页 SSR 取数用全局 `$fetch`，**内部请求不转发浏览器 Cookie**（与 S14 useAuth 同款坑的第二个现场），详情代理因此读不到 visitorId cookie（SSR 每次生成新 UUID，去重永不命中）也读不到 token（登录用户不走 userId 去重）；SPA 内导航是浏览器直连所以一直正常，故只有「刷新/直达」暴露。修复：`/post/[slug].vue` 的文章 useAsyncData 改 `useRequestFetch()`。实证：带 `blog-web-visitor` cookie 打 SSR 页面 → Redis 出现对应 `v{}` 去重键；带 token+visitor → 出现 `u{}` 键（登录 userId 路径）。**纪律补丁：今后任何「SSR 取数 + 下游服务端路由依赖 cookie」的链路，取数侧一律 `useRequestFetch`；服务端路由能种/读 cookie 不代表调用方带得了 cookie（curl 直打代理两种都正常，极具迷惑性）**
 
-## 2.19 质感精修轮（2026-10-15 评审完成，待实施）
+## 2.19 质感精修轮（2026-10-15 评审完成，**已实施验收**）
 
-> 背景：S20 后用户发起的前台质感提升，非 ROADMAP 排期切片（先例：打磨轮批 1/批 2 记录于本文件 §2.12）。评审由 Impeccable 技能完成；实施将用 taste-skill（design-taste-frontend）方法论在新对话进行。
+> 背景：S20 后用户发起的前台质感提升，非 ROADMAP 排期切片（先例：打磨轮批 1/批 2 记录于本文件 §2.12）。评审由 Impeccable 技能完成；实施由 taste-skill（design-taste-frontend）方法论在新对话完成。
 
 评审过程与结论（2026-10-15）：
 
@@ -361,17 +361,41 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 
 力度决策（用户 2026-10-15 定）：**精修**——允许动间距节奏、字号/字距细节、组件视觉升级、局部布局微调（卡片内结构/meta 行排布/区块留白）；不可动信息架构、页面骨架、交互逻辑与数据流；基础清单之外允许实施方按 taste-skill 标准提增量精修项，逐项经用户确认后实施。
 
-基础清单（7 项，待用户挑选）：
+基础清单（7 项）+ 增量项（2 项）——用户 2026-10-15 多选问答**全部确认实施**：
 
-1. 评论未登录态（详情页）：CommentForm 裸文字链「登录后可发表评论」→ 统一空态语言（说明文案 + 明确登录按钮，复用 useLoginModal）——详情页唯一转化点
-2. 搜索初始态（/search）：裸文本提示 → EmptyState 母题（图标+标题+说明）+ 精选标签快捷 chips（featured 接口已有）
-3. 中文标题 `text-wrap: balance`（hero 标题/文章 h1/卡片标题；渐进增强，修「深/处」「缓/存」孤字拆行）
-4. 移动端列表卡标题 line-clamp-2（sm+ 保持单行 truncate）——390px 下 24px 单行约 12 字
-5. prose 代码块复制按钮（client onMounted 注入，SSR 安全）
-6. 评论空态图标 h-24→h-16（68ch 窄栏内头重脚轻）
-7. （争议项）顶栏登录按钮降重量 accent 实底→soft 底——由用户拍板
+1. ✅ 评论未登录态（详情页）：CommentForm 裸文字链 → EmptyState 母题（说明 + 「去登录」按钮，复用 useLoginModal）
+2. ✅ 搜索初始态（/search）：裸文本 → EmptyState 母题 + SSR 精选标签 chips（复用 featured 代理，链到 /tag/{slug}）
+3. ✅ 中文标题 `text-wrap: balance`：tokens.css h1–h4 元素规则 + prose.css `.prose p` 补 `text-wrap: pretty`（渐进增强）
+4. ✅ 移动端列表卡标题 `line-clamp-2`（sm+ 以 `sm:block sm:truncate` 保持单行）——390px 实测省略号渲染正常
+5. ✅ prose 代码块复制按钮：`app/plugins/code-copy.client.ts`（client-only，app:mounted + page:finish 双时机注入，防重复，clipboard + execCommand 兜底）
+6. ✅ 评论空态图标 h-24→h-16：EmptyState 增 `icon-class` 插槽属性（默认不变），详情页 68ch 窄栏两处空态传 h-16
+7. ✅ （争议项，用户拍板做）顶栏登录按钮 accent 实底→soft 底：新增 `btn-soft` 变体（hover 才升实底），contrast.mjs 18 项重跑全过
+8. ✅ 增量 A 页脚设计化收尾：AppFooter 品牌名 + tagline + © 行 + 链接组（保留全部真实链接，补首页）
+9. ✅ 增量 B 评论时间截到分钟（slice 前 16 位，SSR 安全手法）
 
-实施约定：D38 有效（不引 three.js/GSAP/视差）；无组件库、不新增运行时依赖；零后端/契约改动，只动本仓；深浅双主题都过；对比度 WCAG AA（改色值重跑 contrast.mjs）；小步 commit 标 polish。
+实施记录（5 个小步 commit，均标 polish，只动本仓）：
 
-- [ ] 用户挑选清单项 + 增量项确认
-- [ ] 实施 + 验收（taste-skill 新对话；跨仓 ROADMAP §6 决策记录随精修轮验收一并登记）
+| commit | 批次 | 文件 |
+|---|---|---|
+| `07221da` | 统一空态语言（项 1/2/6） | CommentForm / EmptyState / post/[slug] / search.vue |
+| `02b8d82` | 中文排版（项 3/4/9） | tokens.css / prose.css / ArticleCard / CommentList |
+| `5083feb` | 代码块复制钮（项 5） | plugins/code-copy.client.ts（新）/ prose.css / uno.config.ts |
+| `1d6bcba` | 登录按钮降重量（项 7） | uno.config.ts / SdButton / SdRollButton / AppHeader |
+| `7c02518` | 页脚收尾（项 8） | AppFooter.vue |
+
+实施期发现并修复的问题（备案）：
+
+- **`block` 工具类覆盖 line-clamp 的 `display:-webkit-box`**：卡片标题最初写成 `block … line-clamp-2 sm:truncate`，实测 `display` 仍是 block、两行截断静默失效；改为 `line-clamp-2 … sm:block sm:truncate`（sm+ 才复位 block），390px 真实字体实测 clientHeight=2 行、省略号正常
+- **UnoCSS 扫不到运行时注入的图标类**：默认 include 的 `[jt]sx` 不含裸 `.ts`，插件里 `i-mdi:*` 字面量不生成 CSS（注入出空元素）；曾试放开 `.ts` 扫描，但工具链字符串会被误提取出损坏选择器（`[constructor~=…]`）导致 dev 500——最终改用 `safelist: ['i-mdi:content-copy','i-mdi:check']` 精确声明
+- **3000 端口实为生产预览（`npm start`）而非 dev**：`npm run build` 会清掉旧 chunk 令运行中的预览服务 manifest 引用的文件 404/500；每批构建后需重启 3000 才可截图（截图打 3000 的口径不变）
+
+验收（agent 侧，2026-10-15）：
+
+- 每批 `npm run build` 通过；每批全量 44 张冒烟截图（7 页 × 3 视口 × 2 主题 + 交互态）控制台/网络零报错
+- 关键行为实测：卡片标题 390px 两行截断 + 省略号（真实字体）；复制钮端到端（注入结构/图标渲染/hover 显形/剪贴板内容精确/1.2s 复位/SPA 导航不重复/SSR 输出无注入结构）；登录钮 soft 变体深浅主题默认态/hover 态计算样式；评论时间无秒级
+- before/after 截图：上轮基线已备份至 `/tmp/shots-before-batch1/`（44 张），本轮 after 在 `design/shots/`（均不入库）
+- **人工事项（用户侧）**：① Windows 浏览器视觉验收 9 项（重点：搜索初始态 chips 数据为测试标签、登录钮 soft 底观感、页脚收尾）；② 复制钮需在有代码块的真实文章上实测（当前样本文章均无 `<pre>`）；③ 3100 端口旧 preview 与 3000 同样受构建清 chunk 影响，如需保留请重启；④ 跨仓 ROADMAP §6 决策记录待随本轮验收一并登记
+
+- [x] 用户挑选清单项 + 增量项确认（9/9 全做，含争议项 7 拍板）
+- [x] 实施 + 验收（taste-skill 方法论；人工视觉验收待用户侧完成）
+
