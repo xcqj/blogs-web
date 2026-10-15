@@ -399,3 +399,27 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] 用户挑选清单项 + 增量项确认（9/9 全做，含争议项 7 拍板）
 - [x] 实施 + 验收（taste-skill 方法论；人工视觉验收待用户侧完成）
 
+### 二轮精修（2026-10-16，用户带三张截图反馈 → 4 个 polish commit）
+
+背景：用户 Windows 侧验收一轮后提出三处问题——① 页面底部 CTA band「下一篇，从你开始」太空，问能否加三维倾斜；② 首页 Hero 右侧叠层图形（红框标注）显示不正常；③ 顶栏导航三按钮如何调整。经多选问答确认方向：**CTA 静态补分量（否决动效）／Hero 放大精简 + 极淡指针视差（用户明确选择）／导航 active 短下划线**。
+
+实施记录（4 个小步 commit，均标 polish，只动本仓）：
+
+| commit | 批次 | 文件 |
+|---|---|---|
+| `999e84b` | LayerStack 母题组件 + Hero 叠层放大精简 | LayerStack.vue（新）/ HeroVisual.vue / index.vue / tokens.css |
+| `8a65ab3` | Hero client-only ≤3° 指针视差 | HeroVisual.vue |
+| `2f778fe` | CTA band 缩微叠层补静态分量 | CtaBand.vue |
+| `19b3d24` | 导航 hover/active 统一 w-4 短下划线 | AppHeader.vue |
+
+- **LayerStack.vue（新）**：品牌母题「错位纵深叠层」收敛为可复用组件（logo/空态/Hero/CTA 四处同族，AGENTS「该封装就封装」）；props 化层数/边长/层距/透明度/副栈，纯 CSS 3D 无 JS，SSR 友好
+- **Hero 叠层**：主栈 5 层 / 170px / zStep 30（原 6 层 140px zStep 26），容器 240→320px；副栈 88px 透明度 .3 沿对角线滑出；`--layer-fill` 浅色档 #e8e2d6/#d8cfc0 → #ded4c2/#c8bca8（解决浅色主题叠层打在近白底上近乎隐形，图形对比 ≥3:1 人工核对）；**保持 items-center——曾试 items-end 底基线对齐，实测在左上撕出 87px 空洞（视觉容器比文案块高），回退**
+- **指针视差**：onMounted 内挂 window 级 passive pointermove + rAF 节流，映射到 ±3° `--tilt-x/--tilt-y`；双守卫（仅 fine pointer / reduced-motion 完全跳过）；SSR 输出无内联倾斜（实测）
+- **CTA band**：h2 与说明之间插入缩微叠层（4 层 / 56px / 光学约 81×72px，对应用户批准的 64–80px 档），全站 6 个复用页一致的收尾签名；黄 CTA 仍是唯一强焦点
+- **导航**：active/hover 统一 w-4 短横线（rem 基准 17px 下 = 17px），与 prose h2::before 短线语言呼应
+- 验证：每批 npm run build 通过；每批全量 44 张冒烟零报错；元素级几何与计算样式实测（hero 面板 289px、叠层 union 255×230 不裁切、CTA band 415px、视差方向/钳制/reduced-motion、导航 17px/0px）；after 截图备份 `/tmp/shots-after-round2/`
+- **人工事项（用户侧）**：① Windows 浏览器视觉验收四项（Hero 叠层新分量/指针视差手感/CTA 收尾签名/导航短线）；② 指针视差需真机确认手感（幅度/滞后），不喜欢可只留静态；③ 浅色叠层 fill 为图形对比，无文字 AA 门禁覆盖，需肉眼终审；④ 跨仓 ROADMAP §6 决策记录仍待登记
+
+- [x] 用户反馈三处问题确认方向（多选问答）
+- [x] 实施 + agent 侧验收（4 commit；人工视觉验收待用户侧完成）
+
