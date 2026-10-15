@@ -57,7 +57,11 @@ export default defineConfig({
     'sd-search':
       'flex h-9.5 items-center gap-2 rounded-md border border-border-strong bg-elevated pr-1 pl-3 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-primary focus-within:shadow-[0_0_0_3px_var(--accent-line)] [&_input]:min-w-0 [&_input]:flex-1 [&_input]:appearance-none [&_input]:border-0 [&_input]:bg-transparent [&_input]:text-base [&_input]:text-text [&_input]:outline-none [&_input]:placeholder:text-dim',
     'sd-field': 'mb-4.5',
-    'sd-label': 'mb-1.5 block text-sm font-semibold text-muted',
+    // 表单标签降级（三轮精修：用户反馈登录框「像二十年前的管理后台」——独立加粗标签行是
+    // 表单表格感的来源）：text-sm  semibold muted → text-xs 常规字重 dim，只降字号/字重/色阶，
+    // 不动 mb-1.5 间距（字段节奏不变）。全局生效（SdInput/SdTextarea label + 直接使用方：
+    // 登录框/注册页/CoverField/me-profile/PublishDrawer），设计系统单一来源纪律
+    'sd-label': 'mb-1.5 block text-xs font-normal text-dim',
     'sd-hint': 'mt-1.5 text-xs text-dim',
 
     // ---------- 作者中心（S12）：行、徽标、小动作、tab ----------
