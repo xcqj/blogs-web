@@ -347,3 +347,31 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - ⚠️ 与 S14 同源的两个既有纪律继续适用：① 新增 `server/utils` 文件才需重启 dev（本次只改既有文件，HMR 即生效）；② SSR 期需要登录态的 fetch 用 `useRequestFetch`（本次详情代理是服务端路由、不涉及）
 
 **联调期修复（2026-10-14，SSR cookie 断链·第二现场，commit 见下）**：修复 Redisson codec 陷阱后，「每次刷新阅读量仍 +1」——根因：`/post` 详情页 SSR 取数用全局 `$fetch`，**内部请求不转发浏览器 Cookie**（与 S14 useAuth 同款坑的第二个现场），详情代理因此读不到 visitorId cookie（SSR 每次生成新 UUID，去重永不命中）也读不到 token（登录用户不走 userId 去重）；SPA 内导航是浏览器直连所以一直正常，故只有「刷新/直达」暴露。修复：`/post/[slug].vue` 的文章 useAsyncData 改 `useRequestFetch()`。实证：带 `blog-web-visitor` cookie 打 SSR 页面 → Redis 出现对应 `v{}` 去重键；带 token+visitor → 出现 `u{}` 键（登录 userId 路径）。**纪律补丁：今后任何「SSR 取数 + 下游服务端路由依赖 cookie」的链路，取数侧一律 `useRequestFetch`；服务端路由能种/读 cookie 不代表调用方带得了 cookie（curl 直打代理两种都正常，极具迷惑性）**
+
+## 2.19 质感精修轮（2026-10-15 评审完成，待实施）
+
+> 背景：S20 后用户发起的前台质感提升，非 ROADMAP 排期切片（先例：打磨轮批 1/批 2 记录于本文件 §2.12）。评审由 Impeccable 技能完成；实施将用 taste-skill（design-taste-frontend）方法论在新对话进行。
+
+评审过程与结论（2026-10-15）：
+
+- 全站基线截图 44 张（tooling/shot：7 页 × 3 视口 × 2 主题 + 登录弹层/卡片 hover 交互态）落 `design/shots/`，控制台/网络零报错；按专业设计标准逐页评审
+- **结论：整体在专业水准之上**——token 纪律严格、交互五态齐备、深浅主题一致、无泛 AI 特征（无紫蓝渐变/发光/万物皆卡片）、对比度有门禁、空态/错误态/骨架屏体系完整；差距集中在「内容站转化点」与「排版微细节」两类
+- 设计上下文固化为 **`.impeccable.md`**（本仓根目录，Impeccable/taste-skill 的上下文单一来源：Users / Brand（克制·编辑感·深度）/ Aesthetic（暖纸编辑风 + 反参考清单）/ 5 条设计原则 / 硬边界约束），全部内容提炼自已确认决策（tokens.css 头注、本文件打磨轮记录、ROADMAP D30/D38），后续设计类会话自动生效
+- 截图伪影备注（勿当缺陷修）：fullPage 截图中视口外 v-reveal 元素不显现（CTA band「消失」）、fixed 背景长页拼接出现色带
+
+力度决策（用户 2026-10-15 定）：**精修**——允许动间距节奏、字号/字距细节、组件视觉升级、局部布局微调（卡片内结构/meta 行排布/区块留白）；不可动信息架构、页面骨架、交互逻辑与数据流；基础清单之外允许实施方按 taste-skill 标准提增量精修项，逐项经用户确认后实施。
+
+基础清单（7 项，待用户挑选）：
+
+1. 评论未登录态（详情页）：CommentForm 裸文字链「登录后可发表评论」→ 统一空态语言（说明文案 + 明确登录按钮，复用 useLoginModal）——详情页唯一转化点
+2. 搜索初始态（/search）：裸文本提示 → EmptyState 母题（图标+标题+说明）+ 精选标签快捷 chips（featured 接口已有）
+3. 中文标题 `text-wrap: balance`（hero 标题/文章 h1/卡片标题；渐进增强，修「深/处」「缓/存」孤字拆行）
+4. 移动端列表卡标题 line-clamp-2（sm+ 保持单行 truncate）——390px 下 24px 单行约 12 字
+5. prose 代码块复制按钮（client onMounted 注入，SSR 安全）
+6. 评论空态图标 h-24→h-16（68ch 窄栏内头重脚轻）
+7. （争议项）顶栏登录按钮降重量 accent 实底→soft 底——由用户拍板
+
+实施约定：D38 有效（不引 three.js/GSAP/视差）；无组件库、不新增运行时依赖；零后端/契约改动，只动本仓；深浅双主题都过；对比度 WCAG AA（改色值重跑 contrast.mjs）；小步 commit 标 polish。
+
+- [ ] 用户挑选清单项 + 增量项确认
+- [ ] 实施 + 验收（taste-skill 新对话；跨仓 ROADMAP §6 决策记录随精修轮验收一并登记）
