@@ -288,6 +288,8 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 1. **GitHub `redirect_uri` 精确匹配**：GitHub 对 redirect_uri 做含 query 的**整串精确匹配**，注册的 Authorization callback URL 必须与后端配置完全一致——即需注册为 `http://localhost:3000/social-callback?source=github`（JustAuth 惯例：平台来源放 redirect-uri query，落地路由读 `query.source`）。只注册裸路径会报 "The redirect_uri is not associated with this application"。Gitee 同理（用户已配带 query 的地址，授权成功）。
 2. **SSR 登录态丢失（根因修复）**：SSR 阶段全局 `$fetch` 的内部请求**不转发浏览器 Cookie**，`/api/auth/session` 恒返回 `logged:false`（同 cookie 直连该 API 返回 `true`，payload 对比实证）。影响面=所有 SSR 整页加载：社交登录 302 落地、任何刷新、直达 `/me` 全部掉登录态；密码登录走 CSR `refresh()` 一直正常，故 S9/S12 未暴露。修法：`useAuth` + `/me` + `/me/profile` 的登录态 fetch 统一改 `useRequestFetch()`（SSR 转发请求头、客户端退化为普通 fetch）。修复后生产产物实测：带 cookie SSR 首页渲染「作者中心/许愿/退出」、`/me` 出数据。**今后所有 SSR 期需要登录态的 fetch 一律用 useRequestFetch，禁止裸用全局 $fetch**（已写入本条纪律）。
 
+> 已知边界（2026-10-16 用户拍板，ROADMAP D40）：社交账号的**绑定/解绑管理不在 blog-web 提供**（S14 范围 = 登录-only），入口仅 plus-ui「个人资料 → 第三方账号」——普通用户不可达，且社交自动建号账号（随机密码）无法登录 plus-ui。评估三个场景（平台账号丢失致博客账号锁死 / 无法追加第二平台 / 无法解绑）后 MVP 维持现状（PRD 未要求绑定管理，S14-D2 已列为"将来显式功能"）。若后续补齐：最小方案 = 作者中心「账号与登录」小节复用 `GET /system/social/list` + `DELETE /auth/unlock/{socialId}`（两个 Nitro 薄代理、零后端改动，约 0.5d），必须带「若为唯一登录方式，解绑后将无法登录」警示文案。
+
 ## 2.16 S17 PWA + SEO 三件套（2026-10-13 规划）
 
 - [x] `@vite-pwa/nuxt` 接入：manifest（名称/图标/主题色随 token）+ Workbox 策略（app shell precache / 文章页 stale-while-revalidate / API network-first）+ 离线回退页；**`/me/**` 与需登录 API 不进 SW 缓存**（红线）；iOS 无 SW 的限制写进 README
@@ -343,7 +345,7 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] `server/utils/blog.ts`：`blogGet` 增可选 `headers` 参数（默认空，向后兼容，其余 19 个代理零改动）
 - [x] `server/api/blog/public/articles/[id].get.ts`：种/读 `blog-web-visitor` httpOnly cookie（`node:crypto` `randomUUID()`，maxAge 1 年，secure=!dev/sameSite lax）→ 以 query `visitorId` 转发后端；已登录时经 `getAuthCookie` 读 session cookie 转发 `Authorization` 头（服务端读取不触浏览器），使后端按 userId 去重优先于 visitorId
 - [x] 自测：`npm run build` 绿 + 产物抽验（详情代理 chunk 的 `getCookie/setCookie/getAuthCookie/blogGet/randomUUID` 全部正确 import，延续 S14 抽验纪律）
-- [ ] 联调验收（待用户重启 8081 + dev）：同一浏览器 30min 内重复打开同一文章，`viewCount` 只 +1；DevTools 确认 `blog-web-visitor` 为 httpOnly 且请求带 `?visitorId=`；换浏览器/清 cookie 后再打开 +1；DB 值在 10s 内追上展示值（`docker exec blog-mysql` 只读 SELECT）；停 Redis 降级演练留人工
+- [x] 联调验收（2026-10-14 人工实测通过）：同一浏览器 30min 内重复打开同一文章，`viewCount` 只 +1；DevTools 确认 `blog-web-visitor` 为 httpOnly 且请求带 `?visitorId=`；换浏览器/清 cookie 后再打开 +1；DB 值在 10s 内追上展示值（`docker exec blog-mysql` 只读 SELECT）；停 Redis 降级演练：codec 故障期间全量请求实际走过降级路径、详情持续 200（等效验证，详见 ROADMAP §3 S15 验收清单）
 - ⚠️ 与 S14 同源的两个既有纪律继续适用：① 新增 `server/utils` 文件才需重启 dev（本次只改既有文件，HMR 即生效）；② SSR 期需要登录态的 fetch 用 `useRequestFetch`（本次详情代理是服务端路由、不涉及）
 
 **联调期修复（2026-10-14，SSR cookie 断链·第二现场，commit 见下）**：修复 Redisson codec 陷阱后，「每次刷新阅读量仍 +1」——根因：`/post` 详情页 SSR 取数用全局 `$fetch`，**内部请求不转发浏览器 Cookie**（与 S14 useAuth 同款坑的第二个现场），详情代理因此读不到 visitorId cookie（SSR 每次生成新 UUID，去重永不命中）也读不到 token（登录用户不走 userId 去重）；SPA 内导航是浏览器直连所以一直正常，故只有「刷新/直达」暴露。修复：`/post/[slug].vue` 的文章 useAsyncData 改 `useRequestFetch()`。实证：带 `blog-web-visitor` cookie 打 SSR 页面 → Redis 出现对应 `v{}` 去重键；带 token+visitor → 出现 `u{}` 键（登录 userId 路径）。**纪律补丁：今后任何「SSR 取数 + 下游服务端路由依赖 cookie」的链路，取数侧一律 `useRequestFetch`；服务端路由能种/读 cookie 不代表调用方带得了 cookie（curl 直打代理两种都正常，极具迷惑性）**
@@ -455,12 +457,12 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - 二轮（4 项：LayerStack 母题/Hero 放大/指针视差/CTA 叠层/导航短线——按批次）：`999e84b` `8a65ab3` `2f778fe` `19b3d24`
 - 三轮（4 项：Hero 裁切修复/搜索 chip 高亮/标签降级/标题 placeholder）：`97463bf` `87df1d3` `25881d8` `4167c18`
 
-**遗留人工事项（用户侧，跨三轮汇总，供后续挑选项起新对话）**：
+**遗留人工事项闭环（2026-10-16 用户确认全部完成）**：
 
-1. Windows 浏览器视觉验收全套（agent 侧仅冒烟：页面加载/控制台零报错/构建通过/几何与计算样式实测）：搜索初始态 chips（数据为测试标签）、登录钮 soft 底观感、页脚收尾、复制钮在真实含代码块文章上的行为、Hero 叠层裁切修复后的完整可见与均衡（1440 及常用宽度）、搜索高亮可辨性、登录框标签语言、新建文章页标题 placeholder（需登录态）、me/profile 与 PublishDrawer 标签降级连带页
-2. 指针视差真机手感（幅度/滞后）——不喜欢可回退 `8a65ab3` 只留静态
-3. 跨仓 ROADMAP §6 决策记录待随三轮精修验收一并登记（后端仓库）
-4. 3100 端口旧 preview 服务如仍在使用需重启（构建清 chunk 的已知行为，3000 已在每轮重启）
+1. ✅ Windows 浏览器视觉验收全套：搜索初始态 chips、登录钮 soft 底、页脚收尾、复制钮（真实含代码块文章）、Hero 叠层完整可见与均衡（1440 及常用宽度）、搜索高亮可辨性、登录框标签语言、新建文章页标题 placeholder（登录态）、me/profile 与 PublishDrawer 标签降级连带页
+2. ✅ 指针视差真机手感人工确认通过（保留现状，未回退 `8a65ab3`）
+3. ✅ 跨仓 ROADMAP §6 决策记录已登记（后端仓库，D39 精修轮验收关闭）
+4. ✅ 3100 端口旧 preview 重启（构建清 chunk 的已知行为；3000 已在每轮重启）
 
 ## 2.20 S22 注册即登录（blog-web 侧，2026-10-16 实施）
 
@@ -474,6 +476,6 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] `app/composables/useAuth.ts`：`register()` 成功后 `refresh()` 刷新会话（与 `login()` 一致），文档注释同步
 - [x] 自测：`npm run build` 绿 + 编译产物抽验（register.post chunk 含 `setAuthCookie`/`access_token`/`logged: true`、无裸标识符；客户端产物含新 toast 文案、旧「账号创建成功」成功态文案已消失）
 - [x] E2E 实测（Agent，2026-10-16）：另起 8082 后端（新代码）+ blog-web 生产实例（3002，`NUXT_API_BASE` 指向 8082；用户原 8081 实例未动），验证码明文经 Redis 读取后提交——六用例全过：① 注册 → `{registered:true,logged:true}` + httpOnly token cookie（JWT 含新 userId）；② `/api/auth/session` → logged:true；③ 带 cookie `/api/blog/user/profile` → 200；④ 无 cookie → 401；⑤ 错误验证码 →「验证码错误」不种 token；⑥ 重复用户名 →「注册账号已存在」不种 token。测试用户 `e2e_reg_20261016` 与临时实例均已清理
-- [ ] 人工事项：浏览器视觉验收——注册成功 toast 呈现、跳回来源页落地（建议从文章详情页发起）、移动视口回归
+- [x] 人工事项：浏览器视觉验收（2026-10-16 用户确认通过）——注册成功 toast 呈现、跳回来源页落地（从文章详情页发起）、移动视口回归
 
 
