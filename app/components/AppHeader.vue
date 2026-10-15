@@ -26,12 +26,15 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
       <div class="flex shrink-0 items-center gap-2 sm:gap-3">
         <!-- 桌面导航 -->
         <nav class="hidden items-center gap-5 text-sm md:flex">
+          <!-- 下划线语言（二轮精修）：hover 与 active 统一 w-4 短横线（rem 基准 17px 下 = 17px），
+               比 1px 全宽更克制，与全站「短横线章节标记」（prose h2::before 32px 短线）呼应；
+               不做 hover 全宽与 active 短线的混搭（不 coherent）。保留 200ms 宽度动画 -->
           <NuxtLink
             v-for="item in nav"
             :key="item.to"
             :to="item.to"
-            class="relative text-muted transition hover:text-text after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-text after:transition-[width] after:duration-200 hover:after:w-full"
-            active-class="!text-text !font-semibold after:!w-full"
+            class="relative text-muted transition hover:text-text after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-text after:transition-[width] after:duration-200 hover:after:w-4"
+            active-class="!text-text !font-semibold after:!w-4"
           >
             {{ item.label }}
           </NuxtLink>
