@@ -478,4 +478,64 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] E2E 实测（Agent，2026-10-16）：另起 8082 后端（新代码）+ blog-web 生产实例（3002，`NUXT_API_BASE` 指向 8082；用户原 8081 实例未动），验证码明文经 Redis 读取后提交——六用例全过：① 注册 → `{registered:true,logged:true}` + httpOnly token cookie（JWT 含新 userId）；② `/api/auth/session` → logged:true；③ 带 cookie `/api/blog/user/profile` → 200；④ 无 cookie → 401；⑤ 错误验证码 →「验证码错误」不种 token；⑥ 重复用户名 →「注册账号已存在」不种 token。测试用户 `e2e_reg_20261016` 与临时实例均已清理
 - [x] 人工事项：浏览器视觉验收（2026-10-16 用户确认通过）——注册成功 toast 呈现、跳回来源页落地（从文章详情页发起）、移动视口回归
 
+## 2.21 S23 全站视觉改版（方向 C，2026-10-26 立项；P1 进行中）
+
+> 状态权威在 ROADMAP §2/§3 S23 与决策 **D41**（后端仓库），本节只做任务粒度拆解，不复制状态。
+> 视觉方案台账（Stitch 项目/屏名/屏 ID/落地映射/不吸收清单）见 `../design/stitch/README.md`。
+> 力度定义：**换视觉语言**（非"精修"）——D39 精修口径"不动信息架构/骨架"不适用本轮。
+
+**本轮红线（任何阶段不得违反）**
+
+1. 不动 `server/**` 与 `app/types/**`；接口出入参、字段名、三层 API 边界零变化（公共页只调 `/blog/public/**`）。
+2. Stitch 产物只作视觉参考，一律回译为 `tokens.css` 变量 + `uno.config.ts` shortcut，禁止搬运内联样式/px 魔法值。
+3. 禁止分类/专栏/话题/归档导航——Category 永久舍弃（AGENTS.md §5）。
+4. 改任一公共组件前先 grep 全部复用点（`ArticleCard`/`CtaBand`/`TagChip`/`Sd*`）。
+5. 数据一律真值：不编造阅读时长、更新频率、编委会、DOI/ISSN、订阅、评论区等站点没有的东西。
+
+### P1 补屏（Stitch，不计工时）
+
+- [ ] T1 首页列表行补封面缩略图：四段布局（缩略图 120×80 / 等宽日期 76px / 标题+摘要 2 行 / 右对齐阅读量），行高 112；**有图与无图混排**（无图整块不渲染、标题左移填补、禁止灰色占位块）；门禁：看得出图文咬合，无"缺一块"感
+- [ ] T2 深色版首页（新建屏保留浅色）：底 `#131415`、面 `#1A1C1F`、文字 `#E8E6E1`、强调提亮 `#6E9BE0`；禁止发光/冷蓝底/玻璃卡；门禁：深浅并排都成立，强调色可读
+- [ ] T3 文章详情页屏：衬线大标题 + 68ch 正文 + 编号小节（01/02）+ 代码块（行号/语言标签/复制）+ TOC；门禁：版式与首页同族，代码块不与正文抢
+- [ ] T4 冻结结论：两版（深浅）截图归档 `design/stitch/`，屏 ID 记入台账
+
+### P2 立规范（0.5d，代码零改动）
+
+- [ ] T5 建 `design/stitch/README.md`：屏台账 + 落地映射 + **不吸收清单** + **降级规则**（无封面/无标签/文章不足 5 篇）+ 页面状态表
+- [ ] T6 更新 `.impeccable.md`：方向 C 叙述取代"暖纸编辑风"；标注推翻色板/字体/圆角三条，动效与反馈分层仍有效
+- [ ] T7 产出 **token old→new 对照表**（逐项现值→新值，含 `--accent`/`--accent-fg`/`--radius-*`/`--font-*`/`--measure`/`--container`），交用户过目后再动代码
+- [ ] T8 列 `uno.config.ts` shortcut 增废清单：新增（编号锚点 `sd-mark`、数据行 `sd-row`、衬线标题 `sd-serif` 等）/ 废弃（`sd-eyebrow` 等待判）
+
+### P3 换地基（1.5~2d，唯一一次全站同时变样）
+
+- [ ] T9 `tokens.css` 重建：冷米白/靛蓝双主题、圆角统一 3px、阴影近乎取消、新增 `--font-serif`；深色 `--accent` 必须提亮（`#1A4D8F` 在 `#131415` 上仅约 2.1:1，不可用）
+- [ ] T10 **Noto Serif SC 引入**：自托管 woff2，`cn-font-split` 分片 + `unicode-range`，仅 700 字重；`font-display: swap` + 首屏分片 `preload` + `size-adjust`/`ascent-override` 对齐 fallback 度量；**禁走 Google Fonts CDN**
+- [ ] T11 `uno.config.ts` 按 T8 清单重建（新增/废弃/别名映射），`safelist` 复核
+- [ ] T12 `Sd*` 基础件改造（Button 实底+描边两形态 / Card 边框化去阴影 / Badge / Input / Textarea / State），改完 grep 复用点
+- [ ] T13 全站回归：`contrast.mjs` 16 项**重算并更新期望值**（新色对人工核对，不得为过门禁降标准）+ `shot.mjs` 退 0 + build 通过 + 深浅双主题逐页扫一遍 + Lighthouse 四项记录（对比 S17 基线）
+
+### P4 逐页重排（4~5d，一页一 commit）
+
+- [ ] T14 壳层：`AppHeader`（导航激活线/字重）、`AppFooter`、`AppBrand`（衬线字标）、`layouts/default`（全站生效，先做）
+- [ ] T15 首页：`FeaturedPost`（LATEST 头条，仅第 1 页）+ `PostRow`（数据行）+ 右栏双卡 + 系统状态卡（真值 5 项：RENDER/FRAMEWORK/THEME/MOTION/A11Y）+ `CtaBand` 收尾改编；`ArchiveGroup` 去留判定
+- [ ] T16 文章详情：`prose.css` 重写（衬线标题/行宽 68ch/代码块/引用/图片）、`CommentList`/`CommentForm` 连带
+- [ ] T17 标签页 `/tags` + `/tag/[slug]`
+- [ ] T18 搜索页 `/search`（含服务端高亮 `em` 样式沿用新色对，需重过对比度）
+- [ ] T19 用户页 `/user/[userId]`
+- [ ] T20 作者中心 `/me`（列表 / 新建编辑 / 资料）+ `ArticleForm`/`ArticleEditor`/`PublishDrawer`
+- [ ] T21 浮层与状态：`LoginModal`、`AppToaster`、骨架、空态、`error.vue`/404
+
+### P5 plus-ui 小改（0.5d，独立仓独立 commit）
+
+- [ ] T22 `login.vue` / `index.vue` 借版式思路小改（**不套 blog-web token**），验证码链路与 SocialCallback 路由不动；`vue-tsc` 0 错 + 登录 E2E 复测
+
+### 每片完成定义
+
+```
+npm run build 通过
+tooling/shot/shot.mjs 退出码 0（桌面 1440 + 移动 390）
+四视口实测：桌面/移动 × 深色/浅色，无横向滚动、无文字截断
+涉及色值改动：contrast.mjs 全过（P3/P4 期间每片都跑）
+```
+
 
