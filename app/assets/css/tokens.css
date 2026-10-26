@@ -43,7 +43,8 @@
 
   /* 正文测量行宽（66ch，正文 18px 后的可读补偿）/ 列表容器宽 */
   --measure: 66ch;
-  --container: 1100px;
+  /* 容器宽按 Stitch 首页实测 1180（原 1100 偏窄，整体版心不够舒展） */
+  --container: 1180px;
 
   /* 圆角：全站单一值 3px（C 版的克制几何）；只有头像与胶囊用 999 */
   --radius-sm: 3px; --radius-md: 3px; --radius-lg: 3px; --radius-xl: 3px; --radius-full: 999px;
@@ -106,6 +107,8 @@
   --warn: #e0955a;
   --warn-bg: rgb(224 149 90 / 0.14);
   --muted-bg: rgb(160 166 173 / 0.14);
+  /* 中性叠层（标签底 / LATEST 徽标底）：Stitch 用纯黑 5%，原 --muted-bg 带蓝调，标签看着发青 */
+  --overlay-subtle: rgb(255 255 255 / 0.06);
   /* 深色下照片不能比页面更亮，必须压暗 */
   --thumb-filter: brightness(0.95) saturate(0.92);
 
@@ -126,12 +129,15 @@
 :root.light,
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #faf9f6;
-  --bg-fade: #f4f2ee; /* 页面底→底的极淡竖向渐变 */
+  /* 底色按 Stitch 实测 #FCF9F8（原 #faf9f6 偏灰）。注意：body 已取消竖向渐变，
+     否则中段测到的会是渐变的中间色（曾出现 #F8F7F4，与 token 不符）。 */
+  --bg: #fcf9f8;
+  --bg-fade: #fcf9f8; /* 渐变已取消，保留变量名防旧引用断链 */
   --surface: #ffffff;
   --elevated: #f6f3f2;
   --raised: #efede8;
-  --text: #111111;
+  /* 主文字按 Stitch on-surface #1C1B1B（原 #111111 偏黑） */
+  --text: #1c1b1b;
   --text-muted: #55606b;
   /* 三级文字：#8b949e 在白底仅约 3.1:1，远不达 AA；压深到 4.6:1 */
   --text-dim: #667080;
@@ -158,6 +164,8 @@
   --warn: #b45309;
   --warn-bg: rgb(180 83 9 / 0.1);
   --muted-bg: rgb(85 96 107 / 0.1);
+  /* 中性叠层（标签底 / LATEST 徽标底）：Stitch 用纯黑 5%，原 --muted-bg 带蓝调，标签看着发青 */
+  --overlay-subtle: rgb(17 17 17 / 0.05);
   --thumb-filter: saturate(0.92);
   /* 浮层阴影（浅色更轻，否则白底上的浮层发脏） */
   --shadow-float: 0 12px 32px rgb(17 17 17 / 0.14);
@@ -176,12 +184,21 @@
 }
 
 /* ---------- 基础层：底色/正文/链接跟随 token ---------- */
-/* UnoCSS preflight 在 @unocss/nuxt 下未注入，必须自带盒模型重置：
-   否则 w-full + px-* 会按 content-box 计算，导致 .sd-wrap 等容器在小屏溢出视口 */
+/* UnoCSS preflight 在 @unocss/nuxt 下未注入，必须自带两条重置：
+   ① 盒模型：否则 w-full + px-* 会按 content-box 计算，导致 .sd-wrap 等容器在小屏溢出视口；
+   ② 边框样式（2026-10-27 补齐，曾长期缺失）：preflight 缺失时 UnoCSS 的 border 工具类
+      只输出 border-*-width 与 border-color，**不输出 border-style**——而 border-style 默认是
+      none，所以 border / border-b / border-t-2 全都画不出线。
+      症状：列表行无分隔线、区块头无底线、卡片无边框、头条 2px 顶线消失
+      （卡片"看起来有边"只是 #fff 压在 #faf9f6 上的色差）。
+      按 Tailwind preflight 口径补 border-width:0 + border-style:solid，
+      这样各工具类只覆盖宽度即可正常出线。 */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
 }
 
 /* 同样因缺 preflight：hidden 属性会被 display 工具类覆盖，弹层/确认框依赖它 */
@@ -257,9 +274,9 @@ html {
 
 body {
   margin: 0;
-  /* 竖向渐变给页面纵深（attachment:fixed 让长文页也保持视口高度的渐变，不被拉平） */
-  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-fade) 100%);
-  background-attachment: fixed;
+  /* 方向 C 取消纵向渐变（渐变在不吸收清单内）：纯色底才与设计稿的 #FCF9F8 一致。
+     旧版用 linear-gradient(--bg→--bg-fade) 做纵深，代价是页面中段取色永远不等于 token。 */
+  background: var(--bg);
   color: var(--text);
   transition: background 0.35s ease, color 0.35s ease;
 }

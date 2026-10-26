@@ -24,20 +24,22 @@ const summaryHtml = computed(
 </script>
 
 <template>
-  <article class="sd-row items-start">
+  <!-- min-h 稳住行高：库里多数文章没有 summary，缺一层文字时行会塌得比有摘要的矮一截 -->
+  <article class="sd-row min-h-[76px] items-center">
     <div class="min-w-0 flex-1">
-      <h3 class="truncate font-sans text-base font-semibold">
+      <h3 class="truncate font-sans text-base font-bold leading-[1.4]">
         <NuxtLink :to="`/post/${article.articleId}`" class="transition-colors hover:text-primary-fg">
           <span v-if="titleHtml" v-html="titleHtml" />
           <template v-else>{{ article.title }}</template>
         </NuxtLink>
       </h3>
-      <p v-if="summaryHtml" class="mt-1.5 truncate text-sm text-muted" v-html="summaryHtml" />
-      <p v-else-if="article.summary" class="mt-1.5 truncate text-sm text-muted">
+      <p v-if="summaryHtml" class="mt-2 truncate text-sm text-muted" v-html="summaryHtml" />
+      <p v-else-if="article.summary" class="mt-2 truncate text-sm text-muted">
         {{ article.summary }}
       </p>
       <div class="sd-meta mt-2">
-        <span>{{ article.authorName }}</span>
+        <!-- 作者：正文色 + 500 字重（Stitch `text-[#111111] font-medium`），与其余 meta 的次级灰拉开层级 -->
+        <span class="font-medium text-text">{{ article.authorName }}</span>
         <span class="sd-dot" />
         <span>{{ date }}</span>
         <span class="sd-dot" />
@@ -53,7 +55,7 @@ const summaryHtml = computed(
     <NuxtLink
       v-if="article.coverUrl"
       :to="`/post/${article.articleId}`"
-      class="hidden shrink-0 overflow-hidden rounded-md sm:block"
+      class="hidden shrink-0 overflow-hidden rounded-sm border border-border sm:block"
     >
       <img
         :src="article.coverUrl"

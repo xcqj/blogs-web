@@ -36,7 +36,8 @@ const updated = computed(() => (props.article.updateTime || props.article.publis
 <template>
   <div class="sd-row">
     <div class="min-w-0 flex-1">
-      <h3 class="truncate text-lg font-bold tracking-[var(--ls-title)]">{{ article.title }}</h3>
+      <!-- 列表行标题不用衬线（与 PostRow 同口径）：18px 衬线可读性差，且能减少字体分片命中 -->
+      <h3 class="truncate font-sans text-base font-semibold">{{ article.title }}</h3>
       <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted">
         <StatusBadge :status="article.status" :visibility="article.visibility" />
         <TagChip v-for="t in article.tags" :key="t.tagId" :slug="t.slug" :name="t.name" />

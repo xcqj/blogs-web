@@ -110,13 +110,15 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
 
 <template>
   <section>
-    <header class="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <!-- 页头（方向 C）：编号小字 + 衬线标题 + 底线分割 -->
+    <header class="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
       <div>
-        <h1 class="text-2xl font-bold tracking-[var(--ls-h2)]">我的文章</h1>
-        <p class="mt-1 text-sm text-muted">作者中心 · 服务端按 author_id 隔离，仅显示你自己的文章</p>
+        <p class="font-mono text-xs uppercase tracking-[0.08em] text-primary-fg">01 // WORKSPACE</p>
+        <h1 class="mt-3 font-serif text-2xl font-bold tracking-[var(--ls-h1)] md:text-3xl">我的文章</h1>
+        <p class="mt-2 text-sm text-muted">作者中心 · 服务端按 author_id 隔离，仅显示你自己的文章</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <SdButton to="/me/profile" variant="ghost">个人资料</SdButton>
+        <SdButton to="/me/profile" variant="secondary">个人资料</SdButton>
         <SdButton :to="editTarget()">＋ 新建文章</SdButton>
       </div>
     </header>

@@ -54,9 +54,10 @@ useSeoMeta({ title: '个人资料 · 作者中心', robots: 'noindex,follow' });
 
 <template>
   <section class="mx-auto max-w-2xl">
-    <header class="mb-5">
-      <h1 class="text-2xl font-bold tracking-[var(--ls-h2)]">个人资料</h1>
-      <p class="mt-1 text-sm text-muted">走 §8 <code>GET/PUT /blog/user/profile</code>，仅个人简介可编辑</p>
+    <header class="border-b border-border pb-6">
+      <p class="font-mono text-xs uppercase tracking-[0.08em] text-primary-fg">01 // PROFILE</p>
+      <h1 class="mt-3 font-serif text-2xl font-bold tracking-[var(--ls-h1)] md:text-3xl">个人资料</h1>
+      <p class="mt-2 text-sm text-muted">走 §8 <code>GET/PUT /blog/user/profile</code>，仅个人简介可编辑</p>
     </header>
 
     <ErrorState v-if="ready && !logged" title="请先登录" description="个人资料需要登录后访问。">
@@ -65,7 +66,7 @@ useSeoMeta({ title: '个人资料 · 作者中心', robots: 'noindex,follow' });
 
     <div v-else-if="status === 'pending'" class="sd-card h-64 animate-pulse" />
 
-    <div v-else-if="prof" class="sd-card space-y-5 p-5">
+    <div v-else-if="prof" class="mt-8 space-y-6">
       <!-- 头像 + 昵称：只读展示（来源 sys_user） -->
       <div class="flex flex-wrap items-center gap-4">
         <AppAvatar :name="prof.nickName" :src="prof.avatarUrl" size="lg" />

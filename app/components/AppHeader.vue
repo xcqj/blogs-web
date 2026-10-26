@@ -20,26 +20,30 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
 
 <template>
   <header class="site-header sticky top-0 z-50 border-b border-border bg-surface" :class="{ 'is-hidden': hideHeader }">
-    <div class="sd-wrap flex h-16 items-center justify-between gap-3">
-      <AppBrand />
+    <!-- 顶栏版心比正文更宽（Stitch：max-w-1440 + 左右 24/48），正文容器 1180——
+         两者不同是刻意的：导航铺开，内容收窄 -->
+    <div class="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between gap-3 px-6 lg:px-12">
+      <!-- 左组：站名 + 站点导航（Stitch 顶栏口径：导航紧跟站名，不居中也不靠右） -->
+      <div class="flex min-w-0 items-center gap-6 lg:gap-12">
+        <AppBrand />
 
-      <div class="flex shrink-0 items-center gap-2 sm:gap-3">
-        <!-- 桌面导航 -->
-        <nav class="hidden items-center gap-6 text-sm md:flex">
-          <!-- 激活语言（方向 C，2026-10-26）：由「4px 短横线」改为「2px 全宽下边框 + 主色」，
-               与冻结规格 §4.1 一致；用 scaleX 而非 width 过渡，避免逐帧重排。
-               hover 时淡入同一条下边框（未激活为 0 宽），与激活态同一套几何，不做混搭 -->
+        <nav class="hidden items-center gap-6 md:flex" aria-label="站点导航">
+          <!-- 激活语言（方向 C）：2px 全宽下边框 + 主色，用 scaleX 过渡避免逐帧重排；
+               hover 与 active 同一套几何，不做混搭 -->
           <NuxtLink
             v-for="item in nav"
             :key="item.to"
             :to="item.to"
-            class="relative py-1 text-muted transition-colors hover:text-text after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 hover:after:scale-x-100"
+            class="relative py-1 text-[13px] text-muted transition-colors hover:text-text after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 hover:after:scale-x-100"
             active-class="!text-text !font-medium after:!scale-x-100"
           >
             {{ item.label }}
           </NuxtLink>
         </nav>
+      </div>
 
+      <!-- 右组：主题 + 登录态 -->
+      <div class="flex shrink-0 items-center gap-2 sm:gap-3">
         <!-- 主题切换：仅桌面出现在顶栏；窄屏收进下方抽屉菜单 -->
         <div class="hidden md:block">
           <ClientOnly>

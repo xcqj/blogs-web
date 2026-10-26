@@ -143,7 +143,12 @@ async function submit(publish: boolean) {
 <template>
   <section>
     <!-- 操作条：贴在顶栏（h-16）下方，写作时始终可保存/发布 -->
-    <div class="sd-sticky-top sticky top-16 z-20 mb-4 flex flex-wrap items-center gap-2 rounded-md border border-border bg-elevated px-3 py-2.5" :class="{ 'is-header-hidden': hideHeader }">
+    <!-- 操作条（方向 C）：贴在 AppHeader（64px）下方，只留 1px 底线——不再做成面板/圆角，
+         与全站"细线分层"语言一致；窄屏顶栏下滑隐藏时 top 收回 0（.sd-sticky-top 负责） -->
+    <div
+      class="sd-sticky-top sticky top-16 z-20 mb-6 flex flex-wrap items-center gap-3 border-b border-border bg-bg py-2"
+      :class="{ 'is-header-hidden': hideHeader }"
+    >
       <NuxtLink to="/me" class="sd-act no-underline">← 我的文章</NuxtLink>
       <h1 class="text-base font-semibold">{{ isEdit ? '编辑文章' : '新建文章' }}</h1>
       <StatusBadge v-if="detail" :status="detail.status" :visibility="detail.visibility" />
@@ -156,7 +161,8 @@ async function submit(publish: boolean) {
       </NuxtLink>
 
       <span class="ml-auto text-xs text-muted">{{ saveStateText }}</span>
-      <button class="sd-act" @click="drawerOpen = true">更多</button>
+      <!-- 桌面右栏已常驻设置项，抽屉只在 <1024 需要 -->
+      <button class="sd-act lg:hidden" @click="drawerOpen = true">更多</button>
       <!-- 已发布文章不再提供「发布」：后端 ArticleGuards.requirePublishable 只允许草稿发布，
            重复调用会抛「仅草稿状态的文章可以发布」；隐藏/下线文章的重新公开仍在 /me 列表行做 -->
       <SdButton v-if="isPublished" :disabled="!canSave" @click="submit(false)">
@@ -179,22 +185,50 @@ async function submit(publish: boolean) {
 
     <div v-if="loading" class="sd-card p-6 text-sm text-muted">加载文章数据…</div>
 
-    <!-- 主区：单栏写作（标题 / 标签 / 正文），元数据与危险操作不在此摊开 -->
-    <div v-else class="mx-auto max-w-4xl">
-      <input v-model="title" class="title-input" maxlength="200" placeholder="输入文章标题…" :disabled="readOnly" />
+    <!-- 主区（方向 C）：桌面两栏——左写作 / 右设置常驻（≥1024）。
+         <1024 右栏收起，设置项仍走「更多」抽屉；两处共用 ArticleSettingsPanel，标记不会漂移。 -->
+    <div v-else class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div class="min-w-0">
+        <input v-model="title" class="title-input" maxlength="200" placeholder="输入文章标题…" :disabled="readOnly" />
 
-      <div class="mb-4">
-        <label class="mb-1.5 block text-sm font-semibold text-muted">标签（1~6，必填）</label>
-        <TagChipsInput v-model="tagNames" />
+        <div class="mb-5">
+          <label class="mb-1.5 block font-mono text-xs uppercase tracking-[0.08em] text-dim">
+            标签（1~6，必填）
+          </label>
+          <TagChipsInput v-model="tagNames" />
+        </div>
+
+        <!-- ClientOnly：WangEditor 是纯浏览器组件；本页路由已 ssr:false，这层是防复用到 SSR 页的保险 -->
+        <ClientOnly>
+          <ArticleEditor v-model="content" :read-only="readOnly" :min-height="480" />
+          <template #fallback>
+            <div class="border border-border p-6 text-sm text-muted">
+              编辑器加载中…（富文本仅在客户端渲染，不参与 SSR）
+            </div>
+          </template>
+        </ClientOnly>
       </div>
 
-      <!-- ClientOnly：WangEditor 是纯浏览器组件；本页路由已 ssr:false，这层是防复用到 SSR 页的保险 -->
-      <ClientOnly>
-        <ArticleEditor v-model="content" :read-only="readOnly" :min-height="480" />
-        <template #fallback>
-          <div class="sd-card p-6 text-sm text-muted">编辑器加载中…（富文本仅在客户端渲染，不参与 SSR）</div>
-        </template>
-      </ClientOnly>
+      <!-- 桌面右栏：吸顶在「AppHeader 64 + 操作条 56」之下（132px）；窄屏隐藏 -->
+      <aside class="hidden lg:sticky lg:top-[132px] lg:block lg:self-start">
+        <ArticleSettingsPanel
+          v-model:summary="summary"
+          v-model:cover-url="coverUrl"
+          :content="content"
+          :read-only="readOnly"
+        >
+          <div class="border-t border-border pt-6">
+            <p class="mb-2 font-mono text-xs uppercase tracking-[0.08em] text-dim">发布信息</p>
+            <p v-if="detail?.publishedAt" class="sd-hint">首次发布于 {{ detail.publishedAt }}</p>
+            <p v-else class="sd-hint">尚未发布</p>
+            <VersionHistory
+              v-if="articleId && detail"
+              :article-id="detail.articleId"
+              :current-version-no="detail.currentVersion?.versionNo"
+            />
+          </div>
+        </ArticleSettingsPanel>
+      </aside>
     </div>
 
     <!-- 更多设置抽屉：摘要 / 封面 / 首次发布时间 / 历史版本（状态不在此重复，操作条已有） -->
@@ -227,9 +261,12 @@ async function submit(publish: boolean) {
   border: none;
   border-bottom: 1px solid var(--border);
   color: var(--text);
+  /* 方向 C：文章标题是 H1 级，走衬线（与详情页 h1 同一套语言），负字距收紧 */
+  font-family: var(--font-serif);
   font-size: var(--text-2xl);
   font-weight: 700;
   line-height: var(--lh-2xl);
+  letter-spacing: var(--ls-h1);
   padding: 0.375rem 0;
   margin-bottom: 1rem;
   outline: none;

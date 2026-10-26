@@ -41,8 +41,8 @@ const THEMES = {
     accentFg: '#8fb4e8', cta: '#6e9be0', ctaInk: '#0f1215'
   },
   light: {
-    bg: '#faf9f6', surface: '#ffffff', elevated: '#f6f3f2',
-    ink: '#111111', ink2: '#55606b', ink3: '#667080',
+    bg: '#fcf9f8', surface: '#ffffff', elevated: '#f6f3f2',
+    ink: '#1c1b1b', ink2: '#55606b', ink3: '#667080',
     accent: '#1a4d8f', accentInk: '#ffffff', accentSoft: '#e8eef7',
     accentFg: '#1a4d8f', cta: '#1a4d8f', ctaInk: '#ffffff'
   }

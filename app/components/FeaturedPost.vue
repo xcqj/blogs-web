@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// LATEST 头条（方向 C 冻结规格 §4.1，S23-T15）：文字左 + 右图 260×146（16:9、3px、垂直居中）。
-// 与列表行同构（图恒在右），只放大字号与图 —— 全站只有一种图文关系，不做两套语言。
-// 仅第 1 页生效，由页面决定是否渲染。
+// LATEST 头条（方向 C，S23；按 Stitch 首页 HTML 校准 2026-10-27）。
+// 结构：2px 深色顶线 + 顶部行（LATEST 徽标 / 标签 / 日期）→ 主体（文字左 + 右图 260×146）。
+// 标题 48px 衬线、最多两行；摘要 15px 两行；meta 等宽 13px。仅第 1 页生效。
 // 无封面时右侧整块不渲染、文字延伸到全宽（不留白、不出灰块）。
 import type { ArticleSummary } from '~/types/blog'
 
@@ -11,26 +11,36 @@ const date = computed(() => (props.article.publishedAt || '').slice(0, 10))
 </script>
 
 <template>
-  <article class="border-b border-border pb-8">
-    <div class="grid gap-6 md:grid-cols-[minmax(0,1fr)_260px] md:items-center">
-      <div class="min-w-0">
-        <p class="font-mono text-xs uppercase tracking-[0.08em] text-primary-fg">LATEST</p>
-        <h2 class="mt-3 font-serif text-2xl font-bold leading-[1.15] tracking-[var(--ls-h1)] md:text-3xl">
+  <article class="mb-8 border-b border-border pb-8">
+    <!-- 顶部行：2px 深色顶线是头条的"起版"信号，与全站 1px 细线形成层级差 -->
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-3 border-t-2 border-text pt-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <span
+          class="rounded-sm border border-border bg-overlay px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-fg"
+        >
+          LATEST
+        </span>
+        <TagChip v-for="t in article.tags" :key="t.tagId" :slug="t.slug" :name="t.name" />
+      </div>
+      <span class="font-mono text-[11px] tracking-wider text-dim">{{ date }}</span>
+    </div>
+
+    <div class="flex items-center justify-between gap-8">
+      <div class="flex min-h-[190px] min-w-0 flex-1 flex-col justify-center">
+        <h2 class="mb-3 line-clamp-2 font-serif text-2xl font-bold leading-[1.15] tracking-[var(--ls-h1)] md:text-[3rem]">
           <NuxtLink :to="`/post/${article.articleId}`" class="transition-colors hover:text-primary-fg">
             {{ article.title }}
           </NuxtLink>
         </h2>
-        <p v-if="article.summary" class="mt-3 line-clamp-2 max-w-[60ch] text-base text-muted">
+        <p v-if="article.summary" class="mb-4 line-clamp-2 max-w-[60ch] text-[15px] leading-[1.6] text-muted">
           {{ article.summary }}
         </p>
-        <div class="sd-meta mt-4">
-          <span>{{ article.authorName }}</span>
-          <span class="sd-dot" />
+        <div class="flex flex-wrap items-center gap-3 font-mono text-[13px] text-dim">
+          <span class="font-medium text-text">{{ article.authorName }}</span>
+          <span aria-hidden="true">·</span>
           <span>{{ date }}</span>
-          <span class="sd-dot" />
-          <span class="inline-flex items-center gap-1">
-            <span class="i-mdi:eye-outline" aria-hidden="true" />{{ article.viewCount }}
-          </span>
+          <span aria-hidden="true">·</span>
+          <span>{{ article.viewCount }} 次阅读</span>
         </div>
       </div>
 
@@ -38,7 +48,7 @@ const date = computed(() => (props.article.publishedAt || '').slice(0, 10))
       <NuxtLink
         v-if="article.coverUrl"
         :to="`/post/${article.articleId}`"
-        class="hidden overflow-hidden rounded-md md:block"
+        class="hidden h-[146px] w-[260px] shrink-0 overflow-hidden border border-border sm:block"
       >
         <img
           :src="article.coverUrl"
@@ -47,7 +57,7 @@ const date = computed(() => (props.article.publishedAt || '').slice(0, 10))
           height="146"
           loading="lazy"
           decoding="async"
-          class="aspect-[16/9] w-full object-cover [filter:var(--thumb-filter)]"
+          class="h-full w-full object-cover [filter:var(--thumb-filter)]"
         />
       </NuxtLink>
     </div>
