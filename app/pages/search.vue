@@ -59,8 +59,9 @@ useSeoMeta({
           <SdButton @click="refresh">重试</SdButton>
         </ErrorState>
         <template v-else>
-          <div class="space-y-4">
-            <ArticleCard v-for="a in data?.rows" :key="a.articleId" :article="a" />
+          <!-- 方向 C（S23-T18）：结果行改用 PostRow；命中高亮由其内置的 highlight 逻辑承担 -->
+          <div class="mt-2">
+            <PostRow v-for="a in data?.rows" :key="a.articleId" :article="a" />
           </div>
           <EmptyState
             v-if="!data?.rows?.length"

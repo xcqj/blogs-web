@@ -212,13 +212,24 @@ button {
   cursor: pointer;
 }
 
-/* Chrome 自动填充会把输入底刷成淡蓝，与主题色板打架：用 inset 阴影盖回 surface 色 */
+/* Chrome 自动填充会把输入底刷成淡蓝，与主题色板打架：用 inset 阴影盖回**输入框自身底色**
+   （--elevated，与 sd-input / sd-search 一致）。
+   注意：这里曾用 --surface——在 elevated 底的搜索框里会留下一块白色圆角矩形，
+   看起来像"输入框自带边框"（2026-10-26 实拍踩到），故改为 --elevated。 */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--text);
-  box-shadow: 0 0 0 1000px var(--surface) inset;
+  box-shadow: 0 0 0 1000px var(--elevated) inset;
   transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Chrome 原生搜索清除钮（×）：与 sd-search 内嵌的提交按钮功能重复，样式也不随主题，
+   全站隐藏。需要清除时用户全选删除即可，不做额外自绘按钮。 */
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 img,
