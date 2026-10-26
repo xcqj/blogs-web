@@ -25,16 +25,16 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
 
       <div class="flex shrink-0 items-center gap-2 sm:gap-3">
         <!-- 桌面导航 -->
-        <nav class="hidden items-center gap-5 text-sm md:flex">
-          <!-- 下划线语言（二轮精修）：hover 与 active 统一 w-4 短横线（rem 基准 17px 下 = 17px），
-               比 1px 全宽更克制，与全站「短横线章节标记」（prose h2::before 32px 短线）呼应；
-               不做 hover 全宽与 active 短线的混搭（不 coherent）。保留 200ms 宽度动画 -->
+        <nav class="hidden items-center gap-6 text-sm md:flex">
+          <!-- 激活语言（方向 C，2026-10-26）：由「4px 短横线」改为「2px 全宽下边框 + 主色」，
+               与冻结规格 §4.1 一致；用 scaleX 而非 width 过渡，避免逐帧重排。
+               hover 时淡入同一条下边框（未激活为 0 宽），与激活态同一套几何，不做混搭 -->
           <NuxtLink
             v-for="item in nav"
             :key="item.to"
             :to="item.to"
-            class="relative text-muted transition hover:text-text after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-text after:transition-[width] after:duration-200 hover:after:w-4"
-            active-class="!text-text !font-semibold after:!w-4"
+            class="relative py-1 text-muted transition-colors hover:text-text after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 hover:after:scale-x-100"
+            active-class="!text-text !font-medium after:!scale-x-100"
           >
             {{ item.label }}
           </NuxtLink>
