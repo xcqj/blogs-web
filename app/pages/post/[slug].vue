@@ -93,35 +93,39 @@ useHead({
       <span class="i-mdi:arrow-left" aria-hidden="true" />返回文章列表
     </NuxtLink>
     <header>
-      <h1 class="max-w-[24ch] text-3xl font-bold leading-[var(--lh-3xl)] tracking-[var(--ls-h1)]">{{ version?.title }}</h1>
+      <!-- 标题：衬线 + 48px 档（--text-3xl），限 24ch 防超长标题吃满整行 -->
+      <h1 class="max-w-[24ch] font-serif text-3xl font-bold leading-[var(--lh-3xl)] tracking-[var(--ls-h1)]">
+        {{ version?.title }}
+      </h1>
 
-      <!-- meta 条：头像 + 作者 + 日期 + 阅读量 + 标签 -->
+      <!-- meta 条（方向 C）：一行读完「作者 · 日期 · 阅读量」，标签右端；去掉旧版"作者"副行（冗余） -->
       <div class="mt-4 flex flex-wrap items-center gap-3 border-b border-border pb-5">
-        <NuxtLink :to="`/user/${article.authorId}`" class="flex items-center gap-3 transition hover:text-primary">
-          <AppAvatar :name="article.authorName" size="md" />
-          <span class="leading-tight">
-            <b class="block text-sm font-semibold">{{ article.authorName }}</b>
-            <span class="block text-xs text-muted">作者</span>
-          </span>
+        <NuxtLink
+          :to="`/user/${article.authorId}`"
+          class="flex items-center gap-2.5 transition-colors hover:text-primary-fg"
+        >
+          <AppAvatar :name="article.authorName" size="sm" />
+          <span class="text-sm font-medium">{{ article.authorName }}</span>
         </NuxtLink>
         <span class="sd-dot" />
         <span class="text-xs text-muted">{{ displayDate }}</span>
         <span class="sd-dot" />
         <span class="text-xs text-muted">{{ article.viewCount }} 次阅读</span>
-        <div v-if="article.tags?.length" class="flex flex-wrap gap-2">
+        <div v-if="article.tags?.length" class="ml-auto flex flex-wrap gap-2">
           <TagChip v-for="t in article.tags" :key="t.tagId" :slug="t.slug" :name="t.name" />
         </div>
       </div>
     </header>
 
+    <!-- 封面：16:9 + 3px 圆角、无边框（C 版不给照片加框），轻微去饱和/深色压暗走 --thumb-filter -->
     <img
       v-if="version?.coverUrl"
       :src="version.coverUrl"
       :alt="version?.title"
-      class="mt-6 aspect-[16/8] w-full rounded-lg border border-border object-cover [filter:var(--thumb-filter)]"
+      class="mt-6 aspect-[16/9] w-full rounded-md object-cover [filter:var(--thumb-filter)]"
     />
 
-    <!-- 正文：后端已净化 HTML → v-html + prose（prose.css 走 token 定稿，限宽 68ch） -->
+    <!-- 正文：后端已净化 HTML → v-html + prose（prose.css 走 token，限宽 66ch / 18px / 1.75） -->
     <div class="prose mt-8" v-html="version?.content" />
 
     <!-- 评论区：§10.1 列表 + §10.2 发表（CSR）；标签已在 meta 条出现，不再重复一份 -->

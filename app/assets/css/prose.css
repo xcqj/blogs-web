@@ -1,8 +1,9 @@
 /* =====================================================================
-   正文排版（design/article.html 的 .prose 定稿，桶A 第6点）
-   - 全部走 tokens.css 变量，无魔法值；限宽 68ch 保可读行宽
+   正文排版（方向 C，2026-10-26，S23-T16；依据 design/stitch/README.md §5.1）
+   - 全部走 tokens.css 变量，无魔法值；限宽 66ch（正文 18px 后的可读补偿）
+   - 段落间距 24px（C 版节奏更紧，靠留白与字号落差组织，不靠大间隙）
+   - 代码块：浅底 + 1px 边 + 顶部栏（语言标签由 code-copy 插件注入）
    - preset-typography 的规则用 :where() 零特异性，本文件同名选择器可直接覆盖
-   - 代码块两版主题都用深底（--code-bg/--code-text，开发者阅读习惯）
    ===================================================================== */
 
 .prose {
@@ -11,7 +12,7 @@
 }
 
 /* preset-typography 的 .prose{color:var(--un-prose-body);max-width:65ch} 注入在本文件之后，
-   同特异性会覆盖 —— 用双类提到 (0,2,0) 稳定压制，保证正文色跟随主题且行宽 68ch */
+   同特异性会覆盖 —— 用双类提到 (0,2,0) 稳定压制，保证正文色跟随主题且行宽 66ch */
 .prose.prose {
   color: var(--text);
   max-width: var(--measure);
@@ -29,11 +30,12 @@
 }
 
 .prose p {
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-5);
   /* 正文渐进增强 pretty：避免段末单字孤行（CJK 长行场景），旧浏览器忽略（清单3） */
   text-wrap: pretty;
 }
 
+/* 小节标题：衬线（基础层 h2 已给 --font-serif）+ 2px 主色短线作章节标记 */
 .prose h2 {
   position: relative;
   font-size: var(--text-xl);
@@ -43,7 +45,6 @@
   margin: var(--space-8) 0 var(--space-4);
   scroll-margin-top: 80px;
 }
-/* 章节标记：h2 前一条短横线，比纯留白更有结构感（颜色走 dim，不抢标题） */
 .prose h2::before {
   content: "";
   display: block;
@@ -94,15 +95,14 @@
   font-weight: 700;
 }
 
+/* 引用块（方向 C）：2px 主色左边线 + 左内边距，**去底色**（C 版靠线与留白分隔，不用色块） */
 .prose blockquote {
   margin: var(--space-6) 0;
-  padding: var(--space-2) var(--space-5);
-  border-left: 3px solid var(--accent-fg);
+  padding: 0 0 0 var(--space-4);
+  border-left: 2px solid var(--accent);
   color: var(--text-muted);
-  background: var(--surface);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  /* preset-typography 默认给 blockquote 加 italic 与自动引号：
-     中文斜体是机械假斜体、可读性差，且自动引号与中文引号重复，均关掉 */
+  background: none;
+  border-radius: 0;
   font-style: normal;
   font-weight: 400;
 }
@@ -130,7 +130,7 @@
   border: 1px solid var(--border);
   margin: 0 0 var(--space-6);
   font-size: var(--text-sm);
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .prose pre code {
@@ -140,27 +140,54 @@
   padding: 0;
 }
 
-/* ---------- 代码块复制钮（清单5）：由 code-copy.client.ts 注入的 .sd-code 容器承载 ----------
-   容器 relative：复制钮 absolute 到容器而非 pre 内，不随 pre 横向滚动跑掉。
-   克制小尺寸 ghost 钮：默认透明，hover/focus 才显形；触屏设备（hover: none）常显。
-   ::before 把点击热区扩到 44×44（视觉仍 28px）——满足 <640 触控目标 ≥44px 硬边界。
-   颜色只走既有 token（muted→text），不加新装饰；copied 反馈用全墨色 check。 */
+/* ---------- 代码块容器与顶部栏（方向 C，S23-T16） ----------
+   由 code-copy.client.ts 注入：.sd-code > .sd-code-bar（左语言标签 / 右复制钮）+ pre。
+   容器 relative 且 overflow hidden：顶部栏与 pre 共享外框圆角；复制钮在栏内不再 absolute 飘。
+   触屏（hover:none）复制钮常显；::before 仍把热区扩到 44×44。 */
 .sd-code {
   position: relative;
+  margin: 0 0 var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* 容器接管外框后，内部 pre 不再重复边框与圆角 */
+.sd-code > pre {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.sd-code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  height: 36px;
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--elevated);
+}
+
+.sd-code-lang {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
 }
 
 .sd-code-copy {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
+  position: relative;
   display: inline-flex;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: var(--radius-sm);
-  background: var(--elevated);
+  background: transparent;
   color: var(--text-muted);
   cursor: pointer;
   opacity: 0;
@@ -174,7 +201,7 @@
 .sd-code-copy::before {
   content: "";
   position: absolute;
-  inset: -8px;
+  inset: -10px;
 }
 
 .sd-code:hover .sd-code-copy,
@@ -188,7 +215,7 @@
 }
 
 .sd-code-copy.is-copied {
-  color: var(--text);
+  color: var(--accent-fg);
   opacity: 1;
 }
 
@@ -216,10 +243,10 @@
   margin: var(--space-8) 0;
 }
 
+/* 正文图片：C 版去边框，只留 3px 圆角（边框会把照片框成"贴纸"） */
 .prose img {
   max-width: 100%;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
 }
 
 .prose table {
@@ -241,7 +268,7 @@
   font-weight: 700;
 }
 
-/* 响应式（design/responsive.html「表格：xs/sm 横向滚动」）：窄屏让宽表可横滚，不撑破 68ch */
+/* 响应式（design/responsive.html「表格：xs/sm 横向滚动」）：窄屏让宽表可横滚，不撑破 66ch */
 @media (max-width: 639px) {
   .prose table {
     display: block;

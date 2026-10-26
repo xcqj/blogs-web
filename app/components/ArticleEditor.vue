@@ -94,7 +94,10 @@ onBeforeUnmount(() => editorRef.value?.destroy());
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-md border border-border">
+  <!-- 外层**不能** overflow-hidden：WangEditor 的语言/对齐等下拉面板挂在编辑器内部，
+       祖先是 overflow:hidden 时面板会被直接裁掉（只看到半截列表 + 滚动条消失）。
+       圆角改由 toolbar（上两角）与 body（下两角）各自承担。 -->
+  <div class="rounded-md border border-border">
     <WangToolbar class="ed-toolbar" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="mode" />
     <WangEditor
       v-model="valueHtml"
@@ -113,9 +116,58 @@ onBeforeUnmount(() => editorRef.value?.destroy());
 .ed-toolbar {
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  /* 外层不再 overflow-hidden，圆角由上下两段各自承担（否则工作区会露出直角） */
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 .ed-body {
   background: var(--elevated);
   color: var(--text);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+</style>
+
+<style>
+/* WangEditor 下拉浮层（方向 C，S23-T16）：以下是第三方 DOM（@wangeditor-next/editor dist/css），
+   不能 scoped，否则选择器带 data 属性匹配不到。
+   修三处：① 面板过窄 → 出横向滚动条；② 无边框阴影 → 白底上"浮不起来"；③ 滚动条几乎不可见。
+   浮层阴影是 C 版唯一允许的阴影（--shadow-float），仅此处与弹层/抽屉可用。 */
+.w-e-select-list,
+.w-e-drop-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+}
+
+/* 语言选择列表：给足最小宽度（默认过窄会挤成横向滚动），高度走纵向滚动 */
+.w-e-select-list {
+  min-width: 200px;
+  max-height: 280px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* 通用下拉面板（代码块语言、对齐方式等） */
+.w-e-drop-panel {
+  max-height: 340px;
+  overflow: auto;
+  /* 外层去掉 overflow-hidden 后，面板需显式浮在正文之上（站点顶栏 z-50） */
+  z-index: 60;
+}
+
+/* 滚动条：默认几乎看不见，明确给 8px 细条 */
+.w-e-select-list::-webkit-scrollbar,
+.w-e-drop-panel::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.w-e-select-list::-webkit-scrollbar-thumb,
+.w-e-drop-panel::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
+}
+.w-e-select-list::-webkit-scrollbar-track,
+.w-e-drop-panel::-webkit-scrollbar-track {
+  background: transparent;
 }
 </style>
