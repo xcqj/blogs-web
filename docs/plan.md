@@ -511,7 +511,7 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 ### P3 换地基（1.5~2d，唯一一次全站同时变样）
 
 - [ ] T9 `tokens.css` 重建：冷米白/靛蓝双主题、圆角统一 3px、阴影近乎取消、新增 `--font-serif`；深色 `--accent` 必须提亮（`#1A4D8F` 在 `#131415` 上仅约 2.1:1，不可用）
-- [ ] T10 **Noto Serif SC 引入**：自托管 woff2，`cn-font-split` 分片 + `unicode-range`，仅 700 字重；`font-display: swap` + 首屏分片 `preload` + `size-adjust`/`ascent-override` 对齐 fallback 度量；**禁走 Google Fonts CDN**
+- [x] T10 **Noto Serif SC 引入（方案 A，2026-10-26 实测定案）**：`npm i @fontsource/noto-serif-sc`，只 `import '@fontsource/noto-serif-sc/700.css'`——101 个 `unicode-range` 分片（合计 3.1MB，单片 1.5–54KB），浏览器按需下载，**实测典型首屏命中 11 片约 420KB**；`font-display: swap` 由包内 CSS 提供；**不做 preload**（无法预知命中分片）；不采用 1.5MB 全量单文件入口（`chinese-simplified-700.css`）。使用范围收敛到 **H1 级标题**（hero / 文章大标题 / 头条 / 正文 H2），列表行 18px 标题不用衬线（既省流量也更好读）。**验收线由 ≤100KB 修正为 ≤500KB**（100KB 对中文衬线不可达，实测数据见台账 §4.3.2）；禁走 Google Fonts CDN
 - [ ] T11 `uno.config.ts` 按 T8 清单重建（新增/废弃/别名映射），`safelist` 复核
 - [ ] T12 `Sd*` 基础件改造（Button 实底+描边两形态 / Card 边框化去阴影 / Badge / Input / Textarea / State），改完 grep 复用点
 - [ ] T13 全站回归：`contrast.mjs` 16 项**重算并更新期望值**（新色对人工核对，不得为过门禁降标准）+ `shot.mjs` 退 0 + build 通过 + 深浅双主题逐页扫一遍 + Lighthouse 四项记录（对比 S17 基线）

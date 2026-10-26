@@ -31,18 +31,20 @@ const ratio = (fg, bg, base) => {
 };
 
 const THEMES = {
-  // 暖纸（2026-10-11 打磨轮 2）：深色版由同一暖色相派生
+  // 方向 C（2026-10-26，D41 / S23）：冷米白 + 深靛蓝。
+  // 两条硬约束：① 深色下 accent 必须提亮（原靛蓝在近黑上仅约 2.1:1）；
+  // ② 深色下靛蓝实底必须配深字（accentInk），白字仅约 2.8:1。
   dark: {
-    bg: '#14120f', surface: '#1c1916', elevated: '#232019',
-    ink: '#f4f1ea', ink2: '#b5ada2', ink3: '#8a8378',
-    accent: '#e4dbc9', accentInk: '#14120f', accentSoft: 'rgba(228,219,201,.14)',
-    accentFg: '#e4dbc9', cta: '#ffd500', ctaInk: '#1a1c1c'
+    bg: '#131415', surface: '#1a1c1f', elevated: '#232629',
+    ink: '#e8e6e1', ink2: '#a0a6ad', ink3: '#8a9099',
+    accent: '#6e9be0', accentInk: '#0f1215', accentSoft: 'rgba(110,155,224,.14)',
+    accentFg: '#8fb4e8', cta: '#6e9be0', ctaInk: '#0f1215'
   },
   light: {
-    bg: '#f4f1ea', surface: '#fdfbf6', elevated: '#ffffff',
-    ink: '#211e1d', ink2: '#585858', ink3: '#6f6759',
-    accent: '#2f2c25', accentInk: '#ffffff', accentSoft: '#e8e2d6',
-    accentFg: '#2f2c25', cta: '#ffd500', ctaInk: '#1a1c1c'
+    bg: '#faf9f6', surface: '#ffffff', elevated: '#f6f3f2',
+    ink: '#111111', ink2: '#55606b', ink3: '#667080',
+    accent: '#1a4d8f', accentInk: '#ffffff', accentSoft: '#e8eef7',
+    accentFg: '#1a4d8f', cta: '#1a4d8f', ctaInk: '#ffffff'
   }
 };
 // [前景, 背景, 场景, 门槛, 背景所落的 base（默认 surface）]
@@ -54,7 +56,8 @@ const CASES = [
   ['accentInk', 'accent', '主按钮文字', 4.5],
   ['accentFg', 'surface', '链接 / 标题 hover', 4.5],
   ['accentFg', 'accentSoft', 'chip 文字', 4.5, 'surface'],
-  ['ctaInk', 'cta', 'CTA 黄按钮文字', 4.5],
+  // 黄 CTA 已作废（D41），--cta 在 tokens.css 中重定向到 --accent；此条作为实底主按钮的等价回归
+  ['ctaInk', 'cta', 'CTA 实底按钮文字', 4.5],
   ['ink', 'bg', '正文 / 页面底', 4.5],
   ['ink3', 'bg', 'meta / 页面底（chip 场景）', 4.5]
 ];

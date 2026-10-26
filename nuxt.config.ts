@@ -82,7 +82,16 @@ export default defineNuxtConfig({
   },
 
   // 全局样式：设计 token 单一来源（变量 + 基础层），UnoCSS 语义类消费之
-  css: ['~/assets/css/tokens.css', '~/assets/css/prose.css', '~/assets/css/transitions.css'],
+  // 字体（2026-10-26 S23/D41 方案 A）：@fontsource/noto-serif-sc 只引 700 字重——
+  // 包内 700.css 含 101 段带 unicode-range 的 @font-face，浏览器按实际用字按需下载
+  // （实测典型首屏命中 11 片约 420KB）；font-display:swap 由包内提供，无需 preload。
+  // 只用于 H1 级标题（--font-serif），正文仍走系统栈，故拉丁字符不会触发字体下载。
+  css: [
+    '@fontsource/noto-serif-sc/700.css',
+    '~/assets/css/tokens.css',
+    '~/assets/css/prose.css',
+    '~/assets/css/transitions.css'
+  ],
 
   // runtimeConfig：服务端专用（不暴露给浏览器）
   // 环境变量映射：NUXT_API_BASE → apiBase，NUXT_APP_CLIENT_ID → appClientId

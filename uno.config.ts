@@ -8,7 +8,10 @@ import {
   transformerVariantGroup
 } from 'unocss';
 
-// blog-web UnoCSS 配置（D28 裁剪自 plus-ui；质感打磨轮 2026-10-09 重排 shortcut 体系）
+// blog-web UnoCSS 配置（D28 裁剪自 plus-ui；2026-10-26 方向 C 改版重排，ROADMAP D41 / S23）
+// - 方向 C 要点：值全部来自 tokens.css；取消阴影、去胶囊、圆角统一 3px、黄 CTA 重定向到主色；
+//   新增 sd-serif / sd-mark / sd-row / sd-meta 四个语义类供 P4 逐页落地使用
+// - btn-cta 暂时保留（值已在 tokens.css 重定向为 --accent），P4 改调用点后再删
 // - 配色/字号/圆角/阴影/动效全部指向 CSS 变量（app/assets/css/tokens.css），深浅主题自动切换
 // - 去 Element Plus 相关、去 auto-import（Nuxt 原生）；留 wind3/attributify/typography/icons + transformers
 // - presetWind3 默认断点 sm640/md768/lg1024/xl1280 = D28 响应式口径，不自造断点
@@ -21,14 +24,14 @@ export default defineConfig({
     'sd-wrap': 'mx-auto w-full max-w-[var(--container)] px-6 lg:px-8',
     'sd-measure': 'max-w-[var(--measure)]',
 
-    // ---------- 卡片 / 面板：半透明边 + elevation，hover 升一级并轻微上浮（②B） ----------
-    'sd-card': 'rounded-lg border border-border bg-surface shadow-e1',
+    // ---------- 卡片 / 面板（方向 C）：取消阴影、取消上浮；层级只靠 1px 边 + 底色差 ----------
+    'sd-card': 'rounded-lg border border-border bg-surface',
     'card-hover':
-      'transition-[background,border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 hover:bg-elevated hover:border-border-strong hover:shadow-e2',
+      'transition-[background,border-color] duration-200 ease-out hover:bg-elevated hover:border-border-strong',
 
     // ---------- 按钮：基类 + 变体 + 尺寸（小圆角 2px，主按钮不再发光） ----------
     'btn':
-      'inline-flex h-9.5 cursor-pointer items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold whitespace-nowrap transition-[background,border-color,color,box-shadow] duration-150 ease-out select-none disabled:cursor-not-allowed disabled:opacity-45',
+      'inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold whitespace-nowrap transition-[background,border-color,color] duration-150 ease-out select-none disabled:cursor-not-allowed disabled:opacity-45',
     'btn-primary': 'btn bg-primary text-primary-ink hover:bg-primary-strong active:bg-accent-press',
     'btn-secondary':
       'btn border border-border-strong bg-elevated text-text hover:bg-raised active:bg-surface',
@@ -42,10 +45,10 @@ export default defineConfig({
     'btn-lg': 'h-11 rounded-md px-5 text-base',
     'btn-pill': 'rounded-full',
 
-    // ---------- 标签 chip：同色相三件套（soft 底 + fg 字），不再高饱和抢戏 ----------
+    // ---------- 标签 chip（方向 C）：去胶囊，改 3px 小标签；3px 圆角 + 细边 + soft 底 ----------
     'sd-chip':
-      'inline-flex items-center rounded-full bg-soft px-2.5 py-0.5 text-xs font-semibold text-primary-fg transition-[background,color] duration-150 ease-out',
-    'sd-chip-link': 'sd-chip hover:bg-primary hover:text-primary-ink',
+      'inline-flex items-center rounded-sm border border-border bg-soft px-2 py-0.5 text-xs font-medium text-primary-fg transition-[background,border-color,color] duration-150 ease-out',
+    'sd-chip-link': 'sd-chip hover:border-primary hover:bg-primary hover:text-primary-ink',
 
     // ---------- 表单控件：与按钮同族同高（38px），focus 出 3px 半透明环 ----------
     'sd-input':
@@ -75,6 +78,18 @@ export default defineConfig({
     'sd-tab':
       'border-b-2 border-transparent px-3.5 py-2.5 text-sm text-muted transition-[color,border-color] duration-150 ease-out hover:text-text',
     'sd-tab-on': 'sd-tab border-primary text-text font-semibold',
+
+    // ---------- 方向 C 新增（2026-10-26，供 P4 逐页落地使用） ----------
+    // 衬线标题：只给 H1 级（hero / 文章大标题 / 头条 / 正文 H2）；
+    // 列表行 18px 标题不用衬线——既省字体流量（unicode-range 分片按需下载）也更好读
+    'sd-serif': 'font-[var(--font-serif)] font-bold',
+    // 编号锚点：01 // SECTION（等宽大写、次级色、字距放开）
+    'sd-mark': 'font-mono text-xs uppercase tracking-[0.08em] text-dim',
+    // 数据行：上下 16px + 底部发丝线 + hover 换底（列表统一行容器，替代卡片）
+    'sd-row':
+      'flex gap-5 border-b border-border py-4 transition-[background-color] duration-150 ease-out hover:bg-elevated',
+    // meta 行：12px 次级色 + 8px 间距（作者 · 日期 · 阅读量 · 右端标签）
+    'sd-meta': 'flex flex-wrap items-center gap-2 text-xs text-muted',
 
     // ---------- 排版辅助：标题字距走 token（负字距是质感主力） ----------
     'sd-h1': 'text-3xl font-bold tracking-[var(--ls-h1)]',
