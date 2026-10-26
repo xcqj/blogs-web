@@ -21,7 +21,8 @@ export default defineConfig({
   shortcuts: {
     'flex-center': 'flex items-center justify-center',
     // 容器两档：列表/首页宽档 1080（本轮不动），正文窄档 68ch；边距 24 / 桌面 32
-    'sd-wrap': 'mx-auto w-full max-w-[var(--container)] px-6 lg:px-8',
+    // 左右内边距按 Stitch：24（sm）/ 40（lg），原 lg:px-8=32 偏窄
+    'sd-wrap': 'mx-auto w-full max-w-[var(--container)] px-6 lg:px-10',
     'sd-measure': 'max-w-[var(--measure)]',
 
     // ---------- 卡片 / 面板（方向 C）：取消阴影、取消上浮；层级只靠 1px 边 + 底色差 ----------
@@ -30,8 +31,9 @@ export default defineConfig({
       'transition-[background,border-color] duration-200 ease-out hover:bg-elevated hover:border-border-strong',
 
     // ---------- 按钮：基类 + 变体 + 尺寸（小圆角 2px，主按钮不再发光） ----------
+    // 按钮排版按 Stitch：等宽 13px + 0.06em 字距（中文会回落到系统栈，拉丁与数字走等宽）
     'btn':
-      'inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold whitespace-nowrap transition-[background,border-color,color] duration-150 ease-out select-none disabled:cursor-not-allowed disabled:opacity-45',
+      'inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md px-4 font-mono text-[13px] font-medium tracking-[0.06em] whitespace-nowrap transition-[background,border-color,color] duration-150 ease-out select-none disabled:cursor-not-allowed disabled:opacity-45',
     'btn-primary': 'btn bg-primary text-primary-ink hover:bg-primary-strong active:bg-accent-press',
     'btn-secondary':
       'btn border border-border-strong bg-elevated text-text hover:bg-raised active:bg-surface',
@@ -45,10 +47,12 @@ export default defineConfig({
     'btn-lg': 'h-11 rounded-md px-5 text-base',
     'btn-pill': 'rounded-full',
 
-    // ---------- 标签 chip（方向 C）：去胶囊，改 3px 小标签；3px 圆角 + 细边 + soft 底 ----------
+    // ---------- 标签 chip（方向 C，按 Stitch 校准 2026-10-27）----------
+    // Stitch 的标签是「灰底无边框 + 等宽 11px + 次级字色」，早期做成蓝底 soft 是观感不对的主因；
+    // 右栏索引里的热门/精选另用白底+边框（在 index.vue 内手写），与正文内标签区分层级。
     'sd-chip':
-      'inline-flex items-center rounded-sm border border-border bg-soft px-2 py-0.5 text-xs font-medium text-primary-fg transition-[background,border-color,color] duration-150 ease-out',
-    'sd-chip-link': 'sd-chip hover:border-primary hover:bg-primary hover:text-primary-ink',
+      'inline-flex items-center rounded-sm bg-overlay px-2 py-0.5 font-mono text-[11px] font-medium text-muted transition-[background,color] duration-150 ease-out',
+    'sd-chip-link': 'sd-chip hover:bg-soft hover:text-primary-fg',
 
     // ---------- 表单控件：与按钮同族同高（38px），focus 出 3px 半透明环 ----------
     'sd-input':
@@ -86,8 +90,10 @@ export default defineConfig({
     // 编号锚点：01 // SECTION（等宽大写、次级色、字距放开）
     'sd-mark': 'font-mono text-xs uppercase tracking-[0.08em] text-dim',
     // 数据行：上下 16px + 底部发丝线 + hover 换底（列表统一行容器，替代卡片）
+    // hover 用 2% 主文字叠加（Stitch 原式 rgba(17,17,17,0.02)）：跟随底色自动出 #F7F4F3，
+    // 不写死色值，换底色时不需要再改这里
     'sd-row':
-      'flex gap-5 border-b border-border py-4 transition-[background-color] duration-150 ease-out hover:bg-elevated',
+      'flex gap-5 border-b border-border py-4 transition-[background-color] duration-150 ease-out hover:bg-[rgba(17,17,17,0.02)]',
     // meta 行：12px 次级色 + 8px 间距（作者 · 日期 · 阅读量 · 右端标签）
     'sd-meta': 'flex flex-wrap items-center gap-2 text-xs text-muted',
 
@@ -143,7 +149,9 @@ export default defineConfig({
       'danger-bg': 'var(--danger-bg)',
       warn: 'var(--warn)',
       'warn-bg': 'var(--warn-bg)',
-      'muted-bg': 'var(--muted-bg)'
+      'muted-bg': 'var(--muted-bg)',
+      // 中性叠层：标签底与徽标底用它（black 5% / white 6% 双主题），替代带蓝调的 muted-bg
+      overlay: 'var(--overlay-subtle)'
     },
     fontFamily: {
       sans: 'var(--font-sans)',
