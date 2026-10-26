@@ -76,7 +76,7 @@ async function submit() {
     <div v-if="open" class="sd-scrim z-50 flex items-center justify-center px-4" @click.self="hide">
       <!-- 面板（打磨轮 9）：品牌母题 + 一句副文案打头，字段带 label（不再只靠 placeholder），
            底部一行说明，按钮走与导航登录同款的滚轴 -->
-      <div ref="modalEl" class="sd-pop-in w-full max-w-[360px] rounded-lg border border-border bg-elevated p-6 shadow-e3">
+      <div ref="modalEl" class="sd-pop-in w-full max-w-[360px] rounded-lg border border-border bg-elevated p-6 shadow-[var(--shadow-float)]">
         <div class="mb-5 flex items-start justify-between gap-3">
           <div class="flex items-center gap-2.5">
             <!-- 叠框母题（与 logo/空态同源），两条 rect 各绑主题变量 -->

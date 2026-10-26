@@ -43,14 +43,14 @@ function retry() {
 </template>
 
 <style scoped>
+/* 404 码：方向 C（2026-10-26）去掉渐变文字（渐变在不吸收清单里），
+   改为衬线大字 + 主色——与全站标题同一套语言，靠字号与字距出气势。 */
 .code404 {
-  font-size: 64px;
+  font-family: var(--font-serif);
+  font-size: 96px;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -2px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  letter-spacing: var(--ls-display);
+  color: var(--accent-fg);
 }
 </style>

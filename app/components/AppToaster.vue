@@ -17,7 +17,7 @@ function barClass(kind: string) {
     <div
       v-for="t in toasts"
       :key="t.id"
-      :class="['sd-toast pointer-events-auto flex items-start gap-2.5 border-l-3 border-border bg-elevated p-3 shadow-e3', barClass(t.kind), t.leaving ? 'is-out' : '']"
+      :class="['sd-toast pointer-events-auto flex items-start gap-2.5 border-l-3 border-border bg-elevated p-3 shadow-[var(--shadow-float)]', barClass(t.kind), t.leaving ? 'is-out' : '']"
       role="status"
       :aria-live="t.kind === 'err' ? 'assertive' : 'polite'"
     >

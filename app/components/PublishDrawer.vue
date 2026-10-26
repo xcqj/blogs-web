@@ -38,7 +38,7 @@ useModalA11y({ isOpen: () => props.open, container: () => panelEl.value, onClose
       <div class="absolute inset-0 bg-[var(--scrim)] backdrop-blur-[6px]" @click="emit('close')" />
       <aside
         ref="panelEl"
-        class="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-border bg-elevated shadow-e3"
+        class="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-border bg-elevated shadow-[var(--shadow-float)]"
       >
         <header class="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <h2 class="text-base font-semibold">更多设置</h2>
