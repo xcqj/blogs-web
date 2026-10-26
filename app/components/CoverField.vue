@@ -52,7 +52,8 @@ async function onChange(e: Event) {
       <img :src="modelValue" alt="封面预览" class="aspect-[16/9] w-full object-cover" />
       <button class="sd-act absolute right-2 top-2" @click="emit('update:modelValue', '')">移除</button>
     </div>
-    <div v-else class="cover-drop flex h-30 w-full max-w-md items-center justify-center rounded-md border border-dashed border-border bg-surface text-sm text-muted">
+    <!-- 虚线框位于右栏卡片内部：用 --bg（米白）而非 --surface（纯白），否则与卡片同色、虚线成了唯一线索 -->
+    <div v-else class="cover-drop flex h-30 w-full max-w-md items-center justify-center rounded-md border border-dashed border-border bg-bg text-sm text-muted">
       暂无封面（可选）
     </div>
 

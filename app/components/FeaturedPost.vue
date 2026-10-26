@@ -8,10 +8,17 @@ import type { ArticleSummary } from '~/types/blog'
 const props = defineProps<{ article: ArticleSummary }>()
 // 日期截断后端 "yyyy-MM-dd HH:mm:ss" 前 10 位，避免 SSR 端 Date/locale 差异
 const date = computed(() => (props.article.publishedAt || '').slice(0, 10))
+
+// 整块可点（与 PostRow 同口径）：标题与封面仍是真链接，这里只补鼠标热区
+const router = useRouter()
+function openArticle(e: MouseEvent) {
+  if ((e.target as HTMLElement | null)?.closest('a')) return
+  router.push(`/post/${props.article.articleId}`)
+}
 </script>
 
 <template>
-  <article class="mb-8 border-b border-border pb-8">
+  <article class="mb-8 cursor-pointer border-b border-border pb-8" @click="openArticle">
     <!-- 顶部行：2px 深色顶线是头条的"起版"信号，与全站 1px 细线形成层级差 -->
     <div class="mb-3 flex flex-wrap items-center justify-between gap-3 border-t-2 border-text pt-3">
       <div class="flex flex-wrap items-center gap-2">

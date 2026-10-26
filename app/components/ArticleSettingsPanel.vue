@@ -54,7 +54,8 @@ function fillSummaryFromContent() {
       <p class="mb-2 font-mono text-xs uppercase tracking-[0.08em] text-dim">封面</p>
       <CoverField v-model="coverUrl" :disabled="readOnly" />
       <!-- 自动封面提示：未手动选图时保存会自动取正文首图 -->
-      <div v-if="autoCover" class="mt-2.5 flex items-center gap-2.5 border border-border bg-surface p-2.5">
+      <!-- 同样在卡片内，落回 --bg 与卡片拉开一档 -->
+      <div v-if="autoCover" class="mt-2.5 flex items-center gap-2.5 border border-border bg-bg p-2.5">
         <img :src="autoCover" alt="正文首图" class="h-12 w-16 shrink-0 rounded-sm object-cover" />
         <div class="min-w-0 flex-1">
           <p class="text-xs">未设置封面，保存时将自动取正文首图</p>

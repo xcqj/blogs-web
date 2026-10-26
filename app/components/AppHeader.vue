@@ -34,8 +34,8 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
             v-for="item in nav"
             :key="item.to"
             :to="item.to"
-            class="relative py-1 text-[13px] text-muted transition-colors hover:text-text after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 hover:after:scale-x-100"
-            active-class="!text-text !font-medium after:!scale-x-100"
+            class="border-b-2 border-transparent pb-0.5 text-[13px] text-muted transition-colors hover:border-primary hover:text-text"
+            active-class="!border-primary !text-text !font-medium"
           >
             {{ item.label }}
           </NuxtLink>

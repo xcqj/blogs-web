@@ -21,11 +21,20 @@ const titleHtml = computed(() => props.article.highlight?.title?.[0] ?? null)
 const summaryHtml = computed(
   () => props.article.highlight?.summary?.[0] ?? props.article.highlight?.content?.[0] ?? null
 )
+
+// 整行可点（掘金 / Stitch 同款）：之前只有标题文字是链接，点摘要、作者、行内空白全无反应。
+// 标题/封面/标签本身仍是真 <a>（键盘可达 + 可右键新开），这里只补鼠标热区；
+// 命中 <a> 时直接返回，避免与链接自身导航重复触发。
+const router = useRouter()
+function openArticle(e: MouseEvent) {
+  if ((e.target as HTMLElement | null)?.closest('a')) return
+  router.push(`/post/${props.article.articleId}`)
+}
 </script>
 
 <template>
   <!-- min-h 稳住行高：库里多数文章没有 summary，缺一层文字时行会塌得比有摘要的矮一截 -->
-  <article class="sd-row min-h-[76px] items-center">
+  <article class="sd-row min-h-[76px] cursor-pointer items-center" @click="openArticle">
     <div class="min-w-0 flex-1">
       <h3 class="truncate font-sans text-base font-bold leading-[1.4]">
         <NuxtLink :to="`/post/${article.articleId}`" class="transition-colors hover:text-primary-fg">

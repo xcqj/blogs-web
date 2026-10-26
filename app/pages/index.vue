@@ -105,9 +105,11 @@ useSeoMeta({
         </div>
       </div>
 
-      <!-- 右栏：两张卡（1px 边框 + p-6，Stitch 原样；不加阴影以守 C 版"零阴影"纪律） -->
+      <!-- 右栏：两张卡（1px 边框 + p-6 + --shadow-card 极轻阴影）。
+           阴影不是层级手段，只用来柔化 1px 边框的硬边——Stitch 原稿右侧卡就是 0 1px 3px rgba(17,17,17,.04)，
+           去掉后卡片边界明显更黑更硬（用户 2026-10-27 实拍对比指出）。 -->
       <aside class="flex flex-col gap-8 lg:sticky lg:top-24 lg:col-span-4 lg:mt-6 lg:self-start">
-        <div v-reveal class="rounded-sm border border-border bg-surface p-6">
+        <div v-reveal class="rounded-sm border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
           <div class="mb-4 flex items-center justify-between border-b border-border pb-3">
             <span class="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">TAGS // 标签索引</span>
             <NuxtLink to="/tags" class="font-mono text-[11px] text-primary-fg hover:underline">全部 →</NuxtLink>
@@ -115,15 +117,17 @@ useSeoMeta({
 
           <div class="mb-4">
             <p class="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-dim">热门</p>
+            <!-- 底色是这套设计的关键：卡片用 --surface（纯白），chip 用 --bg（#fcf9f8 米白），
+                 两者差一档，chip 才有可见的浅色底。之前两边都写 bg-surface，chip 只剩一根边框。
+                 宽度用自然宽 + flex-wrap（Stitch 原样），不做网格拉伸。 -->
             <div class="flex flex-wrap gap-2">
               <NuxtLink
-                v-for="t in hot?.slice(0, 8)"
+                v-for="t in hot?.slice(0, 6)"
                 :key="t.tagId"
                 :to="`/tag/${encodeURIComponent(t.slug)}`"
-                class="inline-flex max-w-full items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 py-1 font-mono text-[12px] text-text transition-colors hover:border-border-strong"
+                class="inline-flex max-w-full items-center gap-1.5 rounded-sm border border-border bg-bg px-2.5 py-1 font-mono text-[12px] text-text transition-colors hover:border-border-strong"
               >
-                <!-- 长标签名截断：库里存在"全新标签aaaaaaa"这类长名，不截会把两列排布撑乱 -->
-                <span class="max-w-[7.5rem] truncate">{{ t.name }}</span>
+                <span class="max-w-[7rem] truncate">{{ t.name }}</span>
                 <span class="text-dim" aria-hidden="true">·</span>
                 <span class="text-primary-fg">{{ t.articleCount ?? 0 }}</span>
               </NuxtLink>
@@ -142,7 +146,7 @@ useSeoMeta({
                 v-for="t in featured"
                 :key="t.tagId"
                 :to="`/tag/${encodeURIComponent(t.slug)}`"
-                class="max-w-full truncate rounded-sm border border-border bg-surface px-2 py-0.5 font-mono text-[11px] text-muted transition-colors hover:border-border-strong hover:text-text"
+                class="max-w-full truncate rounded-sm border border-border bg-bg px-2 py-0.5 font-mono text-[11px] text-muted transition-colors hover:border-border-strong hover:text-text"
               >
                 {{ t.name }}
               </NuxtLink>
@@ -151,7 +155,7 @@ useSeoMeta({
           </div>
         </div>
 
-        <div v-reveal="90" class="rounded-sm border border-border bg-surface p-6">
+        <div v-reveal="90" class="rounded-sm border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
           <div class="mb-4 flex items-center justify-between border-b border-border pb-3">
             <span class="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">ABOUT // 关于本站</span>
           </div>
