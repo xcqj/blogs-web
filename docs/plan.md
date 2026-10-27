@@ -507,16 +507,16 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 
 ### P2 立规范（0.5d，代码零改动）
 
-- [ ] T5 建 `design/stitch/README.md`：屏台账 + 落地映射 + **不吸收清单** + **降级规则**（无封面/无标签/文章不足 5 篇）+ 页面状态表
-- [ ] T6 更新 `.impeccable.md`：方向 C 叙述取代"暖纸编辑风"；标注推翻色板/字体/圆角三条，动效与反馈分层仍有效
-- [ ] T7 产出 **token old→new 对照表**（逐项现值→新值，含 `--accent`/`--accent-fg`/`--radius-*`/`--font-*`/`--measure`/`--container`），交用户过目后再动代码
-- [ ] T8 列 `uno.config.ts` shortcut 增废清单：新增（编号锚点 `sd-mark`、数据行 `sd-row`、衬线标题 `sd-serif` 等）/ 废弃（`sd-eyebrow` 等待判）
+- [x] T5 建 `design/stitch/README.md`：屏台账（3 屏真实 id）+ 落地映射 + **不吸收清单** + **降级规则** + 页面状态表；另加 §0 核心前提（Stitch 页面与本站数据/功能不一一对应）、§4.1 冻结规格表、§4.2 响应式九档、§4.3 token 对照、§5.1 详情页版式依据、跨屏冲突裁决顺序
+- [x] T6 更新 `.impeccable.md`（2026-10-27 全量重写）：方向 C 美学定义取代"暖纸编辑风"；六条设计原则（新增"面层级必须差一档"并记录 Stitch 命名撞车）；四条硬约束（字体/阴影/响应式/Stitch 纪律）；末尾「已推翻的旧规则」表
+- [x] T7 产出 **token old→new 对照表**（台账 §4.3）：色板 25 项 / 字体字号 15 项 / 圆角间距阴影 / shortcut 增废 / 破坏面 grep 清单，经用户过目后才动 `tokens.css`
+- [x] T8 列 `uno.config.ts` shortcut 增废清单（台账 §4.3.4）：实际新增 `sd-serif`/`sd-mark`/`sd-row`/`sd-meta`；`sd-chip` 去胶囊改 3px 小标签；`--cta*` 未删而是重定向到 `--accent`（6 处调用点保留，避免 P3 阶段按钮变透明）
 
 ### P3 换地基（1.5~2d，唯一一次全站同时变样）
 
-- [ ] T9 `tokens.css` 重建：冷米白/靛蓝双主题、圆角统一 3px、阴影近乎取消、新增 `--font-serif`；深色 `--accent` 必须提亮（`#1A4D8F` 在 `#131415` 上仅约 2.1:1，不可用）
+- [x] T9 `tokens.css` 重建（commit `9183a63`）：冷米白 `#FCF9F8` / 深 `#131415`；靛蓝浅 `#1A4D8F`、深提亮 `#6E9BE0`（原色在近黑上仅约 2.1:1）；圆角全 3px；`--e1~--e3` 归零，仅保留 `--shadow-float`（浮层）与 `--shadow-card`（柔化卡片硬边）两档例外；新增 `--font-serif`；深色 `--accent-ink` 改深字 `#0F1215`（白字仅 2.8:1）；补 `*,*::before,*::after{border-width:0;border-style:solid}` —— **修复 preflight 未注入导致全站 border 从不渲染的长期根因**
 - [x] T10 **Noto Serif SC 引入（方案 A，2026-10-26 实测定案）**：`npm i @fontsource/noto-serif-sc`，只 `import '@fontsource/noto-serif-sc/700.css'`——101 个 `unicode-range` 分片（合计 3.1MB，单片 1.5–54KB），浏览器按需下载，**实测典型首屏命中 11 片约 420KB**；`font-display: swap` 由包内 CSS 提供；**不做 preload**（无法预知命中分片）；不采用 1.5MB 全量单文件入口（`chinese-simplified-700.css`）。使用范围收敛到 **H1 级标题**（hero / 文章大标题 / 头条 / 正文 H2），列表行 18px 标题不用衬线（既省流量也更好读）。**验收线由 ≤100KB 修正为 ≤500KB**（100KB 对中文衬线不可达，实测数据见台账 §4.3.2）；禁走 Google Fonts CDN
-- [ ] T11 `uno.config.ts` 按 T8 清单重建（新增/废弃/别名映射），`safelist` 复核
+- [x] T11 `uno.config.ts` 按 T8 清单重建（同 commit `9183a63`）：新增 `sd-serif`/`sd-mark`/`sd-row`/`sd-meta`；`sd-card` 去阴影、`card-hover` 去上浮只加深边框、`sd-chip` 去胶囊、`btn` 高 38→40 且过渡去 `box-shadow`；`fontFamily` 补 `serif` 映射
 - [x] T12 `Sd*` 基础件随 shortcut 自动生效（btn 高 40 + 加深描边形态、sd-card 去阴影、sd-chip 去胶囊、sd-input/sd-search 高 40）；**未改组件模板**，只改 tokens + uno，改完 grep 过全部复用点
 - [x] T13 **全站回归完成（2026-10-27）**：`contrast.mjs` 由 16 项扩到 **18 项**并重算——换新色板后首跑挂 2 项（深色 meta `#767c84` 仅 4.05:1、浅色 `#8b949e` 仅 3.1:1），修正为 `#8a9099` / `#667080` 后全过；`shot.mjs` **44 张退出码 0、无 console error / 5xx**（生产构建 :3100）；四视口（1440/390 × 深浅）看图复核，查出一处规格不符并修复（移动端头条图丢失，见 T15）；Lighthouse desktop = **Performance 95 / A11y 100 / BP 100 / SEO 100**，FCP 1.0s、LCP 1.3s、TBT 0ms、CLS 0.007、首屏字体 6 片 **213KB**。**相对 S17 全 100 掉 5 分**，主因 total-byte-weight（5.86MB，几乎全是 OSS 未裁剪的封面原图）与 entry.css 内含 101 条 `@font-face`（分片方案固有成本）；图片优化归内容层（OSS resize 参数），字体方案不改
 
@@ -539,7 +539,8 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 
 ### P5 plus-ui 小改（0.5d，独立仓独立 commit）
 
-- [ ] T22 `login.vue` / `index.vue` 借版式思路小改（**不套 blog-web token**），验证码链路与 SocialCallback 路由不动；`vue-tsc` 0 错 + 登录 E2E 复测
+- [x] T22 **缩水完成（2026-10-27 用户拍板：后台首页不再改，就这样）**：仅移除 `login.vue` 的第三方登录入口——微信/maxkey/topiam/Gitee/GitHub 五个圆形按钮、`doSocialLogin()`、两个只为它存在的 import（`authRouterUrl`/`HttpStatus`）、三段 CSS 及媒体查询两段；保留 `api/system/social/auth.ts` 与 i18n 的 `login.social.*`（删 locale 易牵连，收益为零）。`index.vue` **不改**。
+  **未执行**：`vue-tsc` 类型检查与登录 E2E 复测——本次为纯删除、未触及验证码链路与 SocialCallback 路由；已做 `oxlint`（0 警告 0 错误 / 251 文件）与 `vite build`（成功）
 
 ### 每片完成定义
 
