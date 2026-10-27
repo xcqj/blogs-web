@@ -519,6 +519,8 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] T11 `uno.config.ts` 按 T8 清单重建（同 commit `9183a63`）：新增 `sd-serif`/`sd-mark`/`sd-row`/`sd-meta`；`sd-card` 去阴影、`card-hover` 去上浮只加深边框、`sd-chip` 去胶囊、`btn` 高 38→40 且过渡去 `box-shadow`；`fontFamily` 补 `serif` 映射
 - [x] T12 `Sd*` 基础件随 shortcut 自动生效（btn 高 40 + 加深描边形态、sd-card 去阴影、sd-chip 去胶囊、sd-input/sd-search 高 40）；**未改组件模板**，只改 tokens + uno，改完 grep 过全部复用点
 - [x] T13 **全站回归完成（2026-10-27）**：`contrast.mjs` 由 16 项扩到 **18 项**并重算——换新色板后首跑挂 2 项（深色 meta `#767c84` 仅 4.05:1、浅色 `#8b949e` 仅 3.1:1），修正为 `#8a9099` / `#667080` 后全过；`shot.mjs` **44 张退出码 0、无 console error / 5xx**（生产构建 :3100）；四视口（1440/390 × 深浅）看图复核，查出一处规格不符并修复（移动端头条图丢失，见 T15）；Lighthouse desktop = **Performance 95 / A11y 100 / BP 100 / SEO 100**，FCP 1.0s、LCP 1.3s、TBT 0ms、CLS 0.007、首屏字体 6 片 **213KB**。**相对 S17 全 100 掉 5 分**，主因 total-byte-weight（5.86MB，几乎全是 OSS 未裁剪的封面原图）与 entry.css 内含 101 条 `@font-face`（分片方案固有成本）；图片优化归内容层（OSS resize 参数），字体方案不改
+  - **Lighthouse 在本机有显著抖动**（2026-10-27 同版本连跑三次：Perf 64 / 64 / 93，TBT 0~1190ms、LCP 1.4~3.7s、长任务 199~1561ms），稳定值 **Perf 93~95**。**单次低分不得当作回归结论**，须连跑 2~3 次取稳定值；跑之前先确保没有并行 build / 截图进程
+  - **跑法**：`chrome --headless=new --remote-debugging-port=9222 --user-data-dir=... ` 手动起浏览器，再 `lighthouse <url> --port=9222`。直接 `npx lighthouse <url>` 会失败——`chrome-launcher` 在本机误判为 Windows，拼出 `undefined:/Users/undefined/AppData/...` 的临时目录，报 "Unable to create temp directory"
 
 ### P4 逐页重排（4~5d，一页一 commit）
 
