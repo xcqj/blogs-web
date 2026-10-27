@@ -91,7 +91,11 @@
 
 - [x] 我的文章列表：`GET /blog/article/my`（status/visibility/keyword + 分页），行内动作 发布/hide/show/delete（2026-10-08 S12-1：`/me` 5 个状态 tab + pageSize=1 并发取计数 + 数字分页 + 骨架/空/错误态；动作可见性严格按契约状态机与 D13，ADMIN_HIDDEN 编辑禁用仅可删；删除两步确认不用 window.confirm）
 - [x] 新建/编辑页：`POST /blog/article`（草稿）/ `PUT /blog/article/{id}`；**编辑器 WangEditor `@wangeditor-next/editor` + `@wangeditor-next/editor-for-vue` 6.4.1**（与 plus-ui 同版本，无格式分叉），`<ClientOnly>` + 路由 `ssr:false` 按需加载（实测 WangEditor 独立 chunk 661KB，不进读者首屏 bundle），产出 HTML（后端 jsoup 净化），**不上 Markdown**；字段按 §2.8 锁定：**无 slug、无定时发布**。（2026-10-08 S12-2：`/me/new` + `/me/{id}/edit` 共用 `ArticleForm`；新建后自动转编辑路由避免重复创建；保存与发布为两个动作）
-- [x] 封面/正文传图：复用 `/resource/oss/upload`（契约 §2.4）经 Nitro 代理（`server/api/resource/oss/upload.post.ts`），前端不碰 token/clientid。
+- [x] 封面/正文传图：经 Nitro 代理（`server/api/resource/oss/upload.post.ts`），前端不碰 token/clientid。
+  **2026-10-27（D42）改指向 `/blog/oss/upload`**：原先转发 RuoYi 的 `/resource/oss/upload`，该接口要
+  `@SaCheckPermission("system:oss:upload")`，而注册流程不分配角色（`SysRegisterService` 只建用户），
+  博客用户默认零权限 → 封面与正文插图一律 403「没有访问权限，请联系管理员授权」。博客域接口只要求登录，
+  与契约 §2.4「身份：登录用户」一致。浏览器端路径 `/api/resource/oss/upload` 不变，组件零改动。
   **图片 URL 策略已定（D31，2026-10-08）**：正文与封面均**存后端返回的真实访问 URL**，不写 `oss://{ossId}` 标记。
   依据（均为代码实测）：① `SysOssServiceImpl.matchingUrl()` L324-331 **仅当桶为 PRIVATE(0)** 时才换成 `presignGetUrl(..., Duration.ofSeconds(120))`，即过期时长 **120s 且硬编码**；当前 `sys_oss_config.access_policy` 全为 `1`（枚举 0=PRIVATE/1=PUBLIC_READ_WRITE/2=PUBLIC_READ）→ **不签名、不过期**；② `SdBlogArticleServiceImpl.validateCoverUrl()` L275-278 只允许 `/`、`http(s)://` → **封面字段本就不允许存 oss://**（改标记方案需连后端校验一起改）；③ 解析标记的 `/resource/oss/listByIds` 需登录，匿名读者无法解析（即 S10 备案遗留项）。
   **生产约定制**：桶策略用 **公有读(2) + CDN 域名**（博客图片本就公开），并把当前的 `1 公有读写` 收紧为 `2 公有读`（写入仍走后端 SDK 凭据）。
@@ -142,7 +146,7 @@
 用户反馈“基本功能大都在，但样式细节与交互挺糟糕”，四个决策点已拍板（均为用户选定，非默认推断）：
 
 - [x] **列表容器：保持卡片风格仅微调**（不改成掘金式流式行）——`sd-card` 边框/圆角/`card-hover` 全部保留；commit `4aae3e6`：缩略图放大到 `w-40 h-28`（160×112，10:7，仍在左侧、窄屏隐藏、无图不预留空位）、摘要截 1 行、标签不再单独占行而是并入元信息行右端。
-- [x] **自动封面（A 方案，零后端）**：`app/utils/firstImage.ts` 用 `DOMParser` 取正文首个 `<img src>`，仅接受 `/` 与 `http(s)://`（与后端 `validateCoverUrl` 白名单一致，跳过 `data:`/`blob:`/`oss:`）；`coverUrl` 为空时回填，手动选图优先。commit `0b8554c`。已知语义：**存的是快照**，日后删掉正文那张图封面不会自动消失（可手动改）。
+- [x] **自动封面（A 方案，零后端）**：`app/utils/firstImage.ts` 用 `DOMParser` 取正文首个 `<img src>`，仅接受 `/` 与 `http(s)://`（与后端 `validateCoverUrl` 白名单一致，跳过 `data:`/`blob:`/`oss:`）；`coverUrl` 为空时回填，手动选图优先。commit `0b8554c`。**两条已知语义**：① **存的是快照**——日后删掉正文那张图，封面不会自动消失（可手动改）；② **详情页重复显示同一张图**（2026-10-27 用户实拍发现）——封面被回填成正文首图后，`post/[slug].vue` 的顶部封面与正文首图是同一张，读者会连着看到两次。修复：详情页用 `showCover` 判断「封面地址是否已作为 `<img>` 出现在本篇正文 HTML 里」（纯正则、SSR 安全、URL 元字符已转义），命中则跳过顶部封面；手动选的、正文里没有的封面照常显示。**注意判据是"是否出现在本篇正文"，与"是不是网络 URL"无关**，不会导致所有封面都不显示。
 - [x] **发文/编辑页改渐进披露**：commit `ac2f9f1`。主区只留 标题 / 标签 / 正文（单栏 `max-w-4xl`）；摘要、封面（两个可选字段）+ 历史版本收进 `PublishDrawer` 右侧抽屉；顶栏改吸顶操作条（`sticky top-16` 贴 AppHeader 下沿，z-20 低于顶栏 z-40）；新增「从正文生成」摘要与自动封面提示；内容快照比对做未保存提醒（**不做自动保存**，避免误写库）。
   - ❗ **为何标签不能像掘金那样收到发布时再填**：后端 `SdBlogArticleServiceImpl.validateTagCount()`（L572-573）在 `createDraft`(L84) 与 `update`(L124) 都会跑，**草稿也必须 1~6 个标签**，故标签留在写作主区。
 - [x] **复验三修正**：commit `5131fa6`。① 摘要截断由 `line-clamp-1` 改 `truncate`（产物 CSS 正确写了 `display:-webkit-box`，但新版 Chromium 已支持标准 `line-clamp`，`getComputedStyle().display` 报 **flow-root**、省略号是否出现随内核漂移），并补 `min-h-7` 预留行高（空 `<p>` 不生成 line box 高度为 0，导致列表实测 151.9/128.8/105 三种行高）；② `PublishDrawer` 补 ESC 关闭 + 背景滚动锁；③ `LoginModal` 同类缺失一并补齐。

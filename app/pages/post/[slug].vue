@@ -36,6 +36,19 @@ if (error.value || !article.value) {
 
 const version = computed(() => article.value!.currentVersion)
 const displayDate = computed(() => (article.value?.publishedAt || '').slice(0, 10))
+
+// 封面去重：未手选封面时保存会自动回填正文首图（plan.md §2.8「自动封面 A 方案」），
+// 于是详情页「顶部封面 + 正文首图」会把同一张图显示两次。
+// 判据 = 该封面地址是否已作为 <img> 出现在**本篇**正文 HTML 里（纯正则，SSR 安全，不用 DOMParser）；
+// 手动选的、正文里没有的封面照常显示。注意与"是不是网络 URL"无关。
+const showCover = computed(() => {
+  const cover = version.value?.coverUrl
+  if (!cover) return false
+  const html = version.value?.content || ''
+  // URL 里的正则元字符要转义，否则 . ? 等会被当成通配
+  const escaped = cover.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return !new RegExp(`<img[^>]+src=["']${escaped}["']`).test(html)
+})
 // 阅读进度条（M10）：长文刚需，给读者“还剩多少”的位置感。
 // 与顶栏联动（M11 修复）：窄屏顶栏下滑隐藏时进度条随之一并收起，不孤悬在 top-16
 // （桌面不受影响：CSS 媒体查询限制，同 .site-header 口径）。
@@ -121,10 +134,11 @@ useHead({
       </div>
     </header>
 
-    <!-- 封面：16:9 + 3px 圆角、无边框（C 版不给照片加框），轻微去饱和/深色压暗走 --thumb-filter -->
+    <!-- 封面：16:9 + 3px 圆角、无边框（C 版不给照片加框），轻微去饱和/深色压暗走 --thumb-filter。
+         v-if 用 showCover 而非直接判 coverUrl：自动回填的封面就是正文首图，重复渲染没有意义 -->
     <img
-      v-if="version?.coverUrl"
-      :src="version.coverUrl"
+      v-if="showCover"
+      :src="version?.coverUrl"
       :alt="version?.title"
       class="mt-6 aspect-[16/9] w-full rounded-md object-cover [filter:var(--thumb-filter)]"
     />
