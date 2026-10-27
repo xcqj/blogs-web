@@ -205,6 +205,23 @@ ROADMAP v0.4 S20 切片（D38 动效收缩后**仅保留 Lenis**；hero 视差 /
 - 验证：`npm run build` 绿；无头 Chrome 冒烟全 PASS（lenis class、wheel 平滑渐进曲线、reduce 下回退原生滚动、SW 注册态无冲突、三视口零 console error）。
 - ✅ 人工验收通过（2026-10-15）：桌面滚轮/触控板手感、移动端真机跟手、系统减少动态效果切换实测、PWA 安装态叠加，均确认无问题。
 
+## 演示数据生成器（不参与构建）
+
+`tooling/gen-demo-seed.mjs` 生成后端仓的演示数据 SQL。它复用本仓 `app/utils/highlight.ts` 跑一遍
+shiki，让种子文章的代码块自带真实高亮——这也是为什么不能只维护 SQL：`tok-*` 是高亮库算出来的哈希。
+
+```bash
+node tooling/gen-demo-seed.mjs          # 重新生成 seed-min.sql / seed-demo.sql
+node tooling/gen-demo-seed.mjs --check  # 只打印规模，不写文件
+```
+
+| 文件 | 内容 |
+|---|---|
+| `tooling/seed/data-min.mjs` | 8 篇，覆盖有/无封面、有/无代码块、多/单标签、四种状态 |
+| `tooling/seed/data-demo.mjs` | 44 篇扩展，与 min 合并成 52 篇 |
+
+产物落在 `../RuoYi-Vue-Plus/script/sql/seed/`；装载与清理见后端仓 `README.md` 的「演示数据」一节。
+
 ## 视觉基线截图（本地验证工具，不参与构建）
 
 `tooling/shot/` 是一个**独立小包**：不写进主 `package.json`、不进 `dependencies`、不进 Docker 镜像。
