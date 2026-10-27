@@ -32,7 +32,9 @@ function openArticle(e: MouseEvent) {
       <span class="font-mono text-[11px] tracking-wider text-dim">{{ date }}</span>
     </div>
 
-    <div class="flex items-center justify-between gap-8">
+    <!-- 栅格：≥768 文字左/图右；<768 纵向且**图在上**（flex-col-reverse 让 DOM 顺序保持
+         「文字→图」，窄屏反转成「图→文字」，md 回到 row 时又恢复文字左）——台账 §4.2 -->
+    <div class="flex flex-col-reverse gap-6 md:flex-row md:items-center md:justify-between md:gap-8">
       <div class="flex min-h-[190px] min-w-0 flex-1 flex-col justify-center">
         <h2 class="mb-3 line-clamp-2 font-serif text-2xl font-bold leading-[1.15] tracking-[var(--ls-h1)] md:text-[3rem]">
           <NuxtLink :to="`/post/${article.articleId}`" class="transition-colors hover:text-primary-fg">
@@ -55,7 +57,7 @@ function openArticle(e: MouseEvent) {
       <NuxtLink
         v-if="article.coverUrl"
         :to="`/post/${article.articleId}`"
-        class="hidden h-[146px] w-[260px] shrink-0 overflow-hidden border border-border sm:block"
+        class="block w-full shrink-0 overflow-hidden rounded-sm border border-border aspect-video md:aspect-auto md:h-[146px] md:w-[260px]"
       >
         <img
           :src="article.coverUrl"
