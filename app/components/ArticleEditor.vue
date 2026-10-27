@@ -38,6 +38,9 @@ watch(
 watch(valueHtml, (v) => emit('update:modelValue', v));
 
 const ALLOWED = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+// 压缩前的硬上限：只为挡住会噎住浏览器的超大文件。业务上限（maxImageMb）在压缩之后再查——
+// 否则 8MB 的截图会在压缩前就被误拒。
+const HARD_LIMIT_MB = 20;
 
 async function uploadToOss(file: File): Promise<OssUploadResult> {
   const fd = new FormData();
@@ -63,13 +66,21 @@ const editorConfig = computed<Partial<IEditorConfig>>(() => ({
           uploadError.value = `不支持的图片格式：${file.type || '未知'}`;
           return;
         }
-        if (file.size / 1024 / 1024 > props.maxImageMb) {
-          uploadError.value = `图片大小不能超过 ${props.maxImageMb} MB`;
+        // 硬上限挡超大文件；业务上限在压缩后再查（S27：8MB 截图压到 200KB 后应能通过）
+        if (file.size / 1024 / 1024 > HARD_LIMIT_MB) {
+          uploadError.value = `图片过大（上限 ${HARD_LIMIT_MB} MB），请先裁剪`;
           return;
         }
         try {
-          const res = await uploadToOss(file);
-          insertFn(res.url, file.name, res.url);
+          const payload = await compressImage(file);
+          if (payload.size / 1024 / 1024 > props.maxImageMb) {
+            const mb = (payload.size / 1024 / 1024).toFixed(1);
+            uploadError.value = `图片大小不能超过 ${props.maxImageMb} MB（压缩后仍为 ${mb} MB）`;
+            return;
+          }
+          const res = await uploadToOss(payload);
+          // alt 用压缩后的文件名（扩展名可能已由 png/webp 变为 jpg）
+          insertFn(res.url, payload.name, res.url);
         } catch (e: any) {
           uploadError.value = apiErrorText(e, '图片上传失败');
         }

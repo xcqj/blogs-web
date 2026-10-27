@@ -10,6 +10,9 @@ const props = withDefaults(defineProps<{ modelValue?: string; maxSizeMb?: number
 const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>();
 
 const ALLOWED = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+// 压缩前的硬上限：只为挡住会噎住浏览器的超大文件。业务上限（maxSizeMb）在压缩之后再查——
+// 否则 8MB 的截图会在压缩前就被误拒。
+const HARD_LIMIT_MB = 20;
 const fileInput = ref<HTMLInputElement>();
 const uploading = ref(false);
 const error = ref('');
@@ -28,14 +31,21 @@ async function onChange(e: Event) {
     error.value = `不支持的图片格式：${file.type || '未知'}`;
     return;
   }
-  if (file.size / 1024 / 1024 > props.maxSizeMb) {
-    error.value = `封面大小不能超过 ${props.maxSizeMb} MB`;
+  if (file.size / 1024 / 1024 > HARD_LIMIT_MB) {
+    error.value = `图片过大（上限 ${HARD_LIMIT_MB} MB），请先裁剪`;
     return;
   }
   uploading.value = true;
   try {
+    // 先压缩再查业务上限（S27）：压缩失败会回落原文件，绝不阻断上传
+    const payload = await compressImage(file);
+    if (payload.size / 1024 / 1024 > props.maxSizeMb) {
+      const mb = (payload.size / 1024 / 1024).toFixed(1);
+      error.value = `封面大小不能超过 ${props.maxSizeMb} MB（压缩后仍为 ${mb} MB）`;
+      return;
+    }
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append('file', payload);
     const res = await $fetch<OssUploadResult>('/api/resource/oss/upload', { method: 'POST', body: fd });
     emit('update:modelValue', res.url);
   } catch (err: any) {

@@ -25,6 +25,7 @@ const year = new Date().getFullYear()
         <NuxtLink to="/" class="font-semibold text-text transition-colors hover:text-primary-fg">首页</NuxtLink>
         <NuxtLink to="/tags" class="text-muted transition-colors hover:text-text">标签</NuxtLink>
         <NuxtLink to="/search" class="text-muted transition-colors hover:text-text">搜索</NuxtLink>
+        <NuxtLink to="/about" class="text-muted transition-colors hover:text-text">关于</NuxtLink>
       </nav>
     </div>
   </footer>

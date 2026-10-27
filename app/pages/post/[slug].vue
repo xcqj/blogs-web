@@ -2,6 +2,7 @@
 // /post/{slug} —— 文章详情（design/article.html 版式，桶A 第6点）。契约 §1.4：slug 承载 articleId。
 // §5.2 详情 + §10.1 评论列表 SSR；发表评论 §10.2 走 CSR。TOC/上一篇下一篇未做：契约无对应接口且本步未列，需要时先补后端。
 import type { ArticleDetail, Comment, PageResult } from '~/types/blog'
+import { buildToc } from '~/utils/toc'
 
 const route = useRoute()
 const articleId = computed(() => String(route.params.slug || ''))
@@ -49,6 +50,12 @@ const showCover = computed(() => {
   const escaped = cover.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return !new RegExp(`<img[^>]+src=["']${escaped}["']`).test(html)
 })
+
+// 文章目录（S27）：从正文 HTML 解析 h2/h3 并注入 sec-N 锚点。
+// 纯函数、SSR 安全——不能用 DOMParser（服务端没有），也不能等 hydration 后扫 DOM
+// （那会让首屏无目录、锚点不存在于 SSR 输出，影响分享与爬虫）。
+const toc = computed(() => buildToc(version.value?.content || ''))
+const showToc = computed(() => toc.value.items.length >= 2)
 // 阅读进度条（M10）：长文刚需，给读者“还剩多少”的位置感。
 // 与顶栏联动（M11 修复）：窄屏顶栏下滑隐藏时进度条随之一并收起，不孤悬在 top-16
 // （桌面不受影响：CSS 媒体查询限制，同 .site-header 口径）。
@@ -96,7 +103,11 @@ useHead({
 
 <template>
   <div v-if="article">
-    <article class="sd-measure mx-auto">
+    <!-- 双栏（lg 起）：正文 700 + 目录 200 整体居中，两侧留白相等。
+         用 flex 而非 grid：grid 的 1fr 会让正文在自己的列内居中，整体重心偏左、目录贴右边。
+         窄屏不加 flex，正文仍由 mx-auto 居中，与原来的单栏完全一致。 -->
+    <div :class="showToc ? 'lg:flex lg:justify-center lg:gap-16' : ''">
+    <article class="sd-measure mx-auto lg:mx-0">
     <!-- 阅读进度：包裹层负责随顶栏隐藏一起收起（is-hidden 由 hideHeader 驱动，
          内层 read-progress 专职 scaleX，两者 transform 不冲突） -->
     <div class="read-progress-wrap fixed left-0 top-16 z-40 w-full" :class="{ 'is-hidden': hideHeader }">
@@ -143,8 +154,12 @@ useHead({
       class="mt-6 aspect-[16/9] w-full rounded-md object-cover [filter:var(--thumb-filter)]"
     />
 
-    <!-- 正文：后端已净化 HTML → v-html + prose（prose.css 走 token，限宽 66ch / 18px / 1.75） -->
-    <div class="prose mt-8" v-html="version?.content" />
+    <!-- 窄屏目录：<lg 折叠在正文前；宽屏由右侧 aside 承担 -->
+    <ArticleToc v-if="showToc" :items="toc.items" variant="inline" class="lg:hidden" />
+
+    <!-- 正文：用 buildToc 注入锚点后的 HTML。
+         v-html 不能在客户端改 DOM 属性，锚点必须在 SSR 阶段就存在，否则水合会不一致 -->
+    <div class="prose mt-8" v-html="toc.html" />
 
     <!-- 评论区：§10.1 列表 + §10.2 发表（CSR）；标签已在 meta 条出现，不再重复一份 -->
     <section class="mt-10 border-t border-border pt-8">
@@ -162,6 +177,15 @@ useHead({
       <CommentForm :article-id="articleId" @posted="refreshComments" />
     </section>
     </article>
+
+    <!-- 宽屏目录：sticky 吸顶（top-24 避开固定顶栏） -->
+    <aside v-if="showToc" class="hidden w-[200px] shrink-0 lg:block">
+      <div class="sticky top-24">
+        <ArticleToc :items="toc.items" />
+      </div>
+    </aside>
+    </div><!-- /双栏 -->
+
     <!-- 收尾 CTA band：置于 68ch 窄栏之外，全宽呈现（读者→作者转化入口） -->
     <CtaBand class="mt-12" />
   </div>

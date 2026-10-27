@@ -634,4 +634,40 @@ tooling/shot/shot.mjs 退出码 0（桌面 1440 + 移动 390）
 - [x] T31 回归：`npm run build` 绿（9.71s）；`shot.mjs` **44 张退出码 0、无 console error / 5xx**（生产构建 :3100）；`contrast.mjs` **18/18 全过**；双主题着色用 Playwright 实测 PASS（见 T28 门禁）。
   **注意**：历史文章正文没有 tok span，截图里的代码块仍是纯文本——高亮需要作者重新保存一次才生效（已接受的边界）。
 
+## 2.23 S27 阅读体验三项（TOC / 图片压缩 / 关于页，2026-10-28 实施）
+
+> 状态权威在 ROADMAP §2/§3 S27。三项互相独立，**均不依赖后端契约**，零后端改动。
+
+**三条红线**
+
+1. TOC 必须是 **SSR 可渲染的纯函数**——不能等 hydration 后扫 DOM（首屏无目录、锚点不在 SSR 输出、水合不一致）。
+2. 图片压缩**绝不阻断上传**——GIF/SVG 跳过、压缩后更大用原图、任何异常回落原文件。
+3. 校验顺序必须是「硬上限 → 压缩 → 业务上限」，反了会让大图在压缩前就被误拒。
+
+### T1 文章目录
+
+- [x] `app/utils/toc.ts` 的 `buildToc(html)`：正则扫 `h2`/`h3` → `{ html, items }`。锚点用**序号** `sec-N`（中文 slug 化不可读、重复标题会撞 id）；剥标签取纯文本并解码 HTML 实体；空标题跳过；已带 `id` 的标题跳过注入并纳入目录，新 id 会避开已占用的编号（**幂等**，二次调用结果完全相同）。
+- [x] `app/components/ArticleToc.vue`：`variant='aside'`（宽屏 sticky，`top-24` 避开固定顶栏）与 `'inline'`（窄屏 `<details>` 折叠）共用同一份列表；当前小节高亮走 `IntersectionObserver`（`rootMargin: '-80px 0px -70% 0px'`，只在 `onMounted` 里注册）。
+- [x] 详情页改双栏：`lg:flex lg:justify-center lg:gap-16`。**用 flex 不用 grid**——grid 的 `1fr` 会让正文在自己那一列内 `mx-auto`，整体重心偏左、目录贴右；flex 让「正文 756 + 目录 200」整体居中，两侧留白各 76px。
+- [x] 正文 `v-html` 改用 `toc.html`（注入锚点后的版本）；`showCover` 仍读原始 `version.content`，两者互不影响。
+- [x] 标题数 < 2 时不渲染目录（一个标题出目录没有意义，还占右侧空间）。
+
+### T2 上传前图片压缩
+
+- [x] `app/utils/imageCompress.ts`：长边 1600 / q0.85。GIF（canvas 只取首帧会毁动图）与 SVG（矢量无需压）**原样返回**；PNG 缩放后仍导出 PNG（转 JPEG 会把透明区变黑）；尺寸与体积都已达标时不重编码（二次编码掉画质且常变大）；压缩结果 ≥ 原体积、或任何异常，一律回落原文件。
+- [x] 接入 `CoverField.onChange` 与 `ArticleEditor.customUpload`；两处校验顺序统一改为「硬上限 20MB → 压缩 → 业务上限（maxSizeMb / maxImageMb）」，压缩失败的提示里带上压缩后的实际体积。
+- [x] `ArticleEditor` 的 `insertFn` alt 改用压缩后的文件名（扩展名可能已由 png/webp 变为 jpg）。
+
+### T3 关于页
+
+- [x] `app/pages/about.vue`：`06 // ABOUT` + 衬线 h1「关于本站」+ `.prose` 五块（这个站在做什么 / 谁在写 / 写了什么 / 怎么做的 / 联系与订阅）。整页 `sd-measure mx-auto` 居中——文字型页面若左对齐于 1180 容器，行长过长且右侧空一大块。
+- [x] 导航：`AppHeader.navItems` 与 `AppFooter` 各加一条「关于」。
+- [x] 内容写成**长期成立的事实**，不放「最近在做什么」这类会过期的表述；不放个人身份信息。
+
+### 回归
+
+- [x] `shot.mjs` 页面清单加入 `about` → **50 张退出码 0、无 console error / 5xx**（生产构建 :3100）。
+- [x] `contrast.mjs` **18/18 全过**。
+- [x] 实测：详情页 SSR 输出含 `id="sec-1..5"`（锚点在服务端就存在）；1440 宽屏 aside TOC 可见且 5 条、`<details>` 隐藏；390 窄屏 aside 隐藏、折叠面板可见；`/about` 200 且标题正确。
+
 

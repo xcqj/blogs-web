@@ -10,7 +10,8 @@ const route = useRoute()
 const nav = [
   { label: '首页', to: '/' },
   { label: '标签', to: '/tags' },
-  { label: '搜索', to: '/search' }
+  { label: '搜索', to: '/search' },
+  { label: '关于', to: '/about' }
 ]
 
 const menuOpen = ref(false)

@@ -55,6 +55,8 @@ const PAGES = {
   home: { path: '/', full: true },
   post: { path: '', full: true },
   tags: { path: '/tags', full: true },
+  // S27：关于页（文字型内容页，版式与 tags 同族）
+  about: { path: '/about', full: true },
   search: { path: '/search?q=blog', full: true },
   user: { path: '', full: true },
   me: { path: '/me', full: true },
