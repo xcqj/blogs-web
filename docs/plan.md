@@ -64,6 +64,10 @@
 
 - [x] `nuxt.config` 设 `nitro.output: 'node-server'` + blog-web `Dockerfile`。（2026-10-07 M4：`nitro.preset: 'node-server'`，产物 nitro.json 已确认；多阶段 Dockerfile + `.dockerignore` 排除 .env/node_modules/design；`node .output/server/index.mjs` 可直接跑）
 - [x] `RuoYi-Vue-Plus/script/docker/docker-compose` 新增 blog-web 服务 + `docs/architecture.md` 部署图同步（后端仓库仅 infra/文档，**零后端代码改动**）。（2026-10-07 M4：`web` 服务用 `profiles: ["web"]` 门控，默认 `up -d` 仍只三件套（已用 `compose config --services` 双验）；`NUXT_API_BASE` 走 host.docker.internal:8081，密钥经 env 透传不入库）
+  **⚠️ 2026-10-28（S25）起本节描述已变**：新增生产形态 `docker-compose.yml`（7 服务全起）；
+  dev 形态默认只起**四个**中间件（多了 es），后端/前台/后台移入 `app` profile；
+  `NUXT_API_BASE` 改为容器间服务名 `http://backend:8081`，不再用 `host.docker.internal`。
+  详见后端仓 `README.md` 与 `docs/ROADMAP.md` S25。
 
 ### 2.5 验收（对应 ROADMAP S9"验收"项，D27/D28）
 
