@@ -597,7 +597,10 @@ tooling/shot/shot.mjs 退出码 0（桌面 1440 + 移动 390）
 
 ### P2 前端高亮管线（0.7d）
 
-- [ ] T26-a **换行规范化（必须先做，独立于高亮）**：代码块内换行入库统一用 `\n`——保存前把 `<code>` 里的 `<br>` 替换成 `\n` 再重建内容（`textContent` 不含 `<br>` 的换行，必须先做字符串替换再取文本）；读者站靠 `prose` 的 `white-space: pre` 天然渲染 `\n`。这样「编辑器 ↔ 库」往返不再压平多行代码（T25 实测的既有缺陷）
+- [x] T26-a **换行规范化（2026-10-27 完成，commit `488c12e`）**：新增 `app/utils/codeBlock.ts` 的 `normalizeCodeNewlines()`——保存前把 `<pre>` 内的 `<br>`/`<BR>`/`<br/>` 统一转 `\n`（只处理 pre 内部，段落里的手动换行原样保留），`ArticleForm.payload()` 应用；`prose.css` 的 `.prose pre` 补 `white-space: pre`。
+  **顺带查明第二个既有缺陷**：`.prose pre` 之前是默认 `white-space: normal`，`\n` 被渲染成空格 → 库里存 `\n` 的代码块其实一直显示为「挤在一行」，这才是"代码块只有一个空框"的真正原因（不是没内容）。
+  验证：单测 5 例全对（单块 / 段落 br 保留 / 多个 pre / 无 pre / 带属性 + `<BR>` 大小写）；生产构建实测 computed `white-space = pre`、某文章 `innerText` 行数 6；build 绿（8.10s）。
+  已知副作用（用户已决定不处理）：`white-space: pre` 生效后正文多余空行会真实占高度，"空行撑高"比之前明显
 - [ ] T26 新增 `app/utils/highlight.ts`：shiki 细粒度 API（`createHighlighterCore` + `createJavaScriptRegexEngine`，避开 200KB+ 的 oniguruma wasm）；按 `code.language-*` 只加载对应语言；输出用 `transformerStyleToClass` 转 `tok-*`；只处理 `<pre><code>`，超长块（>800 行）跳过；**提取文本按 T26-a 的规范化结果**（`<br>`→`\n`），避免高亮产物与换行规范化互相踩
 - [ ] T27 接入保存链路：`ArticleForm.submit()` 提交前对 `content` 跑一次高亮再发；**失败降级为原文提交**（高亮绝不能阻断发文）
 - [ ] T28 生成并接入 token CSS（读者站与编辑器预览共用）：`.prose .tok-*` + `.dark .prose .tok-*` 两套，约 2KB
