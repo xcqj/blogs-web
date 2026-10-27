@@ -65,9 +65,9 @@ watch(() => route.fullPath, () => (menuOpen.value = false))
           </NuxtLink>
           <button class="hidden text-xs text-muted transition hover:text-text md:inline" @click="logout">退出</button>
         </template>
-        <!-- 登录钮降重量（清单7）：soft 半透明底替代 accent 实底，hover 才升实底；
-             深色顶栏少一块高反光实底，重量让位内容（滚动字效保留） -->
-        <SdRollButton v-else label="登录" variant="soft" @click="showLogin" />
+        <!-- 登录钮：方向 C 改为「1px 边框 + 透明底」（Stitch 顶栏口径 border rgba(17,17,17,.18)）。
+             之前用 soft 淡蓝实底，在纯白顶栏上是一块很抢眼的色块，与"导航轻、内容重"的层级相反。 -->
+        <SdRollButton v-else label="登录" variant="secondary" @click="showLogin" />
 
         <!-- 移动汉堡按钮（<768） -->
         <button

@@ -15,10 +15,12 @@ function toggle() {
 </script>
 
 <template>
+  <!-- WCAG 2.5.3（Label in Name）：可访问名称必须包含可见文字「浅色 / 深色」，
+       否则语音控制用户（说"点击浅色"）点不到。原写法 aria-label 只有"切换到深色"，被判不匹配 -->
   <button
     type="button"
     class="flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 text-xs text-text transition hover:border-primary sm:px-3"
-    :aria-label="isLight ? '切换到深色' : '切换到浅色'"
+    :aria-label="isLight ? '浅色主题，点击切换到深色' : '深色主题，点击切换到浅色'"
     @click="toggle"
   >
     <span :class="isLight ? 'i-mdi:white-balance-sunny' : 'i-mdi:moon-waning-crescent'" aria-hidden="true" />

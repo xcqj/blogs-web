@@ -12,6 +12,10 @@ const articleId = computed(() => String(route.params.slug || ''))
 // 其它公共页（列表/搜索/标签/用户页）不依赖 cookie，保持全局 $fetch 不动。
 const requestFetch = useRequestFetch()
 
+// 评论区的空态与登录引导互斥：未登录时由 CommentForm 承担「登录后参与讨论」，
+// 这里只在已登录（且零评论）时展示「还没有评论」，避免两个空态叠在一起。
+const { logged } = useAuth()
+
 const { data: article, error } = await useAsyncData(
   `article-${articleId.value}`,
   () => requestFetch<ArticleDetail>(`/api/blog/public/articles/${articleId.value}`),
@@ -132,8 +136,15 @@ useHead({
     <section class="mt-10 border-t border-border pt-8">
       <h2 class="mb-4 text-xl font-bold tracking-[var(--ls-title)]">评论 {{ comments?.total ?? 0 }}</h2>
       <CommentList :items="comments?.rows" />
-      <!-- 窄栏（68ch）空态用 compact 图标：h-24 在窄栏内头重脚轻（清单6） -->
-      <EmptyState v-if="!comments?.rows?.length" icon-class="h-16 w-16" title="还没有评论" description="成为第一个讨论这篇的人。" />
+      <!-- 空态只在已登录时出现：未登录时 CommentForm 自己会渲染「登录后参与讨论 + 去登录」，
+           两处同时渲染会堆出两个品牌图标、两段文案（2026-10-27 截图实测）。
+           窄栏（66ch）空态用 compact 图标：h-24 在窄栏内头重脚轻（清单6） -->
+      <EmptyState
+        v-if="!comments?.rows?.length && logged"
+        icon-class="h-16 w-16"
+        title="还没有评论"
+        description="成为第一个讨论这篇的人。"
+      />
       <CommentForm :article-id="articleId" @posted="refreshComments" />
     </section>
     </article>
