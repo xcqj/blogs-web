@@ -31,10 +31,8 @@ const isPublished = computed(() => detail.value?.status === '1');
 // 也不留空隙）；桌面不受影响（CSS 媒体查询限制，同 .site-header 口径）。
 const { hideHeader } = useScrollDirection();
 
-// 客户端校验只是体验；权威校验在后端（§3.1 约束：title/content 必填、tagNames 1~6）
-const canSave = computed(
-  () => !saving.value && !readOnly.value && title.value.trim() && content.value.trim() && tagNames.value.length >= 1 && tagNames.value.length <= 6
-);
+// 客户端校验只是体验；权威校验在后端（§3.1 约束：title/content 必填、tagNames 1~6）。
+// 不再用 canSave 去 disabled 按钮——禁用态点击零反馈，改为 submit() 里校验并告知缺哪项。
 
 /** 与最近一次加载/保存的内容快照比较，用于顶栏的「未保存/已保存」提示（不做自动保存，避免误写库） */
 function snapshot() {
@@ -107,8 +105,33 @@ async function persist(): Promise<string | null> {
   return String(id);
 }
 
+/** 缺哪些必填项（按主区顺序），用于点击保存/发布时给出具体指引 */
+function missingFields(): string[] {
+  const missing: string[] = []
+  if (!title.value.trim()) missing.push('标题')
+  if (tagNames.value.length === 0) missing.push('标签')
+  if (!content.value.trim()) missing.push('正文')
+  return missing
+}
+
 async function submit(publish: boolean) {
-  if (!canSave.value) return;
+  if (saving.value || readOnly.value) return;
+  // 按钮不再 disabled：禁用态点击毫无反馈，用户不知道缺什么（2026-10-27 用户实测反馈）。
+  // 改为可点 + 明确告知缺哪一项，并同步写进操作条下方的错误行。
+  const missing = missingFields()
+  if (missing.length) {
+    const action = publish ? '发布' : '存为草稿'
+    const msg = `请先填写${missing.join('、')}，再${action}`
+    error.value = msg
+    toast.err(`暂时无法${action}`, msg, { key: 'article-save' })
+    return
+  }
+  if (tagNames.value.length > 6) {
+    const msg = '标签最多 6 个，请先删减'
+    error.value = msg
+    toast.err('暂时无法保存', msg, { key: 'article-save' })
+    return
+  }
   saving.value = true;
   error.value = '';
   try {
@@ -165,14 +188,15 @@ async function submit(publish: boolean) {
       <button class="sd-act lg:hidden" @click="drawerOpen = true">更多</button>
       <!-- 已发布文章不再提供「发布」：后端 ArticleGuards.requirePublishable 只允许草稿发布，
            重复调用会抛「仅草稿状态的文章可以发布」；隐藏/下线文章的重新公开仍在 /me 列表行做 -->
-      <SdButton v-if="isPublished" :disabled="!canSave" @click="submit(false)">
+      <!-- 只在提交中禁用：字段缺失时保持可点，由 submit() 告知缺哪项 -->
+      <SdButton v-if="isPublished" :disabled="saving" @click="submit(false)">
         {{ saving ? '保存中…' : '保存修改' }}
       </SdButton>
       <template v-else>
-        <SdButton variant="ghost" :disabled="!canSave" @click="submit(false)">
+        <SdButton variant="ghost" :disabled="saving" @click="submit(false)">
           {{ saving ? '保存中…' : '存为草稿' }}
         </SdButton>
-        <SdButton :disabled="!canSave" @click="submit(true)">
+        <SdButton :disabled="saving" @click="submit(true)">
           {{ saving ? '提交中…' : '发布' }}
         </SdButton>
       </template>
