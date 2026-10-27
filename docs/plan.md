@@ -580,12 +580,23 @@ tooling/shot/shot.mjs 退出码 0（桌面 1440 + 移动 390）
 
 ### P1 往返验证（0.3d，**不过门禁不继续**）
 
-- [ ] T25 **WangEditor 往返实验**：造一篇正文含 `<pre><code class="language-js"><span class="tok-x">…</span></code></pre>` 的文章入库 → 编辑器打开 → 不做修改直接保存 → 检查三项：① `span.tok-*` 是否保留；② 是否发生嵌套；③ `code.language-js` 是否还在
-  门禁：三项全符合预期才进 P2。若 language 类丢失，先解决「语言名持久化」（例如在 `pre` 上加 `data-lang`，并让后端白名单放行该属性）
+- [x] T25 **WangEditor 往返实验（2026-10-27 已完成，用本地最小页面，无需登录态）**：加载 UMD 包（`dist/index.js`，全局 `window.wangEditor`）起独立页面，对五组 HTML 做 `setHtml → getHtml`：
+
+  | 输入 | 输出 | 结论 |
+  |---|---|---|
+  | `<code class="language-js"><span class="tok-x">const</span>…` | `<code class="language-js">const…` | **span 被剥**（Slate 无对应 mark）|
+  | `<code class="language-js">…` | 原样 | **language 类保留** ✓ |
+  | `<pre data-lang="js">` | `<pre>` | data-lang 丢失，备选方案无效（也不需要） |
+  | `<code>a\nb</code>` | `<code>a<br>b</code>` | `\n` → `<br>`（一次转换） |
+  | `<code>a<br>b</code>` | `<code>ab</code>` | **`<br>` 读回时被吃掉** ← 见 T26-a |
+
+  **门禁结论：方案 B 成立**——language 类存活，span 被剥掉反而让幂等更简单（编辑器内永远是纯文本，保存时重新生成，不存在嵌套）。
+  **附带发现一个既有缺陷**：代码块换行往返不一致（`getHtml` 输出 `<br>`、`setHtml` 不认 `<br>`），意味着「作者打开编辑页 → 再保存」会把多行代码压平。与高亮无关，但方案 B 每次保存都要往返，**必须一并修**（见 T26-a）。
 
 ### P2 前端高亮管线（0.7d）
 
-- [ ] T26 新增 `app/utils/highlight.ts`：shiki 细粒度 API（`createHighlighterCore` + `createJavaScriptRegexEngine`，避开 200KB+ 的 oniguruma wasm）；按 `code.language-*` 只加载对应语言；输出用 `transformerStyleToClass` 转 `tok-*`；只处理 `<pre><code>`，超长块（>800 行）跳过
+- [ ] T26-a **换行规范化（必须先做，独立于高亮）**：代码块内换行入库统一用 `\n`——保存前把 `<code>` 里的 `<br>` 替换成 `\n` 再重建内容（`textContent` 不含 `<br>` 的换行，必须先做字符串替换再取文本）；读者站靠 `prose` 的 `white-space: pre` 天然渲染 `\n`。这样「编辑器 ↔ 库」往返不再压平多行代码（T25 实测的既有缺陷）
+- [ ] T26 新增 `app/utils/highlight.ts`：shiki 细粒度 API（`createHighlighterCore` + `createJavaScriptRegexEngine`，避开 200KB+ 的 oniguruma wasm）；按 `code.language-*` 只加载对应语言；输出用 `transformerStyleToClass` 转 `tok-*`；只处理 `<pre><code>`，超长块（>800 行）跳过；**提取文本按 T26-a 的规范化结果**（`<br>`→`\n`），避免高亮产物与换行规范化互相踩
 - [ ] T27 接入保存链路：`ArticleForm.submit()` 提交前对 `content` 跑一次高亮再发；**失败降级为原文提交**（高亮绝不能阻断发文）
 - [ ] T28 生成并接入 token CSS（读者站与编辑器预览共用）：`.prose .tok-*` + `.dark .prose .tok-*` 两套，约 2KB
   门禁：详情页代码块着色正确、深浅主题都对；编辑器内不崩
