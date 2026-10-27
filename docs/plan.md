@@ -301,7 +301,13 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [x] `rss.xml`（RSS 2.0，最新 N 篇公共文章）
 - [x] JSON-LD：`/post` 注 `Article` 结构化数据（headline/author/datePublished，在现有 `useSeoMeta` 基线上扩展）
 - [x] `robots.txt` 声明 sitemap
-- [ ] 验收：Lighthouse PWA + SEO 分数留档（本地 Chrome）；断网刷新已加载文章可读；view-source 抽验结构化数据；移动视口回归（**留人工**）
+- [x] 验收（2026-10-28 完成）：
+  - **Lighthouse PWA 分数项作废**——Lighthouse **v12（2024-10）起移除了 PWA 类别**，不再产出该分数；改以「SW 注册 + 离线可读」实测替代。
+  - **离线可读 PASS**：SW scope `/`、状态 `activated`；`sd-pages` 缓存命中 `/post/{id}`；`context.setOffline(true)` 后 reload，标题与正文完整（365 字符）。**测法注意**：SW 首次安装只接管后续导航，必须先有一次导航（或 reload）让 `controller` 变 true，再断网——直接首访即断网会误判为失败。
+  - **SEO 分数 = 100**（S23 T13 记录，最近三次连跑恒 100，见该条）。
+  - **结构化数据 PASS**：详情页 1 个 JSON-LD 块，`@type: Article`，含 `headline` / `author(Person)` / `datePublished` / `dateModified` / `image` / `publisher` / `mainEntityOfPage`；`robots.txt` / `sitemap.xml` / `rss.xml` 均 200。
+  - 移动视口：已由 S23 T13 的 44 张截图覆盖（含 390 宽）。
+  - **本轮顺带修复**：manifest 的 `theme_color` / `background_color` 仍是 S23 之前的暖黑 `#14120f`（注释写着"取 tokens.css 深色 --bg"），已改 `#131415`——否则 PWA 安装后的启动画面与标题栏用旧色。
 
 **实施结果（2026-10-14，blog-web 仓 2 commit 均标 S17：`1437ad2` SEO / `7237ea1` PWA；零后端改动，ROADMAP §3 状态行属跨仓更新留人工）**：
 

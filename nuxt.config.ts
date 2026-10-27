@@ -36,8 +36,9 @@ export default defineNuxtConfig({
       scope: '/',
       display: 'standalone',
       // 主题色/背景色取 tokens.css 深色 --bg（manifest 为静态单值，深浅切换由 meta theme-color 承担）
-      theme_color: '#14120f',
-      background_color: '#14120f',
+      // 2026-10-28 同步方向 C 色板：S23 把暖黑 #14120f 改成中性冷黑 #131415，此处漏改（PWA 启动画面用旧色）
+      theme_color: '#131415',
+      background_color: '#131415',
       icons: [
         { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
         { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
