@@ -61,7 +61,8 @@ async function submit() {
     form.password = ''
     form.code = ''
   } catch (e: any) {
-    error.value = apiErrorText(e, '登录失败')
+    // 后端验证码错误的消息经 h3 statusMessage 透传，apiErrorText 已能取到（见 utils/apiError.ts）
+    error.value = apiErrorText(e, '登录失败，请检查账号密码与验证码')
     refreshCaptcha() // 验证码一次性，失败后刷新重试
   } finally {
     loading.value = false
@@ -123,7 +124,15 @@ async function submit() {
             />
           </div>
 
-          <p v-if="error" class="text-xs text-danger">{{ error }}</p>
+          <!-- 错误提示：带图标 + 浅红底，比一行裸红字更容易被注意到（原样是 12px 纯文字） -->
+          <p
+            v-if="error"
+            role="alert"
+            class="flex items-start gap-1.5 rounded-sm border border-danger/40 bg-danger-bg px-2.5 py-2 text-xs text-danger"
+          >
+            <span class="i-mdi:alert-circle mt-px shrink-0" aria-hidden="true" />
+            <span>{{ error }}</span>
+          </p>
 
           <SdRollButton
             type="submit"
