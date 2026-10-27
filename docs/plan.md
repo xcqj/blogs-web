@@ -601,19 +601,27 @@ tooling/shot/shot.mjs 退出码 0（桌面 1440 + 移动 390）
   **顺带查明第二个既有缺陷**：`.prose pre` 之前是默认 `white-space: normal`，`\n` 被渲染成空格 → 库里存 `\n` 的代码块其实一直显示为「挤在一行」，这才是"代码块只有一个空框"的真正原因（不是没内容）。
   验证：单测 5 例全对（单块 / 段落 br 保留 / 多个 pre / 无 pre / 带属性 + `<BR>` 大小写）；生产构建实测 computed `white-space = pre`、某文章 `innerText` 行数 6；build 绿（8.10s）。
   已知副作用（用户已决定不处理）：`white-space: pre` 生效后正文多余空行会真实占高度，"空行撑高"比之前明显
-- [ ] T26 新增 `app/utils/highlight.ts`：shiki 细粒度 API（`createHighlighterCore` + `createJavaScriptRegexEngine`，避开 200KB+ 的 oniguruma wasm）；按 `code.language-*` 只加载对应语言；输出用 `transformerStyleToClass` 转 `tok-*`；只处理 `<pre><code>`，超长块（>800 行）跳过；**提取文本按 T26-a 的规范化结果**（`<br>`→`\n`），避免高亮产物与换行规范化互相踩
-- [ ] T27 接入保存链路：`ArticleForm.submit()` 提交前对 `content` 跑一次高亮再发；**失败降级为原文提交**（高亮绝不能阻断发文）
-- [ ] T28 生成并接入 token CSS（读者站与编辑器预览共用）：`.prose .tok-*` + `.dark .prose .tok-*` 两套，约 2KB
-  门禁：详情页代码块着色正确、深浅主题都对；编辑器内不崩
+- [x] T26 新增 `app/utils/highlight.ts`（shiki 细粒度 API）：`createHighlighterCore` + `createJavaScriptRegexEngine`（避开 200KB+ oniguruma wasm）+ `transformerStyleToClass`；12 种语言显式注册表按需 `import()`；别名归一（js→javascript / sh→shellscript / py→python / htm→html）；`>800 行`跳过；已含 `tok-` 类则跳过（幂等）。
+  **关键实现决策**：用 `structure: 'inline'`——默认输出会包一层 `<span class="line">`，那个 class 不带 `tok-` 前缀会被后端剥掉；inline 模式直接是 `tok-*` 序列。代价是它用 `<br>` 分行，故渲染后再 `.replace(/<br>/g, '\n')` 回到 T26-a 的入库约定。
+  体积实测（esbuild，core + JS 引擎 + 双主题 + 1 语言）：entry **53.4KB** gzip，主题各 2.5KB，语言包 16.3KB，**首屏合计约 74.7KB**（< 100KB 门禁）。
+  **真实产物确认**：编辑页 chunk 836K 解包 / **262KB gzip**（含 WangEditor 原有约 200KB，shiki 增量约 60KB）；**首页不引用该 chunk**——读者首屏零增量。
+- [x] T27 接入保存链路：`ArticleForm.payload()` 改为 async，`content` 改为 `await highlightCodeBlocks(normalizeCodeNewlines(content.value))`（normalize 在前，兜住"没有 language 类、不会被高亮"的块）；`persist()` 同步改 `await payload()`。高亮内部五道防线全部返回原文，**不阻断发文**。
+- [x] T28 生成并接入 token CSS：新增 `tooling/gen-highlight-css.mjs`（12 种语言各跑一段覆盖常见 token 的样本，合并 `getCSS()` 去重），产出 **`app/assets/css/highlight.css` — 9 个 token 类、仅 1.1KB**；经 `nuxt.config.ts` 的 `css` 数组紧跟 `prose.css` 引入。
+  应用层两条规则把 shiki 的 CSS 变量映射到 `color`：`.prose pre span[class^='tok-']` → `var(--shiki-light)`，`.dark` 下 → `var(--shiki-dark)`。
+  门禁实测：详情页注入 tok span 后读 computed color，**浅色 `rgb(215,58,73)` / 深色 `rgb(249,117,131)`，与 github-light/dark 定义完全一致 → PASS**。
 
 ### P3 后端白名单（0.3d）
 
-- [ ] T29 `SdBlogArticleServiceImpl` 的 jsoup `Safelist` 放开 `span[class]`，且 class 值须匹配 `^tok-[a-z0-9]+$`（白名单外一律剥掉）
-  门禁：正文含 `<span class="evil">` 与 `<span class="tok-abc123">` 时，前者被剥、后者存活；`<script>`、`onerror` 仍被拦
+- [x] T29 `HtmlSanitizer`（不是 Service，净化逻辑在 `org.dromara.blog.util.HtmlSanitizer`）：
+  - `buildSafelist()` 增 `.addAttributes("span", "class")`——jsoup 1.19.1 的 `relaxed()` 不带全局 class，`span` 原本连 class 都保不住；
+  - 新增 `SAFE_TOKEN_CLASS = ^tok-[a-z0-9]+$` 与 `stripUnsafeTokenClasses(Document)`，在 `HTML_CLEANER.clean()` **之后**逐个校验 span 的 class token，非法一律移除；
+  - 幂等：对已净化内容二次执行结果不变（单测覆盖）。
+  门禁实测：**13 个单测全过**（原 10 + 新增 3：合法 tok 保留、`admin`/`header`/`evil` 混合场景只留 tok、二次净化幂等）。
 
 ### P4 契约与回归（0.2d）
 
-- [ ] T30 `blog-api.md` §3.1 补 `content` 白名单说明（允许标签 + `tok-*` class 规则 + 历史文章无高亮的备案）
-- [ ] T31 回归：`npm run build` + `shot.mjs` 44 张 + `contrast.mjs`（代码块内文字至少 3:1）+ 深浅双主题人眼核对代码块
+- [x] T30 `blog-api.md` §3.1 白名单说明**在 S24 立项时已写入**（允许 `span[class]` 且值须匹配 `^tok-[a-z0-9]+$`、不放开 `style`、历史文章不回溯），本轮复核无需改动。
+- [x] T31 回归：`npm run build` 绿（9.71s）；`shot.mjs` **44 张退出码 0、无 console error / 5xx**（生产构建 :3100）；`contrast.mjs` **18/18 全过**；双主题着色用 Playwright 实测 PASS（见 T28 门禁）。
+  **注意**：历史文章正文没有 tok span，截图里的代码块仍是纯文本——高亮需要作者重新保存一次才生效（已接受的边界）。
 
 

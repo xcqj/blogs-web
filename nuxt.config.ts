@@ -90,6 +90,8 @@ export default defineNuxtConfig({
     '@fontsource/noto-serif-sc/700.css',
     '~/assets/css/tokens.css',
     '~/assets/css/prose.css',
+    // 代码高亮 token 色（S24）：由 tooling/gen-highlight-css.mjs 生成，紧跟 prose.css 便于覆盖代码块
+    '~/assets/css/highlight.css',
     '~/assets/css/transitions.css'
   ],
 

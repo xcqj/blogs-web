@@ -1,0 +1,23 @@
+/* 本文件由 tooling/gen-highlight-css.mjs 生成，请勿手改。
+   改动方式：修改脚本里的样本或主题后重新运行 `node tooling/gen-highlight-css.mjs`。
+   内容 = GitHub Light/Dark 双主题的 token 色，共 9 条；
+   颜色以 CSS 变量承载，由下方应用层按当前主题选取，因此同一份正文 HTML 在深浅主题下自动变色。 */
+
+/* 应用层：shiki 的 token class 只声明变量，真正上色靠这两条 */
+.prose pre span[class^='tok-'] {
+  color: var(--shiki-light);
+}
+.dark .prose pre span[class^='tok-'] {
+  color: var(--shiki-dark);
+}
+
+/* token 色板（浅/深各一份，一次生成） */
+.tok-140thh{--shiki-light:#24292E;--shiki-dark:#E1E4E8}
+.tok-17hn0y{--shiki-light:#22863A;--shiki-dark:#85E89D}
+.tok-1itgoe{--shiki-light:#D73A49;--shiki-dark:#F97583}
+.tok-1jdh33{--shiki-light:#E36209;--shiki-dark:#FFAB70}
+.tok-1t8gfj{--shiki-light:#6F42C1;--shiki-dark:#B392F0}
+.tok-21nrsd{--shiki-light:#6A737D;--shiki-dark:#6A737D}
+.tok-21q97f{--shiki-light:#032F62;--shiki-dark:#DBEDFF}
+.tok-dzsirb{--shiki-light:#005CC5;--shiki-dark:#79B8FF}
+.tok-mdbnqw{--shiki-light:#032F62;--shiki-dark:#9ECBFF}

@@ -83,21 +83,25 @@ async function load() {
 onMounted(load);
 watch(() => props.articleId, load);
 
-function payload(): ArticleSavePayload {
+async function payload(): Promise<ArticleSavePayload> {
   return {
     title: title.value.trim(),
     summary: summary.value.trim() || undefined,
     // 未手动选封面时自动取正文首图（A 方案，零后端）；手动选图仍以手动值为准
     coverUrl: coverUrl.value.trim() || pickFirstImage(content.value) || undefined,
-    // 代码块换行规范化（S24/T26-a）：WangEditor 的 getHtml 用 <br> 表示代码块内换行，
-    // 而它的 setHtml 不认 <br>（实测 a<br>b → ab），不转换的话「打开编辑页→保存」会把多行代码压平
-    content: normalizeCodeNewlines(content.value),
+    // ① normalizeCodeNewlines（S24/T26-a）：WangEditor 的 getHtml 用 <br> 表示代码块内换行，
+    //    而 setHtml 不认 <br>（实测 a<br>b → ab），不转换的话「打开编辑页→保存」会把多行代码压平；
+    //    这里先兜一遍，覆盖「没有 language 类、不会被高亮处理」的块。
+    // ② highlightCodeBlocks（S24/T27）：对声明了语言的块用 shiki 着色，内部失败一律返回原文，
+    //    不会阻断发文。
+    content: await highlightCodeBlocks(normalizeCodeNewlines(content.value)),
     tagNames: tagNames.value
   };
 }
 
 async function persist(): Promise<string | null> {
-  const body = payload();
+  // payload() 现在是异步的（内部跑 shiki 高亮）
+  const body = await payload();
   if (isEdit.value) {
     await $fetch(`/api/blog/article/${props.articleId}`, { method: 'PUT', body });
     return props.articleId!;
