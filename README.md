@@ -85,6 +85,33 @@ npm run preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
+## 容器化与一键启动（S25）
+
+本仓镜像已就绪（`Dockerfile`，多阶段，运行层只带 `.output`，约 200MB）。
+
+单仓构建：
+
+```bash
+docker build -t blog-web:local .
+docker run -d -p 3000:3000 \
+  -e NUXT_API_BASE=http://<后端地址>:8081 \
+  -e NUXT_APP_CLIENT_ID=... \
+  -e NUXT_RSA_PUBLIC_KEY=... -e NUXT_RSA_PRIVATE_KEY=... \
+  blog-web:local
+```
+
+一键起全套（含后端、后台、MySQL/Redis/MinIO/ES）在后端仓：
+
+```bash
+cd ../RuoYi-Vue-Plus/script/docker
+cp .env.example .env        # 填 NUXT_APP_CLIENT_ID 与 RSA 密钥
+docker compose up -d --build
+```
+
+**容器与本地 `.env` 的差异**：容器里不放 `.env`，四个变量由 compose 注入；
+且 `NUXT_API_BASE` 指向容器间服务名 `http://backend:8081`，**不再用 `host.docker.internal`**——
+后者只在「后端跑在宿主机」的旧 dev 形态才成立。
+
 ## S17 PWA + SEO（2026-10-14 实施）
 
 ROADMAP v0.4 S17 切片：PWA 应用化 + SEO 三件套。**零后端改动**（数据源全部走既有 `/blog/public/**`），只动本仓。
