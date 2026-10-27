@@ -170,4 +170,43 @@ onBeforeUnmount(() => editorRef.value?.destroy());
 .w-e-drop-panel::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ---------- 主题跟随（方向 C，S23）----------
+   WangEditor 把全部配色收在 17 个 CSS 变量里（定义在 `:host,:root`），
+   所以不必逐类覆盖——重新赋值即可让工具条、下拉、弹窗、书写区、代码块一起跟随。
+   值全部指向本站 token，深浅主题自动切换（token 本身随 .dark 变）。
+   特异性用 `:root:root` 而非 `:root`：WangEditor 的 dist CSS 由组件 import 注入，
+   在全局样式之后加载，同特异性会被它盖掉。 */
+:root:root {
+  --w-e-textarea-bg-color: var(--elevated); /* 书写区：比面板亮一档 */
+  --w-e-textarea-color: var(--text);
+  --w-e-textarea-border-color: var(--border);
+  --w-e-textarea-slight-border-color: var(--border);
+  --w-e-textarea-slight-color: var(--text-dim);
+  --w-e-textarea-slight-bg-color: var(--surface); /* 代码块/引用底：比书写区暗，形成凹陷 */
+  --w-e-textarea-selected-border-color: var(--accent);
+  --w-e-textarea-handler-bg-color: var(--accent);
+  --w-e-toolbar-color: var(--text-muted);
+  --w-e-toolbar-bg-color: var(--surface);
+  --w-e-toolbar-active-color: var(--text);
+  --w-e-toolbar-active-bg-color: var(--elevated); /* 工具条 hover / 激活底 */
+  --w-e-toolbar-disabled-color: var(--text-dim);
+  --w-e-toolbar-border-color: var(--border);
+  --w-e-modal-button-bg-color: var(--elevated);
+  --w-e-modal-button-border-color: var(--border-strong);
+}
+
+/* 变量管不到的两处硬编码白底（其余 #fff 是字体/背景调色板色块，属功能性，不能改） */
+.w-e-text-container [data-slate-editor] pre.w-e-code-block .w-e-code-block-copy-button {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+.w-e-text-container [data-slate-editor] pre.w-e-code-block .w-e-code-block-copy-button:hover {
+  color: var(--text);
+}
+/* 表格选区高亮：原为 hsla(0,0%,100%,.95)，深色下是一块刺眼白 */
+.w-e-text-container [data-slate-editor] .w-e-table-selection-segment {
+  background: var(--accent-soft);
+}
 </style>
