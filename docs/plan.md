@@ -517,19 +517,25 @@ M6 作者中心(S12/D29)：我的列表 + WangEditor 发文/编辑 + 发布/隐�
 - [ ] T9 `tokens.css` 重建：冷米白/靛蓝双主题、圆角统一 3px、阴影近乎取消、新增 `--font-serif`；深色 `--accent` 必须提亮（`#1A4D8F` 在 `#131415` 上仅约 2.1:1，不可用）
 - [x] T10 **Noto Serif SC 引入（方案 A，2026-10-26 实测定案）**：`npm i @fontsource/noto-serif-sc`，只 `import '@fontsource/noto-serif-sc/700.css'`——101 个 `unicode-range` 分片（合计 3.1MB，单片 1.5–54KB），浏览器按需下载，**实测典型首屏命中 11 片约 420KB**；`font-display: swap` 由包内 CSS 提供；**不做 preload**（无法预知命中分片）；不采用 1.5MB 全量单文件入口（`chinese-simplified-700.css`）。使用范围收敛到 **H1 级标题**（hero / 文章大标题 / 头条 / 正文 H2），列表行 18px 标题不用衬线（既省流量也更好读）。**验收线由 ≤100KB 修正为 ≤500KB**（100KB 对中文衬线不可达，实测数据见台账 §4.3.2）；禁走 Google Fonts CDN
 - [ ] T11 `uno.config.ts` 按 T8 清单重建（新增/废弃/别名映射），`safelist` 复核
-- [ ] T12 `Sd*` 基础件改造（Button 实底+描边两形态 / Card 边框化去阴影 / Badge / Input / Textarea / State），改完 grep 复用点
-- [ ] T13 全站回归：`contrast.mjs` 16 项**重算并更新期望值**（新色对人工核对，不得为过门禁降标准）+ `shot.mjs` 退 0 + build 通过 + 深浅双主题逐页扫一遍 + Lighthouse 四项记录（对比 S17 基线）
+- [x] T12 `Sd*` 基础件随 shortcut 自动生效（btn 高 40 + 加深描边形态、sd-card 去阴影、sd-chip 去胶囊、sd-input/sd-search 高 40）；**未改组件模板**，只改 tokens + uno，改完 grep 过全部复用点
+- [x] T13 **全站回归完成（2026-10-27）**：`contrast.mjs` 由 16 项扩到 **18 项**并重算——换新色板后首跑挂 2 项（深色 meta `#767c84` 仅 4.05:1、浅色 `#8b949e` 仅 3.1:1），修正为 `#8a9099` / `#667080` 后全过；`shot.mjs` **44 张退出码 0、无 console error / 5xx**（生产构建 :3100）；四视口（1440/390 × 深浅）看图复核，查出一处规格不符并修复（移动端头条图丢失，见 T15）；Lighthouse desktop = **Performance 95 / A11y 100 / BP 100 / SEO 100**，FCP 1.0s、LCP 1.3s、TBT 0ms、CLS 0.007、首屏字体 6 片 **213KB**。**相对 S17 全 100 掉 5 分**，主因 total-byte-weight（5.86MB，几乎全是 OSS 未裁剪的封面原图）与 entry.css 内含 101 条 `@font-face`（分片方案固有成本）；图片优化归内容层（OSS resize 参数），字体方案不改
 
 ### P4 逐页重排（4~5d，一页一 commit）
 
-- [ ] T14 壳层：`AppHeader`（导航激活线/字重）、`AppFooter`、`AppBrand`（衬线字标）、`layouts/default`（全站生效，先做）
-- [ ] T15 首页：`FeaturedPost`（LATEST 头条，仅第 1 页）+ `PostRow`（数据行）+ 右栏双卡 + 系统状态卡（真值 5 项：RENDER/FRAMEWORK/THEME/MOTION/A11Y）+ `CtaBand` 收尾改编；`ArchiveGroup` 去留判定
-- [ ] T16 文章详情：`prose.css` 重写（衬线标题/行宽 68ch/代码块/引用/图片）、`CommentList`/`CommentForm` 连带
-- [ ] T17 标签页 `/tags` + `/tag/[slug]`
-- [ ] T18 搜索页 `/search`（含服务端高亮 `em` 样式沿用新色对，需重过对比度）
-- [ ] T19 用户页 `/user/[userId]`
-- [ ] T20 作者中心 `/me`（列表 / 新建编辑 / 资料）+ `ArticleForm`/`ArticleEditor`/`PublishDrawer`
-- [ ] T21 浮层与状态：`LoginModal`、`AppToaster`、骨架、空态、`error.vue`/404
+- [x] T14 壳层：`AppHeader`（导航激活改 2px 全宽下边框，`scaleX` 过渡且 hover 同几何）、`AppFooter`（单行编辑式收尾：衬线站名 22px + `/` + tagline 13px，© 归左栏第二行）、`AppBrand`（衬线站名，去 `drop-shadow` 发光）、`layouts/default`（**删除 BgDrift 漂移层**、上留白 24px）；顶栏/页脚容器改 `max-w-1440`（比正文 1180 更宽，导航铺开内容收窄）
+- [x] T15 首页：`FeaturedPost`（LATEST 头条，仅第 1 页；文字左 + 右图 260×146；**<768 改 `flex-col-reverse` 图满宽 16:9 在上**——T13 回归查出窄屏用 `hidden sm:block` 把头条图一并隐藏，与 §4.2「头条图保留」不符，已修）+ `PostRow`（数据行，掘金式右图 132×76 + 三层信息）+ 右栏双卡 + `CtaBand` 改编（2px 深线起头 + 左对齐 + `03 // CONTRIBUTION`）
+  - **`SectionMark`**（编号锚点）与 **`SystemStatus`**（状态卡）新增；后者 2026-10-27 按用户要求**删除**（hero 右侧留白过多，改单栏 `max-w-[760px]`）
+  - 右栏 chip 底色踩坑：Stitch 的 `surface` 是米白、`surface-container-lowest` 才是白，与我们命名相反，照抄导致卡片与 chip 同色（详见 `.impeccable.md` 原则 2）
+  - `ArchiveGroup` / `ArticleCard` 已删除（见孤儿清理）
+- [x] T16 文章详情：`prose.css` 重写（66ch / 18px / 1.75、段距 24px、引用块 2px 主色左边线无底色、正文图去边框）；代码块升级为 `.sd-code > 顶部栏（语言标签 + 复制钮）+ pre`（语言取自 `language-*` 类，缺省 `CODE`，**不编造文件名**）；编辑器语言下拉修复（外层 `overflow-hidden` 把面板裁掉 → 去掉，圆角由 toolbar/body 分别承担；`min-width 200` / `max-height 280` / 8px 滚动条 / `z-index 60`）
+  - 详情页封面去重：自动封面会把正文首图回填进 `coverUrl`，导致顶部封面与正文首图重复；改用 `showCover` 判断「封面地址是否已作为 `<img>` 出现在本篇正文」（纯正则、SSR 安全、URL 元字符已转义）
+- [x] T17 标签页 `/tags`（`01 // INDEX` + 衬线 h1 + chip 云不包卡片）与 `/tag/[slug]`（改 `PostRow`、**取消按月分组**）
+- [x] T18 搜索页 `/search`（`PostRow` **内置服务端高亮**：`titleHtml`/`summaryHtml` 走 `v-html`，`summary 命中 > content 命中 > 原摘要` 降级，`em` 用 accent-soft 底，深 6.43:1 / 浅 7.20:1）+ `/page/[n]`（同换 `PostRow` 并去分组）；顺带修搜索框 autofill 白框（inset 兜底色由 `--surface` 改 `--elevated`）与 Chrome 原生清除钮
+- [x] T19 用户页 `/user/[userId]`：资料区去面板（`01 // AUTHOR` + 衬线昵称），列表换 `PostRow` 并去分组
+- [x] T20 作者中心：`/me`（`01 // WORKSPACE` + 衬线 h1 + 底线）、`/me/profile`（去 `sd-card`）、`ArticleForm`（**双顶栏 64+56**、主区 `grid lg:grid-cols-[1fr_320px]`、右栏 `sticky top-[132px]` 常驻设置、标题输入改衬线、「更多」`lg:hidden`）、新增 **`ArticleSettingsPanel`**（桌面右栏与移动抽屉共用同一份标记）、`PublishDrawer` 瘦身为纯外壳
+  - 字段缺失提示：原先按钮绑 `:disabled="!canSave"`，字段不填点击毫无反馈；改为只在提交中禁用，点击时告知缺哪项
+- [x] T21 浮层与状态：`LoginModal` / `AppConfirmDialog`（并补 1px 边框）/ `AppToaster` / `PublishDrawer` 的 `shadow-e3`（已归零）统一换 `--shadow-float`；`error.vue` 404 由渐变文字改衬线大字 + 主色；`LoginModal` 错误提示改「图标 + 浅红底」提示块
+  - 评论区双空态：未登录且零评论时 `EmptyState` 与 `CommentForm` 各渲染一次，改为 `EmptyState` 仅在 `logged` 时出现
 
 ### P5 plus-ui 小改（0.5d，独立仓独立 commit）
 
