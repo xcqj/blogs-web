@@ -89,7 +89,9 @@ function payload(): ArticleSavePayload {
     summary: summary.value.trim() || undefined,
     // 未手动选封面时自动取正文首图（A 方案，零后端）；手动选图仍以手动值为准
     coverUrl: coverUrl.value.trim() || pickFirstImage(content.value) || undefined,
-    content: content.value,
+    // 代码块换行规范化（S24/T26-a）：WangEditor 的 getHtml 用 <br> 表示代码块内换行，
+    // 而它的 setHtml 不认 <br>（实测 a<br>b → ab），不转换的话「打开编辑页→保存」会把多行代码压平
+    content: normalizeCodeNewlines(content.value),
     tagNames: tagNames.value
   };
 }

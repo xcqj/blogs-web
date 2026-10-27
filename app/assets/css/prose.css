@@ -131,6 +131,9 @@
   margin: 0 0 var(--space-6);
   font-size: var(--text-sm);
   line-height: 1.65;
+  /* 代码块换行入库统一用 \n（见 utils/codeBlock.ts），必须 white-space: pre 才会换行；
+     历史数据里存的是 <br>，同样不受影响。不用 pre-wrap：代码块要保横向滚动，不折行。 */
+  white-space: pre;
 }
 
 .prose pre code {
