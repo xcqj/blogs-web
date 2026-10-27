@@ -670,4 +670,43 @@ tooling/shot/shot.mjs 退出码 0（桌面 1440 + 移动 390）
 - [x] `contrast.mjs` **18/18 全过**。
 - [x] 实测：详情页 SSR 输出含 `id="sec-1..5"`（锚点在服务端就存在）；1440 宽屏 aside TOC 可见且 5 条、`<details>` 隐藏；390 窄屏 aside 隐藏、折叠面板可见；`/about` 200 且标题正确。
 
+## 2.24 S28 上一篇/下一篇 + 前端单测（2026-10-28 实施）
+
+> 状态权威在 ROADMAP §2/§3 S28。跨仓：后端扩展详情响应，前端消费；测试范围经用户确认为「Vitest 单测 + 复用截图回归」，**不引 Playwright E2E 框架**。
+
+**三条红线**
+
+1. `prev` / `next` 只在**公共可见**文章间跳转（`status=1 且 visibility=0`），否则读者点进去即 404。
+2. 排序必须 **`published_at` + `article_id` 双键**——只按时间排，同秒发布的两篇顺序不确定、导航会来回跳。
+3. 前端取数链路不动（仍走 `useRequestFetch`，SSR 必须转发 Cookie），只消费响应新增字段。
+
+### T1 相邻文章导航
+
+- [x] 类型：`app/types/blog.ts` 增 `AdjacentArticle { articleId, title }`，`ArticleDetail` 加可选的 `prev` / `next`（注释标明「仅公共可见，首/末篇为 null」）。
+- [x] 新增 `app/components/ArticleNav.vue`：至少一侧存在才渲染（两侧都空则整块不出现，不留空框）；≥640 两栏、左项左对齐 / 右项右对齐，<640 堆叠且都左对齐；标题 `truncate` 单行省略，避免把布局撑开。
+- [x] 接入详情页：正文 `v-html` 之后、评论区之前，位于 `article.sd-measure` 内（与 66ch 正文同宽），**不进右侧 TOC 那一列**。
+- [x] 视觉：顶部 1px `--border` 分隔线、上下各 32px；标签 12px 等宽 `--text-dim`；标题 15px 衬线；hover 转 `--primary-fg` 并加下划线，150ms 只动颜色。**不加卡片底、不加箭头、不加 hover 位移**。
+
+### T2 Vitest 单测
+
+- [x] `vitest.config.ts`：`environment: 'node'`、`include: ['app/**/*.spec.ts']`，**不加载 Nuxt 插件与 alias**（三个被测模块都没有 `~/` 导入）。
+- [x] `app/utils/__tests__/toc.spec.ts` 8 例：h2/h3 层级、锚点 `sec-N` 递增、含 `<code>` 标题取纯文本、`&amp;` 解码（目录文字解码而正文 HTML 保留原样）、空标题跳过且不占号、已有 `id` 不重编号、二次调用完全幂等、空输入返回空。
+- [x] `app/utils/__tests__/codeBlock.spec.ts` 7 例：`<br>`→`\n`、`<BR>`/`<br/>` 大小写与自闭合、多个 `<pre>`、段落 `<br>` 不误伤、保留 `<pre>` 属性、无 pre 原样、幂等。
+- [x] `app/utils/__tests__/imageCompress.spec.ts` 4 例：GIF / SVG / Node 无 DOM 三种跳过，均断言**返回同一 File 引用**（不是副本）。
+- [x] `package.json`：`vitest@^5.0.5` 进 devDependencies，`"test": "vitest run"`。
+  **canvas 缩放分支不测**：需要 canvas 实现（happy-dom + mock），为 0.5d 的收益不划算，且该路径 S27 已由浏览器实测覆盖。
+
+### 回归
+
+- [x] `npx vitest run`：**3 文件 / 19 例全过 / 151ms**。
+- [x] `npm run build` 绿。
+- [x] `shot.mjs` **50 张退出码 0、无 console error / 5xx**（后端须跑 S28 版本才有 prev/next 数据）。
+- [x] 实测：20 号文章桌面两栏（左「上一篇 TypeScript 类型体操…」、右「下一篇 分布式锁…」），390 窄屏上下堆叠且标题单行省略。
+- [x] **后端边界实测**（在容器里跑真实接口，非仅单测）：最新篇 `next=null`、最早篇 `prev=null`、34 号的 prev 跳过已下线的 08 号命中 33 号。
+
+### 顺带记录：后端镜像的 native 崩溃（不属本仓，但本轮发现）
+
+跑登录页截图时后端容器反复 `Exited (139)`，日志 `Problematic frame: libawt.so+0x1e4e6 AnyIntIsomorphicCopy.cold`。根因是 S25 的 `eclipse-temurin:21-jre-alpine`（musl libc）与 Temurin 的 AWT native 库不兼容，而验证码走 Java2D 绘制——**首次请求 `/auth/code` 就崩**。S25 验收只 `curl /` 没触发验证码，所以漏了。
+已在后端仓修掉：换 Debian 基础镜像 + 补 `fontconfig`/`fonts-dejavu-core` + `-Djava.awt.headless=true`。详见 `RuoYi-Vue-Plus/Dockerfile` 注释与 ROADMAP S28 第 7 条。
+
 

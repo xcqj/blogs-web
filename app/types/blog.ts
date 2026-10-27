@@ -64,6 +64,12 @@ export interface ArticleVersion {
   createTime: string
 }
 
+/** §5.2 相邻文章（S28）：只在公共可见文章间跳转，首/末篇对应字段为 null */
+export interface AdjacentArticle {
+  articleId: string
+  title: string
+}
+
 /** §5.2 公共文章详情（BlogPublicArticleDetailVo，不含 status/visibility/治理字段） */
 export interface ArticleDetail {
   articleId: string
@@ -73,6 +79,10 @@ export interface ArticleDetail {
   publishedAt: string
   tags: TagRef[]
   viewCount: number
+  /** 上一篇（发布时间更早的公共文章），没有则为 null */
+  prev?: AdjacentArticle | null
+  /** 下一篇（发布时间更晚的公共文章），没有则为 null */
+  next?: AdjacentArticle | null
 }
 
 /** §10.1 一级评论项（userName 由后端 USER_ID_TO_NAME 翻译，不复制） */

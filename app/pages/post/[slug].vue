@@ -161,6 +161,9 @@ useHead({
          v-html 不能在客户端改 DOM 属性，锚点必须在 SSR 阶段就存在，否则水合会不一致 -->
     <div class="prose mt-8" v-html="toc.html" />
 
+    <!-- 上一篇/下一篇（S28）：由详情接口一次带出，前端零额外请求 -->
+    <ArticleNav :prev="article.prev" :next="article.next" />
+
     <!-- 评论区：§10.1 列表 + §10.2 发表（CSR）；标签已在 meta 条出现，不再重复一份 -->
     <section class="mt-10 border-t border-border pt-8">
       <h2 class="mb-4 text-xl font-bold tracking-[var(--ls-title)]">评论 {{ comments?.total ?? 0 }}</h2>

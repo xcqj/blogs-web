@@ -8,7 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "start": "node --env-file-if-exists=.env .output/server/index.mjs",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource/noto-serif-sc": "^5.3.1",
@@ -27,6 +28,7 @@
     "@unocss/nuxt": "^66.10.5",
     "@vite-pwa/nuxt": "^1.1.1",
     "unocss": "^66.10.5",
+    "vitest": "^5.0.5",
     "workbox-cacheable-response": "^7.4.1",
     "workbox-expiration": "^7.4.1",
     "workbox-precaching": "^7.4.1",
