@@ -565,4 +565,39 @@ tooling/shot/shot.mjs 退出码 0（桌面 1440 + 移动 390）
 
 禁止出现（无对应字段或 MVP 不做）：分类/专栏、SEO 面板、关键词、OG 图、定时发布、协作/审稿、评论设置、AI 写作、模板选择、草稿箱列表。
 
+## 2.22 S24 正文语法高亮（方案 B：保存时高亮，2026-10-27 立项）
+
+> 状态权威在 ROADMAP §2/§3 S24 与决策 **D43**（后端仓库），本节只做任务拆解。
+> 三方案对比、五个待决策（D1~D5）与阶段门禁见 ROADMAP §3 S24，此处不重复。
+
+**本轮红线**
+
+1. 高亮产物必须**幂等**：保存前一律「取 `<code>` 的 textContent 重新高亮」，不做增量叠加。
+2. 标记用 **class（`tok-*`）**，不用 inline style——后端白名单只需校验 `^tok-[a-z0-9]+$`，彻底规避 `style` 注入面。
+3. 不改 `app/types/**` 与接口出入参；`content` 仍是字符串，只是内部多了一层 span。
+4. **历史文章不批量重刷**；作者重新保存一次即自然获得高亮。
+5. plus-ui 不同步，接受两端发文体验不一致（记入 D3）。
+
+### P1 往返验证（0.3d，**不过门禁不继续**）
+
+- [ ] T25 **WangEditor 往返实验**：造一篇正文含 `<pre><code class="language-js"><span class="tok-x">…</span></code></pre>` 的文章入库 → 编辑器打开 → 不做修改直接保存 → 检查三项：① `span.tok-*` 是否保留；② 是否发生嵌套；③ `code.language-js` 是否还在
+  门禁：三项全符合预期才进 P2。若 language 类丢失，先解决「语言名持久化」（例如在 `pre` 上加 `data-lang`，并让后端白名单放行该属性）
+
+### P2 前端高亮管线（0.7d）
+
+- [ ] T26 新增 `app/utils/highlight.ts`：shiki 细粒度 API（`createHighlighterCore` + `createJavaScriptRegexEngine`，避开 200KB+ 的 oniguruma wasm）；按 `code.language-*` 只加载对应语言；输出用 `transformerStyleToClass` 转 `tok-*`；只处理 `<pre><code>`，超长块（>800 行）跳过
+- [ ] T27 接入保存链路：`ArticleForm.submit()` 提交前对 `content` 跑一次高亮再发；**失败降级为原文提交**（高亮绝不能阻断发文）
+- [ ] T28 生成并接入 token CSS（读者站与编辑器预览共用）：`.prose .tok-*` + `.dark .prose .tok-*` 两套，约 2KB
+  门禁：详情页代码块着色正确、深浅主题都对；编辑器内不崩
+
+### P3 后端白名单（0.3d）
+
+- [ ] T29 `SdBlogArticleServiceImpl` 的 jsoup `Safelist` 放开 `span[class]`，且 class 值须匹配 `^tok-[a-z0-9]+$`（白名单外一律剥掉）
+  门禁：正文含 `<span class="evil">` 与 `<span class="tok-abc123">` 时，前者被剥、后者存活；`<script>`、`onerror` 仍被拦
+
+### P4 契约与回归（0.2d）
+
+- [ ] T30 `blog-api.md` §3.1 补 `content` 白名单说明（允许标签 + `tok-*` class 规则 + 历史文章无高亮的备案）
+- [ ] T31 回归：`npm run build` + `shot.mjs` 44 张 + `contrast.mjs`（代码块内文字至少 3:1）+ 深浅双主题人眼核对代码块
+
 
