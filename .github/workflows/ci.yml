@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -19,6 +20,11 @@ jobs:
 
       - name: Install
         run: npm ci
+
+      # 门禁：单测（app/utils/__tests__，19 例）+ 生产构建。
+      # 本仓无 lint / typecheck 脚本（D30 未引 @nuxt/eslint），故不设该门禁。
+      - name: Test
+        run: npm test
 
       - name: Build
         run: npm run build
