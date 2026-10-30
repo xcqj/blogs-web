@@ -19,7 +19,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { highlightCodeBlocks } from '../app/utils/highlight.ts'
-import { AUTHORS, TAGS, COVERS, POSTS_MIN } from './seed/data-min.mjs'
+import { AUTHORS, TAGS, COVERS, POSTS_MIN, h2, p, ul, pre, quote } from './seed/data-min.mjs'
 import { POSTS_DEMO_EXTRA } from './seed/data-demo.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -67,6 +67,146 @@ function hoursAfter(baseStr, hours) {
 /** SQL 字面量：先转反斜杠再转单引号（MySQL 默认模式反斜杠是转义符） */
 const esc = (s) => String(s).replace(/\\/g, '\\\\').replace(/'/g, "''")
 const q = (v) => (v === null || v === undefined ? 'NULL' : `'${esc(v)}'`)
+
+// ---------------------------------------------------------------------------
+// 正文富化（演示数据增强）
+//
+// 背景：原种子每篇只有 1~2 个 h2 + 几段，正文平均 565 字、无任何图片，
+//       演示时列表与详情页都偏"空"。这里做两件事，且保持"数据可重放"：
+//       ① 每篇内嵌 1~2 张正文图（走公网图片域名，读者侧可直接加载）
+//       ② 追加 2 个"深入小节"（p / ul / pre / quote 混合），把篇幅拉到 2~3KB
+//
+// 图片域名：演示栈的 Cloudflare 路由 img.<zone> → MinIO 19000。
+//           换 cloud 目标时用 SEED_IMG_BASE 覆盖，不必改代码。
+// ---------------------------------------------------------------------------
+const IMG_BASE = (process.env.SEED_IMG_BASE || 'https://img.sdblog.us.ci/ruoyi').replace(/\/$/, '')
+/** COVERS 里存的是 127.0.0.1 的完整 URL，这里只取对象 key，统一按 IMG_BASE 拼 */
+const IMAGE_KEYS = COVERS.map((u) => u.replace(/^.*?\/ruoyi\//, ''))
+const imgUrl = (key) => `${IMG_BASE}/${key}`
+const figure = (key, caption) =>
+  `<figure><img src="${imgUrl(key)}" alt="${caption}" loading="lazy"><figcaption>${caption}</figcaption></figure>`
+
+/** 在正文第 n 个 </p> 之后插入图像；段落不够就追加到末尾 */
+function injectFigure(html, figHtml, afterParagraph = 2) {
+  let seen = 0
+  let idx = -1
+  const re = /<\/p>/g
+  let m
+  while ((m = re.exec(html))) {
+    seen++
+    if (seen === afterParagraph) {
+      idx = m.index + m[0].length
+      break
+    }
+  }
+  if (idx < 0) return html + figHtml
+  return html.slice(0, idx) + figHtml + html.slice(idx)
+}
+
+/**
+ * 5 组"深入小节"模板，按文章序号取 2 组（错开取，避免相邻文章雷同）。
+ * 文案刻意写成"方法/经验"而非具体结论，套在任意主题上都不违和。
+ */
+const DEEP_SECTIONS = [
+  (h2, p, ul, quote) =>
+    h2('边界条件比主流程更值得写') +
+    p(
+      '文中这套做法在主流程上是成立的，但真正决定它能不能上线的，是几个不起眼的边界：数据量涨一个数量级之后复杂度怎么变、依赖服务抖一下会不会雪崩、以及出问题时能不能在十分钟内定位。'
+    ) +
+    ul(
+      '数据规模：先用真实量级压测一遍，别拿几条样例数据下结论',
+      '失败路径：超时、重试、降级各跑一次，确认兜底不是"什么都不做"',
+      '可观测性：关键分支埋点或打日志，否则只能靠猜'
+    ) +
+    quote('能被复现的问题都不算难题，难的是"上次好好的，这次怎么就不行了"。') +
+    p(
+      '所以我习惯在方案落地前先写一页"它会怎么坏"：列出三种最可能的失败方式，以及各自的观测手段。这一页往往比设计文档更早救火。'
+    ),
+
+  (h2, p, ul, quote, pre) =>
+    h2('一次线上排查的记录') +
+    p(
+      '线上出现的是"偶发变慢"，监控上表现为长尾抖动，平均值几乎没变。这类问题的第一原则是不要猜，先把时间花在能缩小范围的动作上。'
+    ) +
+    pre(
+      'bash',
+      `# 1) 先确认是不是单机问题：对比各实例的 P99
+for h in app-01 app-02 app-03; do
+  echo -n "$h "
+  curl -s "http://$h:9090/metrics" | grep http_request_duration_p99
+done
+
+# 2) 再确认是不是下游
+time curl -s -o /dev/null http://127.0.0.1:8081/healthz`
+    ) +
+    p(
+      '结果三台机器的 P99 同步抬升，说明不是单实例的 JIT 或 GC 问题；再往下看依赖，发现是连接池在高并发下反复建连。把连接复用和超时对齐之后，长尾立刻收敛。'
+    ) +
+    ul(
+      '平均值正常但长尾异常，优先怀疑锁、连接池、GC',
+      '先排除"单实例"，再排除"下游"，最后才看自己的代码',
+      '每次排查都留一条可复用的命令，下次十分钟内能复现同一视角'
+    ),
+
+  (h2, p, ul, quote) =>
+    h2('和同类方案的取舍') +
+    p(
+      '这类问题通常有三种解法：改代码、加中间层、换组件。三者不是先进与落后的关系，而是"把复杂度放在哪"的选择。'
+    ) +
+    ul(
+      '改代码：成本最低、见效最快，但把复杂度留在了业务里，人一换就容易腐化',
+      '加中间层：隔离性好，代价是多一个要监控、要扩容、要背锅的东西',
+      '换组件：一次性收益大，迁移成本与团队熟悉度是隐性负债'
+    ) +
+    quote('架构决策没有正确答案，只有"此刻这个团队能维护得住"的答案。') +
+    p(
+      '我这次选了第一种，因为团队只有三个人，多一个中间层意味着多一份值班负担；如果团队规模翻倍，我会重新评估第二种。'
+    ),
+
+  (h2, p, ul, quote) =>
+    h2('如果重来一次，我会怎么改') +
+    p(
+      '回头看，这件事本可以在半天内做完，实际花了两天。差别不在技术难度，而在动手前的十分钟：先写清楚验收标准，再写代码。'
+    ) +
+    ul(
+      '先把"完成"定义成可验证的观测指标，而不是"功能跑通"',
+      '先做最小闭环（能跑通一条链路），再补齐异常分支',
+      '把回归手段前置：能一条命令复现的问题，改起来才敢下手'
+    ) +
+    p(
+      '顺序一换，很多"改到一半发现方向不对"的返工就不会发生。技术方案的价值，往往体现在它让后续每一次修改都更便宜。'
+    ) +
+    quote('写代码的时间只占三分之一，剩下的是让它可被验证、可被回滚、可被接手。'),
+
+  (h2, p, ul, quote, pre) =>
+    h2('一个小实验：先用最小代价验证假设') +
+    p(
+      '遇到不确定的结论，我倾向于先写一个几十行的最小实验，而不是直接改生产代码。实验只要能证伪就够了，不需要优雅。'
+    ) +
+    pre(
+      'sql',
+      `-- 验证"索引到底有没有被用上"：对比加索引前后的执行计划
+explain select article_id, title
+  from sd_blog_article
+ where status = '1'
+ order by published_at desc
+ limit 20;`
+    ) +
+    p(
+      '执行计划里出现 filesort 就说明排序没有走索引；补一个联合索引后再看，type 从 ALL 变成 range，排序消失。'
+    ) +
+    quote('先用五分钟证伪，胜过用五小时论证。') +
+    p(
+      '这套"最小实验"的习惯，最大的收益不是省时间，而是让讨论从"我觉得"变成"跑出来是这样"。'
+    )
+]
+
+function deepSections(idx, h2, p, ul, quote, pre) {
+  const a = DEEP_SECTIONS[idx % DEEP_SECTIONS.length]
+  const b = DEEP_SECTIONS[(idx + 2) % DEEP_SECTIONS.length]
+  return a(h2, p, ul, quote, pre) + b(h2, p, ul, quote, pre)
+}
+
 
 // ---------------------------------------------------------------------------
 // 评论文案池：真实语气，不是「好评」「支持」这类无信息量的话
@@ -180,10 +320,19 @@ async function buildSeed({ label, authors, tags, posts, commentTarget }) {
     const createAt = post.status === '1' ? hoursAfter(publishAt, -3) : daysAgo(post.daysAgo, 9, 0)
     articleTimes.push(publishAt)
 
-    // 正文跑一遍 shiki（失败回落原文，绝不中断生成）
-    const content = await highlightCodeBlocks(post.html)
+    // 正文增强：内嵌 1~2 张图 + 追加 2 个深入小节，再统一跑 shiki
+    const figKeys = [IMAGE_KEYS[i % IMAGE_KEYS.length], IMAGE_KEYS[(i + 3) % IMAGE_KEYS.length]]
+    let enriched = post.html
+    enriched = injectFigure(enriched, figure(figKeys[0], `${post.title} · 示意图一`), 2)
+    if (i % 2 === 0) enriched = injectFigure(enriched, figure(figKeys[1], `${post.title} · 示意图二`), 6)
+    enriched += deepSections(i, h2, p, ul, quote, pre)
 
-    const coverUrl = post.cover === null || post.cover === undefined ? null : COVERS[post.cover]
+    // 跑一遍 shiki（失败回落原文，绝不中断生成）
+    const content = await highlightCodeBlocks(enriched)
+
+    // 封面统一走公网图片域：原来 COVERS 里是 127.0.0.1:9000（读者侧必破图）
+    const coverKey = IMAGE_KEYS[(post.cover ?? i) % IMAGE_KEYS.length]
+    const coverUrl = imgUrl(coverKey)
     const hiddenBy = post.visibility === '2' ? '1761100000000000001' : null
     const hiddenAt = post.visibility === '2' ? daysAgo(Math.max(0, post.daysAgo - 2), 15, 30) : null
 
