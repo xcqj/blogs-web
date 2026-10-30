@@ -80,8 +80,10 @@ const q = (v) => (v === null || v === undefined ? 'NULL' : `'${esc(v)}'`)
 //           换 cloud 目标时用 SEED_IMG_BASE 覆盖，不必改代码。
 // ---------------------------------------------------------------------------
 const IMG_BASE = (process.env.SEED_IMG_BASE || 'https://img.sdblog.us.ci/ruoyi').replace(/\/$/, '')
-/** COVERS 里存的是 127.0.0.1 的完整 URL，这里只取对象 key，统一按 IMG_BASE 拼 */
-const IMAGE_KEYS = COVERS.map((u) => u.replace(/^.*?\/ruoyi\//, ''))
+// 配图不用真实照片：改用 tooling/gen-seed-covers.mjs 生成的抽象 SVG（2~4KB/张、无版权问题），
+// 由 deploy.sh seed 上传到 MinIO 的 seed/covers/ 前缀，再按图片域名引用。
+// 换域名时用 SEED_IMG_BASE 覆盖，或重新生成种子。
+const IMAGE_KEYS = Array.from({ length: 12 }, (_, i) => `seed/covers/c${String(i + 1).padStart(2, '0')}.svg`)
 const imgUrl = (key) => `${IMG_BASE}/${key}`
 const figure = (key, caption) =>
   `<figure><img src="${imgUrl(key)}" alt="${caption}" loading="lazy"><figcaption>${caption}</figcaption></figure>`
