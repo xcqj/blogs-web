@@ -115,7 +115,6 @@ useSeoMeta({ title: '我的文章 · 作者中心', robots: 'noindex,follow' })
       <div>
         <p class="font-mono text-xs uppercase tracking-[0.08em] text-primary-fg">01 // WORKSPACE</p>
         <h1 class="mt-3 font-serif text-2xl font-bold tracking-[var(--ls-h1)] md:text-3xl">我的文章</h1>
-        <p class="mt-2 text-sm text-muted">作者中心 · 服务端按 author_id 隔离，仅显示你自己的文章</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <SdButton to="/me/profile" variant="secondary">个人资料</SdButton>
