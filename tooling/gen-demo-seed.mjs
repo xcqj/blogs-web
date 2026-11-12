@@ -45,8 +45,8 @@ const vid = (seq) => (SEG.version + BigInt(seq)).toString()
 const cid = (seq) => (SEG.comment + BigInt(seq)).toString()
 const rid = (seq) => (SEG.relation + BigInt(seq)).toString()
 
-/** admin 的 BCrypt（admin123），复用现成 hash，避免自造不兼容 */
-const PASSWORD_HASH = '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2'
+/** 演示账号口令的 BCrypt（随机口令，明文不入库；见部署机私有记录） */
+const PASSWORD_HASH = '$2a$10$2VsvRUKfvVr/qYy0KyNaU.bpTpgMWITlFHioL.m8FP7wuldGmxEgm'
 
 const pad = (n) => String(n).padStart(2, '0')
 const fmt = (d) =>
@@ -280,7 +280,7 @@ async function buildSeed({ label, authors, tags, posts, commentTarget }) {
   push()
 
   // ---------- 用户 ----------
-  push('-- ---------- 作者（密码统一为 admin123，仅演示用）----------')
+  push('-- ---------- 作者（口令为随机值，见部署机私有记录；仓库不写明文和弱口令）----------')
   for (const a of authors) {
     const id = uid(a.seq)
     const ct = daysAgo(95)
